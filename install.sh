@@ -124,7 +124,7 @@ else
     stage=
 fi
 # Prepare the audited completion cache before switching an existing installation.
-ZSHARD_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/oh-my-ztty/zshard" \
+ZSHARD_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/oh-my-ztty/zshard/$release_id" \
     HISTFILE=/dev/null "$release/bin/zshard" cache warm "$release/packaging/completions" \
     || die "completion cache preparation failed; active version was not changed"
 if [ ! -L "$base/current" ] || [ "$(readlink "$base/current")" != "releases/$release_id" ]; then

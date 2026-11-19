@@ -40,7 +40,7 @@ case "$cmd" in
         export PATH="$root/bin:$PATH"
         export ZDOTDIR="$root/config/zsh"
         export ZSHARD_HOME="$root/components/zshard"
-        export ZSHARD_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/oh-my-ztty/zshard"
+        export ZSHARD_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/oh-my-ztty/zshard/${root##*/}"
         state="${XDG_STATE_HOME:-$HOME/.local/state}/oh-my-ztty"
         [ -d "$state" ] || (umask 077; mkdir -p -- "$state")
         export HISTFILE="$state/history"
@@ -53,7 +53,8 @@ case "$cmd" in
         action=${1:-help}
         [ "$#" -eq 0 ] || shift
         case "$action" in
-            context|ask) exec "$root/components/zshard/bin/zshard" ai "$action" "$@" ;;
+            context) exec "$root/components/zshard/bin/zshard" ai context "$@" ;;
+            ask) exec "$root/bin/omztty" shell -i -c 'zai ask "$@"' omztty-ai "$@" ;;
             connect) exec "$root/bin/ssmcp" "$@" ;;
             propose) printf 'Open omztty shell, then use: zai propose "command"\nThe proposal is placed in the editable buffer for review.\n'; exit 2 ;;
             help|-h|--help) printf 'Usage: omztty ai context | connect [ssmcp options] | ask TEXT\nContext is local JSON; connect starts ssmcp explicitly.\n' ;;
