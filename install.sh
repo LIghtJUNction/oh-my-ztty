@@ -1,7 +1,7 @@
 #!/bin/sh
 # Per-user release installation; never changes the login shell.
 set -eu
-VERSION=0.2.0
+VERSION=0.2.1
 die() { printf 'oh-my-ztty: %s\n' "$*" >&2; exit 1; }
 usage() {
     cat <<'EOF'
@@ -154,11 +154,15 @@ else
     mv -T -- "$stage" "$release"
     stage=
 fi
-# Prepare the audited completion cache before switching an existing installation.
-ZDOTDIR="$release/config/zsh" \
+# Share the default fpath without running personal startup hooks during installation.
+# Keep preparation before the active-version switch so a failure preserves it.
+OMZTTY_ROOT="$release" ZDOTDIR="$release/config/zsh" \
 ZSHARD_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/oh-my-ztty/zshard/$release_id" \
-    HISTFILE=/dev/null "$release/bin/zshard" cache warm "$release/packaging/completions" \
-    || die "completion cache preparation failed; active version was not changed"
+    HISTFILE=/dev/null ZSHARD_PROMPT=off zsh -d -f -i -c '
+        source "$OMZTTY_ROOT/config/zsh/completion-paths.zsh" || exit
+        typeset -g ZSHARD_HOME="$OMZTTY_ROOT/components/zshard"
+        source "$ZSHARD_HOME/zshard.zsh" && zshard complete
+    ' || die "completion cache preparation failed; active version was not changed"
 if [ ! -L "$base/current" ] || [ "$(readlink "$base/current")" != "releases/$release_id" ]; then
     [ ! -e "$base/current" ] || [ -L "$base/current" ] || die "current path is not a managed link"
     ln -s "releases/$release_id" "$base/.current.$$"
@@ -188,6 +192,7 @@ Comment=A lean terminal workspace built on Project Z
 Exec="$execpath" terminal
 Icon=$base/current/packaging/oh-my-ztty.svg
 Terminal=false
+X-TerminalArgExec=-e
 Categories=System;TerminalEmulator;
 Keywords=terminal;shell;zsh;AI;
 StartupNotify=false

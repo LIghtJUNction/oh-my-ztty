@@ -36,6 +36,22 @@ suite_socket() {
         export ZTTY_SOCKET="@oh-my-ztty-$(id -u)-$version"
     fi
 }
+terminal_needs_default_shell() {
+    # Match the pinned ztty option arity without consuming its command arguments.
+    # In particular, a value such as --name '-e' is not an execution boundary.
+    while [ "$#" -gt 0 ]; do
+        case "$1" in
+            --config|--name|--cwd|--font|--geometry|--scrollback|--tab|--split-right|--split-down)
+                [ "$#" -ge 2 ] || return 1
+                shift 2 ;;
+            --observe) shift ;;
+            -e|--|--help|-h|--version|-V) return 1 ;;
+            # Let ztty diagnose unknown arguments and missing option values.
+            *) return 1 ;;
+        esac
+    done
+    return 0
+}
 case "$cmd" in
     shell|terminal)
         command -v zsh >/dev/null 2>&1 || { printf 'zsh is required\n' >&2; exit 1; }
@@ -48,7 +64,10 @@ case "$cmd" in
         export HISTFILE="$state/history"
         if [ "$cmd" = shell ]; then exec zsh -d "$@"; fi
         suite_socket
-        exec "$root/bin/ztty" --config "$root/config/ztty/config" "$@" -e "$root/bin/omztty" shell ;;
+        if terminal_needs_default_shell "$@"; then
+            set -- "$@" -e "$root/bin/omztty" shell
+        fi
+        exec "$root/bin/ztty" --config "$root/config/ztty/config" "$@" ;;
     ai)
         export PATH="$root/bin:$PATH"
         export ZSHARD_HOME="$root/components/zshard"

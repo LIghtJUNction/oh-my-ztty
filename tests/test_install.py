@@ -38,11 +38,11 @@ class Installation(unittest.TestCase):
     def tearDown(self):
         self.temp.cleanup()
 
-    def bundle(self, version, warm_exit=0):
+    def bundle(self, version, warm_exit=0, real_zshard=False):
         stage = self.work / ("stage-" + version) / "oh-my-ztty"
         stage.mkdir(parents=True)
         for rel in ["install.sh", "uninstall.sh", "bin/omztty", "bin/zshard",
-                    "config/zsh/.zshrc", "config/zsh/ink.zsh", "packaging/oh-my-ztty.svg", "packaging/omztty.1"]:
+                    "config/zsh/.zshrc", "config/zsh/completion-paths.zsh", "config/zsh/ink.zsh", "packaging/oh-my-ztty.svg", "packaging/omztty.1"]:
             out = stage / rel
             out.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(ROOT / rel, out)
@@ -52,13 +52,25 @@ class Installation(unittest.TestCase):
         (stage / "PLATFORM").write_text("linux-" + os.uname().machine + "\n")
         shard = stage / "components/zshard"
         (shard / "bin").mkdir(parents=True)
-        (shard / "zshard.zsh").write_text("typeset -g ZSHARD_TEST=loaded\nzshard() { :; }\n")
+        (shard / "zshard.zsh").write_text(
+            "typeset -g ZSHARD_TEST=loaded\n"
+            'zshard() {\n'
+            '  printf "%s\\n" "$ZSHARD_CACHE_DIR" "$ZDOTDIR" > "$HOME/fixture-cache-dir"\n'
+            f'  return {warm_exit}\n'
+            '}\n'
+        )
         (shard / "bin/zshard").write_text(
             "#!/bin/sh\n"
             'printf "%s\\n" "$ZSHARD_CACHE_DIR" "$ZDOTDIR" > "$HOME/fixture-cache-dir"\n'
             f"printf 'zshard fixture\\n'\nexit {warm_exit}\n"
         )
         (shard / "bin/zshard").chmod(0o755)
+        if real_zshard:
+            shutil.copy2(ROOT / "components/zshard/zshard.zsh", shard / "zshard.zsh")
+            for directory in ("bin", "lib", "completions"):
+                shutil.copytree(ROOT / "components/zshard" / directory, shard / directory,
+                                dirs_exist_ok=True)
+            shutil.copytree(ROOT / "packaging/completions", stage / "packaging/completions")
         for name in ["ztty", "ssmcp", "zdot", "zfetch"]:
             executable = stage / "bin" / name
             executable.write_text(f"#!/bin/sh\nprintf '{name} fixture\\n'\n")
@@ -151,6 +163,52 @@ shutil.copyfile(sources[urls[0]], args[args.index("-o") + 1])
         self.assertTrue(desktop.is_symlink())
         if shutil.which("desktop-file-validate"):
             self.run_command(["desktop-file-validate", desktop])
+
+    def assert_real_completion_cache_reused(self, completion=None):
+        settings = Path(self.env["XDG_CONFIG_HOME"]) / "oh-my-ztty"
+        settings.mkdir(parents=True, exist_ok=True)
+        for name in ("options", "local"):
+            (settings / (name + ".zsh")).write_text(
+                f'print -r -- {name} >> "$HOME/personal-hooks"\n')
+        self.install(self.bundle("0.1.1", real_zshard=True))
+        self.assertFalse((self.home / "personal-hooks").exists(),
+                         "installation must not execute personal shell hooks")
+        current = (self.base / "current").resolve()
+        cache = self.home / ".cache/oh-my-ztty/zshard" / current.name
+        def snapshot():
+            return {p.name: (sha(p), p.stat().st_mtime_ns)
+                    for p in cache.glob("zcompdump-*")}
+        prepared = snapshot()
+        self.assertTrue(prepared, "installer must prepare the audited completion dump")
+        command = 'zshard complete || exit; print -r -- "$_ZSHARD_COMPLETION_READY"'
+        if completion:
+            command += '; print -r -- "$_comps[omztty-cache-test]"'
+        result = self.cli("shell", "-ic", command)
+        self.assertEqual(result.stdout.splitlines(), ["1"] + ([completion] if completion else []))
+        self.assertEqual(snapshot(), prepared,
+                         "first completion must reuse the prepared bytes and mtime")
+        self.assertEqual((self.home / "personal-hooks").read_text().splitlines(),
+                         ["options", "local"])
+
+    def test_completion_cache_reused_with_missing_personal_directory(self):
+        personal = self.home / ".config/oh-my-ztty/completions"
+        self.assertFalse(personal.exists())
+        self.assert_real_completion_cache_reused()
+        self.assertFalse(personal.exists())
+
+    def test_completion_cache_reused_with_custom_xdg_and_symlinked_inputs(self):
+        self.env["XDG_CONFIG_HOME"] = str(self.home / "custom config")
+        personal = Path(self.env["XDG_CONFIG_HOME"]) / "oh-my-ztty/completions"
+        personal.parent.mkdir(parents=True)
+        actual = self.home / "completion files"
+        actual.mkdir()
+        (actual / "_omztty_cache_test").write_text("#compdef omztty-cache-test\n_arguments '--example'\n")
+        personal.symlink_to(actual, target_is_directory=True)
+        self.data.mkdir(parents=True)
+        alias = self.home / "data link"
+        alias.symlink_to(self.data, target_is_directory=True)
+        self.env["XDG_DATA_HOME"] = str(alias)
+        self.assert_real_completion_cache_reused("_omztty_cache_test")
 
     def test_desktop_choice_survives_repeat_upgrade_and_reenable(self):
         desktop = self.data / "applications/oh-my-ztty.desktop"
