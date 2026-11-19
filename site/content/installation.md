@@ -57,6 +57,10 @@ Choose another absolute command directory or omit the desktop entry:
 sh install.sh --bin-dir "$HOME/bin" --no-desktop
 ```
 
+A new installation creates a desktop entry by default. `--no-desktop` disables it; `--desktop` enables it again. When neither option is supplied, repeat installations and updates preserve the last successful choice.
+
+Disabling an existing installation removes only desktop links that still point to this suite. Replacement files and foreign links are preserved. Enabling the entry stops if an unrelated file or link already occupies its path.
+
 Personal shell configuration belongs outside the release directory. See [configuration](configuration.md) before adding aliases, themes or plugins.
 
 ## Offline installation
@@ -74,6 +78,15 @@ Use the aarch64 archive on ARM64. If you have already obtained the digest from t
 ```sh
 omztty update
 ```
+
+To change the desktop entry choice during an update, select one option:
+
+```sh
+omztty update --no-desktop
+omztty update --desktop
+```
+
+For installations created by v0.1.1 or older, the first successful installation with this installer infers the choice from the existing desktop-entry record: present means enabled, absent means disabled. Either explicit option overrides it. The preference is saved after installation succeeds; failed preparation leaves the previous choice intact.
 
 Each version has its own directory. A `current` link selects the active version, and completion caches are separated by release.
 
