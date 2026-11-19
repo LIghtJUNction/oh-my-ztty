@@ -76,7 +76,7 @@ def main():
     version = (ROOT / "VERSION").read_text().strip()
     lock = json.loads((ROOT / "dependencies.lock.json").read_text())
     sources = {}
-    for name in ["ztty", "ssmcp", "zshard", "zdot"]:
+    for name in ["ztty", "ssmcp", "zshard", "zdot", "zrc"]:
         source = ROOT / "components" / name
         sha = run(["git", "rev-parse", "HEAD"], cwd=source)
         sources[name] = sha
@@ -99,13 +99,14 @@ def main():
     with tempfile.TemporaryDirectory(prefix="bundle-", dir=ROOT / ".cache") as temp:
         stage = Path(temp) / "oh-my-ztty"
         stage.mkdir()
-        for path in ["install.sh", "uninstall.sh", "LICENSE", "VERSION", "dependencies.lock.json", "bin/omztty", "bin/zshard"]:
+        for path in ["install.sh", "uninstall.sh", "LICENSE", "VERSION", "dependencies.lock.json", "bin/omztty", "bin/omztty-config", "bin/zshard"]:
             copy(ROOT / path, stage / path)
         for folder in ["config", "packaging"]:
             for source in sorted((ROOT / folder).rglob("*")):
                 if source.is_file():
                     copy(source, stage / source.relative_to(ROOT))
         tracked_component("zshard", stage / "components/zshard")
+        tracked_component("zrc", stage / "components/zrc")
         copy(args.zdot, stage / "bin/zdot")
         for name, spec in lock["components"].items():
             archive = download(spec["assets"][args.arch])
@@ -117,11 +118,11 @@ def main():
             binary = stage / "bin" / name
             binary.chmod(0o755)
             check_elf(binary, args.arch)
-        for name in ["omztty", "zshard"]:
+        for name in ["omztty", "omztty-config", "zshard"]:
             (stage / "bin" / name).chmod(0o755)
         (stage / "install.sh").chmod(0o755)
         (stage / "uninstall.sh").chmod(0o755)
-        for name in ["zshard", "zdot"]:
+        for name in ["zshard", "zdot", "zrc"]:
             copy(ROOT / "components" / name / "LICENSE", stage / "licenses" / f"{name}.txt")
         (stage / "PLATFORM").write_text(f"linux-{args.arch}\n")
         metadata = {"schema": 1, "suite_version": version, "platform": f"linux-{args.arch}", "source_commits": sources}

@@ -13,7 +13,7 @@ import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-COMPONENTS = ("ztty", "ssmcp", "zshard", "zdot")
+COMPONENTS = ("ztty", "ssmcp", "zshard", "zdot", "zrc")
 
 def run(*args, cwd=ROOT, capture=False):
     result = subprocess.run(args, cwd=cwd, check=True, text=True,
@@ -313,7 +313,7 @@ def check(component):
     if component:
         run("make", "check", cwd=ROOT if component == "suite" else directory(component))
         return
-    for name in ("zshard", "zdot"):
+    for name in ("zshard", "zdot", "zrc"):
         run("make", "check", cwd=directory(name))
     run("make", "check")
 
@@ -323,7 +323,7 @@ def main():
     show = commands.add_parser("status", help="show exact source pins and local changes")
     show.add_argument("--json", action="store_true")
     validate = commands.add_parser("check", help="run local checks for new components and the suite")
-    validate.add_argument("--component", choices=("suite", "zshard", "zdot"))
+    validate.add_argument("--component", choices=("suite", "zshard", "zdot", "zrc"))
     update = commands.add_parser("pin", help="fetch and select one explicit component release")
     update.add_argument("component", choices=COMPONENTS)
     update.add_argument("ref")

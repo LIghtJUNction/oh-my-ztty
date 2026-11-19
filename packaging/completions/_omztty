@@ -3,6 +3,8 @@ if (( CURRENT > 2 )) && [[ $words[2] == update ]]; then
     _arguments '1:command:(update)' \
         '(--no-desktop)--desktop[Enable the managed desktop entry]' \
         '(--desktop)--no-desktop[Disable the managed desktop entry]'
+elif (( CURRENT > 2 )) && [[ $words[2] == config ]]; then
+    _arguments '1:command:(config)' '2:action:(init plan apply status remove path audit sync)' '*:argument:(--backup --json)'
 else
-    _arguments '1:command:(shell terminal ai dot zdot zshard ztty ssmcp doctor version update uninstall)' '*:argument:_files'
+    _arguments '1:command:(shell terminal ai config dot zdot zshard ztty ssmcp doctor version update uninstall)' '*:argument:_files'
 fi

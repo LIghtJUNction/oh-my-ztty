@@ -11,6 +11,7 @@ Usage: omztty COMMAND [ARGS...]
   shell       Open the preset zsh (accepts zsh arguments)
   terminal    Open ztty with the preset zsh (accepts ztty options)
   ai          Connect this directory through bundled ssmcp
+  config      Manage the unified zrc profile through zdot
   dot         Run bundled zdot
   zshard      Manage shell plugins
   ztty|ssmcp  Run a bundled component directly
@@ -61,6 +62,7 @@ case "$cmd" in
             *) printf 'Unknown AI action: %s\n' "$action" >&2; exit 2 ;;
         esac ;;
     ssmcp) exec "$root/bin/ssmcp" "$@" ;;
+    config) exec sh "$root/bin/omztty-config" "$@" ;;
     dot|zdot) exec "$root/bin/zdot" "$@" ;;
     zshard) exec "$root/components/zshard/bin/zshard" "$@" ;;
     ztty) suite_socket; exec "$root/bin/ztty" "$@" ;;

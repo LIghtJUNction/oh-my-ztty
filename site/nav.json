@@ -24,7 +24,7 @@
           "slug": "configuration",
           "title": "Configuration",
           "source": "configuration.md",
-          "description": "Set shell options, personal aliases, plugins and prompt behavior."
+          "description": "Adopt one reversible profile for the native editor, shell and everyday terminal tools."
         },
         {
           "slug": "plugins",

@@ -45,7 +45,7 @@ Remove uses the saved deployment profile, checks link ownership and restores ori
 
 To change a deployed profile, remove its previous deployment, edit it, then apply again. Keep the repository at its original path until removal.
 
-Uninstalling oh-my-ztty does not remove dotfile repositories or their managed links. Remove deployments separately when that is your intent.
+Uninstalling oh-my-ztty restores the adopted `omztty config` home profile before removing its runtime. Independent repositories deployed through `omztty dot` remain independently managed.
 
 ## Synchronize with Git
 
@@ -72,8 +72,8 @@ No synchronization daemon or background network activity is started.
 | Ordinary apply failure | New links and moved originals are rolled back |
 | Interrupted deployment | Journal is retained for remove recovery |
 
-Metadata remains in the target's `.zdot-state` directory, and `.zdot.lock` serializes cooperating zdot processes. zdot does not upload these files. Concurrent edits by unrelated programs are outside its transaction model.
+The suite profile uses `--state-dir` to keep metadata and backups under `~/.local/state/zdot/oh-my-ztty`. Direct zdot invocations without that option retain the target’s `.zdot-state` layout and `.zdot.lock` compatibility. zdot does not upload these files. Concurrent edits by unrelated programs are outside its transaction model.
 
 The native tool requires Linux 4.11 or later and a mounted `/proc`. Its Rust library and CLI use `no_std`, Project Z's zclap and direct system calls, without an allocator or libc.
 
-See [zdot's usage reference](https://github.com/LIghtJUNction/zdot/tree/v0.1.1) and [design and recovery details](https://github.com/LIghtJUNction/zdot/blob/v0.1.1/docs/design.md).
+See [zdot's usage reference](https://github.com/LIghtJUNction/zdot/tree/v0.2.0) and [design and recovery details](https://github.com/LIghtJUNction/zdot/blob/v0.2.0/docs/design.md).

@@ -10,3 +10,6 @@
 [submodule "components/zdot"]
 	path = components/zdot
 	url = https://github.com/LIghtJUNction/zdot.git
+[submodule "components/zrc"]
+	path = components/zrc
+	url = https://github.com/LIghtJUNction/zrc.git

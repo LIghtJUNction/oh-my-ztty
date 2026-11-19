@@ -43,9 +43,50 @@ def main():
         run(cli, "dot", "--help")
         run(cli, "ssmcp", "--help")
         run(cli, "ztty", "--version")
+        # Exercise adoption with the actual no_std binary, including conflict recovery.
+        original = "print -r -- ORIGINAL_SHELL_CONFIG\\n"
+        (home / ".zshrc").write_text(original)
+        run(cli, "config", "init")
+        profile = home / ".config/oh-my-ztty/profile"
+        manifest = (profile / "profile.zdot").read_bytes()
+        run(cli, "config", "init")
+        assert (profile / "profile.zdot").read_bytes() == manifest
+        run(cli, "config", "plan", "--json")
+        rejected = subprocess.run([str(cli), "config", "apply"], env=env,
+                                  text=True, capture_output=True, timeout=20)
+        assert rejected.returncode != 0
+        assert (home / ".zshrc").read_text() == original
+        run(cli, "config", "apply", "--backup")
+        assert (home / ".zshrc").is_symlink()
+        assert not (home / ".zdot-state").exists() and not (home / ".zdot.lock").exists()
+        run(cli, "config", "apply", "--backup")
+        run("zsh", "-d", "-i", "-c", '[[ -n $ZSHARD_VERSION ]] && print DIRECT_SHELL_OK')
+        run(cli, "config", "status")
+        marker = profile / ".omztty-profile"
+        marker.write_text("damaged")
+        rejected = subprocess.run([str(cli), "uninstall"], env=env,
+                                  text=True, capture_output=True, timeout=20)
+        assert rejected.returncode != 0 and current.exists()
+        assert (home / ".zshrc").is_symlink()
+        marker.write_text("omztty-profile-v1" + chr(10))
+        run(cli, "config", "remove")
+        assert not (home / ".zshrc").is_symlink()
+        assert (home / ".zshrc").read_text() == original
+        env["XDG_CONFIG_HOME"] = str(home / "custom-config")
+        run(cli, "config", "init")
+        run(cli, "config", "apply", "--backup")
+        assert (home / "custom-config/nvim").is_symlink()
+        assert (home / "custom-config/ztty").is_symlink()
+        assert not (home / ".config/nvim").exists()
+        run("zsh", "-d", "-i", "-c", '[[ -n $ZSHARD_VERSION ]]')
+        run(cli, "config", "remove")
+        env["XDG_CONFIG_HOME"] = str(home / ".config")
+        run(cli, "config", "apply", "--backup")
         run(cli, "uninstall")
         assert not current.parent.exists()
-        print("PASS: actual bundle install, repeat, doctor, zsh, local AI context, component commands and uninstall.")
+        assert not (home / ".zshrc").is_symlink()
+        assert (home / ".zshrc").read_text() == original
+        print("PASS: actual bundle install, repeat, doctor, zsh, local AI context, component commands, zdot adoption/restore and uninstall.")
 
 if __name__ == "__main__":
     main()

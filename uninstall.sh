@@ -7,6 +7,29 @@ case "$base" in /*/oh-my-ztty) ;; *) die "invalid installation root" ;; esac
 [ ! -L "$base" ] && [ -f "$base/.owner" ] && [ "$(cat "$base/.owner")" = oh-my-ztty-v1 ] || die "installation ownership check failed"
 bindir=$(cat "$base/.bin-dir")
 case "$bindir" in /*) ;; *) die "invalid bin directory" ;; esac
+# Restore an adopted home before removing the program that owns its entry point.
+profile="${XDG_CONFIG_HOME:-$HOME/.config}/oh-my-ztty/profile"
+state="${XDG_STATE_HOME:-$HOME/.local/state}/zdot/oh-my-ztty"
+managed_shell=0
+if [ -L "$HOME/.zshrc" ] && [ "$(readlink -- "$HOME/.zshrc")" = "$profile/files/.zshrc" ]; then
+    managed_shell=1
+fi
+deployment=0
+for owner in "$state"/*/owner; do
+    [ ! -f "$owner" ] || deployment=1
+done
+if [ "$deployment" = 1 ]; then
+    [ -d "$profile" ] && [ ! -L "$profile" ] &&
+      [ "$(cat "$profile/.omztty-profile" 2>/dev/null)" = omztty-profile-v1 ] ||
+        die "configuration profile ownership is damaged; installation was preserved"
+    "$base/current/bin/zdot" remove --root "$profile" --target "$HOME" --state-dir "$state" ||
+        die "configuration restoration failed; installation was preserved"
+    if [ -L "$HOME/.zshrc" ] && [ "$(readlink -- "$HOME/.zshrc")" = "$profile/files/.zshrc" ]; then
+        die "the managed shell still depends on this installation; installation was preserved"
+    fi
+elif [ "$managed_shell" = 1 ]; then
+    die "the managed shell has no recovery journal; installation was preserved"
+fi
 for exe in omztty ztty ssmcp zdot zshard; do
     link="$bindir/$exe"
     if [ -L "$link" ] && [ "$(readlink "$link")" = "$base/current/bin/$exe" ]; then rm -- "$link"; fi

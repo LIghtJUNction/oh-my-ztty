@@ -1,6 +1,6 @@
 # oh-my-ztty
 
-A lean Linux terminal setup built on Project Z: **ztty + zsh + zshard + zdot + ssmcp**.
+A lean Linux terminal setup built on Project Z: **ztty + zsh + zshard + zrc + zdot + ssmcp**.
 
 [Website](https://lightjunction.github.io/oh-my-ztty/) · [中文](README.zh-CN.md) · [Install guide](docs/installation.md) · [Performance](docs/performance.md)
 
@@ -14,7 +14,7 @@ sh install.sh
 ~/.local/bin/omztty shell
 ```
 
-Linux x86_64 and ARM64. Requires system zsh; the graphical terminal uses X11/fontconfig. The bundle includes all four Project Z components. Installation is per user and repeatable. Your login shell and existing tools remain available.
+Linux x86_64 and ARM64. Requires system zsh; the graphical terminal uses X11/fontconfig. The bundle includes the Project Z components and a native application configuration profile. Installation is per user and repeatable. Your login shell and existing tools remain available.
 
 ## The suite
 
@@ -22,6 +22,7 @@ Linux x86_64 and ARM64. Requires system zsh; the graphical terminal uses X11/fon
 | --- | --- |
 | [ztty](https://github.com/LIghtJUNction/ztty) | Native terminal |
 | [zshard](https://github.com/LIghtJUNction/zshard) | Original zsh framework: completion, suggestions, highlighting and lazy plugins |
+| [zrc](https://github.com/LIghtJUNction/zrc) | Native Neovim and terminal-tool configuration with one warm Ink palette |
 | [zdot](https://github.com/LIghtJUNction/zdot) | `no_std` dotfiles manager with plans, reversible links and explicit Git sync |
 | [ssmcp](https://github.com/LIghtJUNction/ssmcp) | On-demand MCP workspace connection for AI |
 
@@ -29,9 +30,19 @@ Each is a separate open-source repository, pinned here as a Git submodule. zsh i
 
 ## Ink preset
 
-A graphite palette, generous spacing and a two-line prompt with the path, cached Git branch and command status. The prompt uses zsh builtins; installed fonts fall back through Fontconfig. [Customize the preset](docs/installation.md#ink-appearance).
+A warm graphite, linen and copper palette, generous spacing and a two-line prompt with the path, cached Git branch and command status. The prompt uses zsh builtins; installed fonts fall back through Fontconfig. [Customize the preset](docs/installation.md#ink-appearance).
 
-![Ink preset running real commands in ztty](docs/reports/linux-x86_64-terminal.png)
+![The native Ink editor running in ztty](docs/reports/workspace-0.2.0/nvim-home.jpg)
+
+## Make it your default workspace
+
+~~~sh
+omztty config init
+omztty config plan --json
+omztty config apply --backup
+~~~
+
+One editable profile manages zsh, ztty, Neovim, Kitty, Foot, Ghostty, tmux, fzf, bat, ripgrep and Git display settings. Existing configurations are backed up by zdot. [Configuration and recovery](docs/configuration.md) explains the native editor, application coverage and file locations.
 
 ## Everyday commands
 
