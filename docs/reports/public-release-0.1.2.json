@@ -1,0 +1,390 @@
+{
+  "schema": "oh-my-ztty.public-verification.v2",
+  "tag": "v0.1.2",
+  "release_url": "https://github.com/LIghtJUNction/oh-my-ztty/releases/tag/v0.1.2",
+  "checked_at_utc": "2026-11-19T21:59:07.205576+00:00",
+  "workflow_run": "44623463767",
+  "expected_source_commit": "0ad667661e26316851e3a90406c146ce98aa9663",
+  "expected_zshard": {
+    "version": "0.1.3",
+    "commit": "a55c2d08b4299b25ec007b45641df87e8c0d0bbb"
+  },
+  "assets": [
+    {
+      "name": "install.sh",
+      "bytes": 10612,
+      "sha256": "bdfa1c737eb133203b6c18f5e5a0680ca280e4515111441d4482c657ad3dbc54",
+      "url": "https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.1.2/install.sh",
+      "github_digest_verified": true
+    },
+    {
+      "name": "install.sh.sha256",
+      "bytes": 77,
+      "sha256": "d6b0ad704898bd72c35684e01fa4ec9b4290e1a0748d2890b21798b91a3604a9",
+      "url": "https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.1.2/install.sh.sha256",
+      "github_digest_verified": true
+    },
+    {
+      "name": "oh-my-ztty-0.1.2-linux-x86_64.tar.gz",
+      "bytes": 5247940,
+      "sha256": "6aaebcdd18851d3597f509cb442cbcbaa662575faf5538b9aab5561ab452ff04",
+      "url": "https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.1.2/oh-my-ztty-0.1.2-linux-x86_64.tar.gz",
+      "github_digest_verified": true
+    },
+    {
+      "name": "oh-my-ztty-0.1.2-linux-x86_64.tar.gz.sha256",
+      "bytes": 103,
+      "sha256": "42fa462c5876316a75047bf45a542c3fe7b8783f182f726a6bf2c8095d2fd72a",
+      "url": "https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.1.2/oh-my-ztty-0.1.2-linux-x86_64.tar.gz.sha256",
+      "github_digest_verified": true
+    },
+    {
+      "name": "oh-my-ztty-0.1.2-linux-aarch64.tar.gz",
+      "bytes": 5054872,
+      "sha256": "7e8436deb8867d831ee6105bd2214e713f5c23a775f9b7791435d21fed06d7c6",
+      "url": "https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.1.2/oh-my-ztty-0.1.2-linux-aarch64.tar.gz",
+      "github_digest_verified": true
+    },
+    {
+      "name": "oh-my-ztty-0.1.2-linux-aarch64.tar.gz.sha256",
+      "bytes": 104,
+      "sha256": "9cffce8f23d75bbdda7ebad965063d3a95d08a207690d582339036ab5ec1cd87",
+      "url": "https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.1.2/oh-my-ztty-0.1.2-linux-aarch64.tar.gz.sha256",
+      "github_digest_verified": true
+    }
+  ],
+  "builds": [
+    {
+      "arch": "x86_64",
+      "manifest_files_verified": 45,
+      "build_json_sha256": "c44cd00d6322948f46d1c65659e1d3add7b71d2d53ccf7acaac359dd60f5beb9",
+      "metadata": {
+        "platform": "linux-x86_64",
+        "schema": 1,
+        "source_commits": {
+          "ssmcp": "52a531a59e9ec9236a76eafc0f4f068799e44b15",
+          "zdot": "43cc523c0fd4331402d2393280509ac2c672a262",
+          "zshard": "a55c2d08b4299b25ec007b45641df87e8c0d0bbb",
+          "ztty": "6b91e29e923aaee0207953f2b04393087f19e0d8"
+        },
+        "suite_version": "0.1.2"
+      },
+      "zshard_version": "0.1.3",
+      "source_gitlinks_verified": true,
+      "published_installer_matches_bundle": true
+    },
+    {
+      "arch": "aarch64",
+      "manifest_files_verified": 45,
+      "build_json_sha256": "711f1dc8bdea1470386e6004c9cdc4d9917702e5c87e58408a8e5f96cf7479e8",
+      "metadata": {
+        "platform": "linux-aarch64",
+        "schema": 1,
+        "source_commits": {
+          "ssmcp": "52a531a59e9ec9236a76eafc0f4f068799e44b15",
+          "zdot": "43cc523c0fd4331402d2393280509ac2c672a262",
+          "zshard": "a55c2d08b4299b25ec007b45641df87e8c0d0bbb",
+          "ztty": "6b91e29e923aaee0207953f2b04393087f19e0d8"
+        },
+        "suite_version": "0.1.2"
+      },
+      "zshard_version": "0.1.3",
+      "source_gitlinks_verified": true,
+      "published_installer_matches_bundle": true
+    }
+  ],
+  "elf": [
+    {
+      "arch": "x86_64",
+      "binary": "ztty",
+      "bytes": 801176,
+      "sha256": "65d5487ef55c92e982d601f5621d0364d1c2f17836e50b872fc331ccc86868fa",
+      "minimum_glibc": "2.34",
+      "needed": [
+        "libc.so.6",
+        "libXrender.so.1",
+        "libX11.so.6",
+        "libXft.so.2",
+        "libgcc_s.so.1"
+      ],
+      "other_versions": [
+        "GCC_3.0"
+      ],
+      "interpreter": "/lib64/ld-linux-x86-64.so.2"
+    },
+    {
+      "arch": "x86_64",
+      "binary": "ssmcp",
+      "bytes": 10202640,
+      "sha256": "409af30e7af8f4c43be24e1f9fc87ec46320a7531f89b590eab31265812055e7",
+      "minimum_glibc": "2.34",
+      "needed": [
+        "libgcc_s.so.1",
+        "libm.so.6",
+        "libc.so.6"
+      ],
+      "other_versions": [
+        "GCC_3.0",
+        "GCC_3.3",
+        "GCC_4.2.0"
+      ],
+      "interpreter": "/lib64/ld-linux-x86-64.so.2"
+    },
+    {
+      "arch": "x86_64",
+      "binary": "zdot",
+      "bytes": 53848,
+      "sha256": "c18fb073f473014c7cff8a9e753bbe53b591da4a47fc59ec63cb0525e81af7a4",
+      "minimum_glibc": null,
+      "needed": [],
+      "other_versions": [],
+      "interpreter": null
+    },
+    {
+      "arch": "aarch64",
+      "binary": "ztty",
+      "bytes": 768800,
+      "sha256": "877decab1b589eeceb33703fe29871da036272693d71de3cc4ff0b938557e354",
+      "minimum_glibc": "2.34",
+      "needed": [
+        "libc.so.6",
+        "libXrender.so.1",
+        "libX11.so.6",
+        "libXft.so.2",
+        "libgcc_s.so.1"
+      ],
+      "other_versions": [
+        "GCC_3.0"
+      ],
+      "interpreter": "/lib/ld-linux-aarch64.so.1"
+    },
+    {
+      "arch": "aarch64",
+      "binary": "ssmcp",
+      "bytes": 8482216,
+      "sha256": "2ca6345e3ead6bfa7f9d71fc4a1af848e1e0b7d29f723924729de33e13dbb8a3",
+      "minimum_glibc": "2.34",
+      "needed": [
+        "libgcc_s.so.1",
+        "libm.so.6",
+        "libc.so.6",
+        "ld-linux-aarch64.so.1"
+      ],
+      "other_versions": [
+        "GCC_3.0",
+        "GCC_3.3",
+        "GCC_4.2.0"
+      ],
+      "interpreter": "/lib/ld-linux-aarch64.so.1"
+    },
+    {
+      "arch": "aarch64",
+      "binary": "zdot",
+      "bytes": 66168,
+      "sha256": "b075deb1219e3db7075a5d07066867dd345d5369578eb522e7f14056ee9c9387",
+      "minimum_glibc": null,
+      "needed": [],
+      "other_versions": [],
+      "interpreter": null
+    }
+  ],
+  "installer": {
+    "used_downloaded_installer": true,
+    "default_network_path": true,
+    "version_override": false,
+    "local_archive_override": false,
+    "download_url_override": false,
+    "path_mock": false,
+    "native_arch": "x86_64",
+    "host_glibc": "glibc 2.44",
+    "isolated_home_with_spaces": true,
+    "ai_connection_started": false,
+    "umask": "0022",
+    "passed": true,
+    "steps": [
+      {
+        "step": "network_install_first",
+        "exit_code": 0,
+        "stdout": "Preserved existing command: <ISOLATED_HOME>/.local/bin/ztty; bundled version is available through omztty.\nPreserved existing command: <ISOLATED_HOME>/.local/bin/zdot; bundled version is available through omztty.\nInstalled oh-my-ztty 0.1.2\nRun: <ISOLATED_HOME>/.local/bin/omztty shell\nOpen a window: <ISOLATED_HOME>/.local/bin/omztty terminal\nUninstall: <ISOLATED_HOME>/.local/bin/omztty uninstall\nAdd <ISOLATED_HOME>/.local/bin to PATH to use the short command names.\n",
+        "stderr": ""
+      },
+      {
+        "step": "network_install_second_without_options",
+        "exit_code": 0,
+        "stdout": "Preserved existing command: <ISOLATED_HOME>/.local/bin/ztty; bundled version is available through omztty.\nPreserved existing command: <ISOLATED_HOME>/.local/bin/zdot; bundled version is available through omztty.\nInstalled oh-my-ztty 0.1.2\nRun: <ISOLATED_HOME>/.local/bin/omztty shell\nOpen a window: <ISOLATED_HOME>/.local/bin/omztty terminal\nUninstall: <ISOLATED_HOME>/.local/bin/omztty uninstall\nAdd <ISOLATED_HOME>/.local/bin to PATH to use the short command names.\n",
+        "stderr": ""
+      },
+      {
+        "step": "doctor",
+        "exit_code": 0,
+        "stdout": "oh-my-ztty 0.1.2\nok   system zsh\nok   system git\nok   ztty 0.4.1\nok   ssmcp 0.10.10\nok   zdot 0.1.1\nok   zshard\ninfo no DISPLAY; shell and AI commands still work\nNo connection or background service was started.\n",
+        "stderr": ""
+      },
+      {
+        "step": "interactive_shell",
+        "exit_code": 0,
+        "stdout": "OMZTTY_PUBLIC_SHELL_OK preserved\n",
+        "stderr": ""
+      },
+      {
+        "step": "ai_local_context",
+        "exit_code": 0,
+        "stdout": "{\"schema\":\"zshard.context.v1\",\"cwd\":\"<ISOLATED_HOME>\",\"shell\":\"zsh\",\"shell_version\":\"5.9.2\",\"last_exit\":0,\"capabilities\":[\"context\",\"stage-command\",\"ssmcp\"],\"history_included\":false,\"environment_included\":false}\n",
+        "stderr": ""
+      },
+      {
+        "step": "uninstall",
+        "exit_code": 0,
+        "stdout": "Uninstalled oh-my-ztty. User configuration, history and dotfiles are preserved.\n",
+        "stderr": ""
+      }
+    ],
+    "installed_manifest_checks": [
+      {
+        "stage": "first_install",
+        "files_verified": 46,
+        "directories_verified": 16,
+        "file_hashes_verified": true,
+        "file_and_directory_modes_verified": true,
+        "no_unexpected_entries": true
+      },
+      {
+        "stage": "repeat_install",
+        "files_verified": 46,
+        "directories_verified": 16,
+        "file_hashes_verified": true,
+        "file_and_directory_modes_verified": true,
+        "no_unexpected_entries": true
+      }
+    ],
+    "repeated_install_same_current_inode": true,
+    "network_archive_sha256_matches_public_asset": true,
+    "installed_build_sources_verified": true,
+    "existing_history_preserved_by_installer": true,
+    "user_config_preserved": true,
+    "state_files_preserved_after_uninstall": 1,
+    "managed_files_removed": true,
+    "foreign_command_file_preserved": true,
+    "foreign_command_link_preserved": true
+  },
+  "desktop_preference": {
+    "used_downloaded_installer": true,
+    "default_network_path": true,
+    "version_override": false,
+    "local_archive_override": false,
+    "download_url_override": false,
+    "path_mock": false,
+    "native_arch": "x86_64",
+    "host_glibc": "glibc 2.44",
+    "isolated_home_with_spaces": true,
+    "ai_connection_started": false,
+    "umask": "0022",
+    "passed": true,
+    "steps": [
+      {
+        "step": "network_install_no_desktop",
+        "exit_code": 0,
+        "stdout": "Preserved existing command: <ISOLATED_HOME>/.local/bin/ztty; bundled version is available through omztty.\nPreserved existing command: <ISOLATED_HOME>/.local/bin/zdot; bundled version is available through omztty.\nInstalled oh-my-ztty 0.1.2\nRun: <ISOLATED_HOME>/.local/bin/omztty shell\nOpen a window: <ISOLATED_HOME>/.local/bin/omztty terminal\nUninstall: <ISOLATED_HOME>/.local/bin/omztty uninstall\nAdd <ISOLATED_HOME>/.local/bin to PATH to use the short command names.\n",
+        "stderr": ""
+      },
+      {
+        "step": "network_install_second_without_options",
+        "exit_code": 0,
+        "stdout": "Preserved existing command: <ISOLATED_HOME>/.local/bin/ztty; bundled version is available through omztty.\nPreserved existing command: <ISOLATED_HOME>/.local/bin/zdot; bundled version is available through omztty.\nInstalled oh-my-ztty 0.1.2\nRun: <ISOLATED_HOME>/.local/bin/omztty shell\nOpen a window: <ISOLATED_HOME>/.local/bin/omztty terminal\nUninstall: <ISOLATED_HOME>/.local/bin/omztty uninstall\nAdd <ISOLATED_HOME>/.local/bin to PATH to use the short command names.\n",
+        "stderr": ""
+      },
+      {
+        "step": "network_update_enable_desktop",
+        "exit_code": 0,
+        "stdout": "install.sh: OK\nPreserved existing command: <ISOLATED_HOME>/.local/bin/ztty; bundled version is available through omztty.\nPreserved existing command: <ISOLATED_HOME>/.local/bin/zdot; bundled version is available through omztty.\nInstalled oh-my-ztty 0.1.2\nRun: <ISOLATED_HOME>/.local/bin/omztty shell\nOpen a window: <ISOLATED_HOME>/.local/bin/omztty terminal\nUninstall: <ISOLATED_HOME>/.local/bin/omztty uninstall\nAdd <ISOLATED_HOME>/.local/bin to PATH to use the short command names.\n",
+        "stderr": ""
+      },
+      {
+        "step": "network_update_disable_desktop",
+        "exit_code": 0,
+        "stdout": "install.sh: OK\nPreserved existing command: <ISOLATED_HOME>/.local/bin/ztty; bundled version is available through omztty.\nPreserved existing command: <ISOLATED_HOME>/.local/bin/zdot; bundled version is available through omztty.\nInstalled oh-my-ztty 0.1.2\nRun: <ISOLATED_HOME>/.local/bin/omztty shell\nOpen a window: <ISOLATED_HOME>/.local/bin/omztty terminal\nUninstall: <ISOLATED_HOME>/.local/bin/omztty uninstall\nAdd <ISOLATED_HOME>/.local/bin to PATH to use the short command names.\n",
+        "stderr": ""
+      },
+      {
+        "step": "uninstall",
+        "exit_code": 0,
+        "stdout": "Uninstalled oh-my-ztty. User configuration, history and dotfiles are preserved.\n",
+        "stderr": ""
+      }
+    ],
+    "installed_manifest_checks": [
+      {
+        "stage": "first_install",
+        "files_verified": 46,
+        "directories_verified": 16,
+        "file_hashes_verified": true,
+        "file_and_directory_modes_verified": true,
+        "no_unexpected_entries": true
+      },
+      {
+        "stage": "repeat_install",
+        "files_verified": 46,
+        "directories_verified": 16,
+        "file_hashes_verified": true,
+        "file_and_directory_modes_verified": true,
+        "no_unexpected_entries": true
+      },
+      {
+        "stage": "update_desktop_on",
+        "files_verified": 46,
+        "directories_verified": 16,
+        "file_hashes_verified": true,
+        "file_and_directory_modes_verified": true,
+        "no_unexpected_entries": true
+      },
+      {
+        "stage": "update_desktop_off",
+        "files_verified": 46,
+        "directories_verified": 16,
+        "file_hashes_verified": true,
+        "file_and_directory_modes_verified": true,
+        "no_unexpected_entries": true
+      }
+    ],
+    "repeated_install_same_current_inode": true,
+    "first_install_disabled": true,
+    "default_repeat_preserves_disabled": true,
+    "explicit_update_enables_desktop": true,
+    "explicit_update_disables_desktop": true,
+    "same_release_inode_stable_through_preference_updates": true,
+    "network_archive_sha256_matches_public_asset": true,
+    "installed_build_sources_verified": true,
+    "existing_history_preserved_by_installer": true,
+    "foreign_desktop_preserved_after_uninstall": true,
+    "user_config_preserved": true,
+    "state_files_preserved_after_uninstall": 1,
+    "managed_files_removed": true,
+    "foreign_command_file_preserved": true,
+    "foreign_command_link_preserved": true
+  },
+  "passed": true,
+  "workflow": {
+    "id": 44623463767,
+    "html_url": "https://github.com/LIghtJUNction/oh-my-ztty/actions/runs/44623463767",
+    "head_sha": "0ad667661e26316851e3a90406c146ce98aa9663",
+    "path": ".github/workflows/release.yml",
+    "event": "push",
+    "status": "completed",
+    "conclusion": "success",
+    "run_attempt": 1
+  },
+  "latest_release_tag": "v0.1.2",
+  "release_id": 451976855,
+  "published_at": "2026-11-19T21:56:01Z",
+  "source_commit": "0ad667661e26316851e3a90406c146ce98aa9663",
+  "release_gitlinks": {
+    "ssmcp": "52a531a59e9ec9236a76eafc0f4f068799e44b15",
+    "zdot": "43cc523c0fd4331402d2393280509ac2c672a262",
+    "zshard": "a55c2d08b4299b25ec007b45641df87e8c0d0bbb",
+    "ztty": "6b91e29e923aaee0207953f2b04393087f19e0d8"
+  },
+  "checksum_sidecars_verified": 3,
+  "embedded_manifests_verified": 2,
+  "build_metadata_verified": 2,
+  "completed_at_utc": "2026-11-19T21:59:31.733087+00:00"
+}
