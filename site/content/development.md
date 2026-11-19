@@ -45,14 +45,26 @@ Commit and publish component changes before advancing the parent gitlink. Keep u
 
 ## Pin a published component
 
-The pin command accepts a component and a published version. For the framework version in suite 0.1.1:
+The pin command accepts a component and a published version. For the framework version in suite 0.1.2:
 
 ```sh
-python3 scripts/workspace.py pin zshard v0.1.2
+python3 scripts/workspace.py pin zshard v0.1.3
 python3 scripts/workspace.py check
 ```
 
-Review and commit the changed gitlink when selecting a new version. Pinning ztty or ssmcp also obtains release asset digests and updates `dependencies.lock.json`; it requires GitHub CLI access and the expected assets for both architectures.
+Pin fetches the requested revision, checks out the component, synchronizes submodule URLs, and initializes and updates its nested submodules recursively. This also handles a dependency that moves from an inline source directory to a submodule. Review and commit the changed parent gitlink after validation.
+
+Pinning ztty or ssmcp also obtains release asset digests for `dependencies.lock.json`. It requires a stable release tag, GitHub CLI access and the expected assets for both architectures. The lock is replaced only after the recursive source update succeeds. First-party zshard and zdot pins also accept a full lowercase commit SHA.
+
+### Local state and recovery
+
+Pin requires clean source checkouts, including initialized nested repositories, and a clean dependency lock when selecting upstream binaries. It refuses a nonempty uninitialized submodule directory and preserves its contents.
+
+Ignored paths in an initialized nested repository are also refused. These paths may be ordinary build caches; the restriction exists because Git's recursive checkout can overwrite ignored files. The error names the repository and paths to move aside. An ignored cache at the component's top level can remain if it does not collide with the new revision.
+
+If an update fails, pin attempts to restore the previous component and nested commits, their checkout branches, and the saved submodule URL configuration. It leaves the dependency lock unchanged; a concurrent lock edit is preserved. Newly initialized directories can remain and are listed for inspection. Pin does not delete their contents to make recovery appear clean.
+
+A failed recovery is reported alongside the original failure. For example, a source edit made while pin is running can prevent Git from restoring an old checkout. Inspect the reported paths before retrying.
 
 The component's release and the suite's selected pin are separate decisions.
 
@@ -64,7 +76,7 @@ Each new project exposes the same version interface:
 python3 scripts/bump.py patch
 ```
 
-This updates version files for review. Use `minor` or `major` when appropriate.
+This updates version files for review. In the suite it also synchronizes the current release version and installation examples in the documentation. Historical performance results and release evidence keep their original version links. Use `minor` or `major` when appropriate.
 
 From a clean, validated main branch, the release form checks, commits, tags and pushes:
 
