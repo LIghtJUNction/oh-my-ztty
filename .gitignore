@@ -4,3 +4,4 @@
 /.ssmcp/
 __pycache__/
 *.pyc
+/_site/

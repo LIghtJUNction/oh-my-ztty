@@ -2,7 +2,7 @@ name: Publish website
 on:
   push:
     branches: [main]
-    paths: ['site/**', '.github/workflows/pages.yml']
+    paths: ['site/**', 'scripts/build_site.py', 'VERSION', '.github/workflows/pages.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -17,9 +17,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - name: Install pinned documentation renderer
+        run: |
+          python3 -m venv .cache/docs-venv
+          .cache/docs-venv/bin/python -m pip install --disable-pip-version-check --require-hashes -r site/requirements.txt
+      - name: Build static documentation and check local links
+        run: .cache/docs-venv/bin/python scripts/build_site.py
       - uses: actions/upload-pages-artifact@v5
         with:
-          path: site
+          path: _site
   deploy:
     needs: build
     runs-on: ubuntu-latest

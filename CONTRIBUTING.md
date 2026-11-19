@@ -69,4 +69,6 @@ Record benchmarks with source revisions, OS and CPU, warm-up policy, samples and
 
 ## Website
 
-The website is plain HTML, CSS and JavaScript in `site/`. It has no build step, tracking scripts or external fonts. Check desktop and narrow mobile layouts, keyboard navigation and the copy button before publishing a design change. The Pages workflow deploys changes to these files.
+The documentation website is authored in `site/content/*.md`, with navigation in `site/nav.json`. A small Python build uses hash-locked Markdown dependencies and emits plain HTML, CSS and JavaScript in `_site`; the browser does not parse Markdown. See [the website build guide](site/README.md) for the isolated build and local preview commands.
+
+The Pages workflow builds the site, validates local links and heading anchors, and deploys the static output. There are no tracking scripts, external fonts or browser framework. Check desktop and narrow layouts, keyboard navigation, search, code copying and both warm-neutral themes before publishing a design change.
