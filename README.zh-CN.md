@@ -27,6 +27,12 @@ sh install.sh
 
 本仓库用 Git 子模块固定各组件版本。zsh 由系统包管理器安装。启动普通 shell 时无需运行额外的套件守护进程。
 
+## Ink 默认外观
+
+石墨色背景、低饱和配色、24 px 内边距与两行提示符，把路径、缓存的 Git 分支和输入区分开。提示符只使用 zsh 内置能力；字体通过 Fontconfig 回退，不强制安装图标字体。[自定义预设](docs/installation.md#ink-appearance)。
+
+![ztty 中真实运行的 Ink 预设](docs/reports/linux-x86_64-terminal.png)
+
 ## 常用命令
 
 ```sh
