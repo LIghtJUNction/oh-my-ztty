@@ -39,7 +39,7 @@ class Installation(unittest.TestCase):
         stage = self.work / ("stage-" + version) / "oh-my-ztty"
         stage.mkdir(parents=True)
         for rel in ["install.sh", "uninstall.sh", "bin/omztty", "bin/zshard",
-                    "config/zsh/.zshrc", "packaging/oh-my-ztty.svg", "packaging/omztty.1"]:
+                    "config/zsh/.zshrc", "config/zsh/ink.zsh", "packaging/oh-my-ztty.svg", "packaging/omztty.1"]:
             out = stage / rel
             out.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(ROOT / rel, out)
@@ -49,7 +49,7 @@ class Installation(unittest.TestCase):
         (stage / "PLATFORM").write_text("linux-" + os.uname().machine + "\n")
         shard = stage / "components/zshard"
         (shard / "bin").mkdir(parents=True)
-        (shard / "zshard.zsh").write_text("typeset -g ZSHARD_TEST=loaded\n")
+        (shard / "zshard.zsh").write_text("typeset -g ZSHARD_TEST=loaded\nzshard() { :; }\n")
         (shard / "bin/zshard").write_text(
             "#!/bin/sh\n"
             'printf "%s\\n" "$ZSHARD_CACHE_DIR" "$ZDOTDIR" > "$HOME/fixture-cache-dir"\n'

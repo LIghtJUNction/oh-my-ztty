@@ -19,7 +19,7 @@ class AIBridge(unittest.TestCase):
         self.home = self.work / "home with spaces"
         self.home.mkdir()
         self.runtime = self.work / "suite runtime"
-        for rel in ("bin/omztty", "bin/zshard", "VERSION", "config/zsh/.zshrc"):
+        for rel in ("bin/omztty", "bin/zshard", "VERSION", "config/zsh/.zshrc", "config/zsh/ink.zsh"):
             target = self.runtime / rel
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(ROOT / rel, target)

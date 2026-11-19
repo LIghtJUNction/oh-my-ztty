@@ -1,0 +1,314 @@
+{
+  "archive": "oh-my-ztty-0.1.1-linux-x86_64.tar.gz",
+  "archive_sha256": "6d4a608a037c625b76be3b2d19f269fef69046112868a732e9c8dbf7e69e7e6f",
+  "build": {
+    "platform": "linux-x86_64",
+    "schema": 1,
+    "source_commits": {
+      "ssmcp": "52a531a59e9ec9236a76eafc0f4f068799e44b15",
+      "zdot": "43cc523c0fd4331402d2393280509ac2c672a262",
+      "zshard": "a2dd935ede92fb96a0dc0556ce16e5f7494a0448",
+      "ztty": "6b91e29e923aaee0207953f2b04393087f19e0d8"
+    },
+    "suite_version": "0.1.1"
+  },
+  "cases": {
+    "kitty": {
+      "cleanup_ok": true,
+      "command": [
+        "kitty",
+        "--config",
+        "NONE",
+        "--class",
+        "ohmy-compare-kitty",
+        "--title",
+        "ohmy-compare-kitty",
+        "-o",
+        "font_family=JetBrainsMono Nerd Font",
+        "-o",
+        "font_size=13",
+        "-o",
+        "initial_window_width=100c",
+        "-o",
+        "initial_window_height=28c",
+        "-o",
+        "remember_window_size=no",
+        "-o",
+        "window_padding_width=24",
+        "-o",
+        "background=#11151c",
+        "-o",
+        "foreground=#dce4ee",
+        "-o",
+        "shell_integration=disabled",
+        "-o",
+        "enable_audio_bell=no",
+        "-o",
+        "close_on_child_death=yes",
+        "{installed_omztty}",
+        "shell"
+      ],
+      "geometry": {
+        "columns": 100,
+        "rows": 28
+      },
+      "median_application_Pss_KiB": 178062.0,
+      "median_session_helpers_Pss_KiB": 0.0,
+      "median_total_Pss_KiB": 178062.0,
+      "median_total_Rss_KiB": 217868.0,
+      "processes_at_last_sample": [
+        {
+          "Private_Clean_KiB": 49100,
+          "Private_Dirty_KiB": 82116,
+          "Pss_KiB": 145527,
+          "Rss_KiB": 179288,
+          "Shared_Clean_KiB": 45056,
+          "Shared_Dirty_KiB": 3016,
+          "executable": "/usr/bin/kitty",
+          "program": "kitty",
+          "scope": "application"
+        },
+        {
+          "Private_Clean_KiB": 16404,
+          "Private_Dirty_KiB": 12360,
+          "Pss_KiB": 28773,
+          "Rss_KiB": 30820,
+          "Shared_Clean_KiB": 2056,
+          "Shared_Dirty_KiB": 0,
+          "executable": "/usr/bin/kitten",
+          "program": "kitten",
+          "scope": "application"
+        },
+        {
+          "Private_Clean_KiB": 1308,
+          "Private_Dirty_KiB": 2076,
+          "Pss_KiB": 3472,
+          "Rss_KiB": 7476,
+          "Shared_Clean_KiB": 4092,
+          "Shared_Dirty_KiB": 0,
+          "executable": "/usr/bin/zsh",
+          "program": "zsh",
+          "scope": "application"
+        }
+      ],
+      "sample_count": 10,
+      "samples": [
+        {
+          "application_Pss_KiB": 178062,
+          "session_helpers_Pss_KiB": 0,
+          "total_Pss_KiB": 178062,
+          "total_Rss_KiB": 217868
+        },
+        {
+          "application_Pss_KiB": 178062,
+          "session_helpers_Pss_KiB": 0,
+          "total_Pss_KiB": 178062,
+          "total_Rss_KiB": 217868
+        },
+        {
+          "application_Pss_KiB": 178062,
+          "session_helpers_Pss_KiB": 0,
+          "total_Pss_KiB": 178062,
+          "total_Rss_KiB": 217868
+        },
+        {
+          "application_Pss_KiB": 178062,
+          "session_helpers_Pss_KiB": 0,
+          "total_Pss_KiB": 178062,
+          "total_Rss_KiB": 217868
+        },
+        {
+          "application_Pss_KiB": 178060,
+          "session_helpers_Pss_KiB": 0,
+          "total_Pss_KiB": 178060,
+          "total_Rss_KiB": 217868
+        },
+        {
+          "application_Pss_KiB": 178062,
+          "session_helpers_Pss_KiB": 0,
+          "total_Pss_KiB": 178062,
+          "total_Rss_KiB": 217868
+        },
+        {
+          "application_Pss_KiB": 178062,
+          "session_helpers_Pss_KiB": 0,
+          "total_Pss_KiB": 178062,
+          "total_Rss_KiB": 217868
+        },
+        {
+          "application_Pss_KiB": 177784,
+          "session_helpers_Pss_KiB": 0,
+          "total_Pss_KiB": 177784,
+          "total_Rss_KiB": 217584
+        },
+        {
+          "application_Pss_KiB": 177784,
+          "session_helpers_Pss_KiB": 0,
+          "total_Pss_KiB": 177784,
+          "total_Rss_KiB": 217584
+        },
+        {
+          "application_Pss_KiB": 177772,
+          "session_helpers_Pss_KiB": 0,
+          "total_Pss_KiB": 177772,
+          "total_Rss_KiB": 217584
+        }
+      ],
+      "settle_seconds": 5,
+      "status": "measured"
+    },
+    "ztty": {
+      "cleanup_ok": true,
+      "command": [
+        "{installed_omztty}",
+        "terminal",
+        "--name",
+        "ohmy-compare",
+        "--geometry",
+        "100x28"
+      ],
+      "geometry": {
+        "columns": 100,
+        "rows": 28
+      },
+      "median_application_Pss_KiB": 14735.0,
+      "median_session_helpers_Pss_KiB": 0.0,
+      "median_total_Pss_KiB": 14735.0,
+      "median_total_Rss_KiB": 26520.0,
+      "processes_at_last_sample": [
+        {
+          "Private_Clean_KiB": 52,
+          "Private_Dirty_KiB": 216,
+          "Pss_KiB": 981,
+          "Rss_KiB": 4376,
+          "Shared_Clean_KiB": 3316,
+          "Shared_Dirty_KiB": 792,
+          "executable": "{temporary_home}/.local/share/oh-my-ztty/releases/0.1.1-linux-x86_64/bin/ztty",
+          "program": "ztty",
+          "scope": "application"
+        },
+        {
+          "Private_Clean_KiB": 6616,
+          "Private_Dirty_KiB": 2668,
+          "Pss_KiB": 10310,
+          "Rss_KiB": 14820,
+          "Shared_Clean_KiB": 4744,
+          "Shared_Dirty_KiB": 792,
+          "executable": "{temporary_home}/.local/share/oh-my-ztty/releases/0.1.1-linux-x86_64/bin/ztty",
+          "program": "ztty",
+          "scope": "application"
+        },
+        {
+          "Private_Clean_KiB": 1208,
+          "Private_Dirty_KiB": 2068,
+          "Pss_KiB": 3385,
+          "Rss_KiB": 7324,
+          "Shared_Clean_KiB": 4048,
+          "Shared_Dirty_KiB": 0,
+          "executable": "/usr/bin/zsh",
+          "program": "zsh",
+          "scope": "application"
+        }
+      ],
+      "sample_count": 10,
+      "samples": [
+        {
+          "application_Pss_KiB": 14736,
+          "session_helpers_Pss_KiB": 0,
+          "total_Pss_KiB": 14736,
+          "total_Rss_KiB": 26520
+        },
+        {
+          "application_Pss_KiB": 14733,
+          "session_helpers_Pss_KiB": 0,
+          "total_Pss_KiB": 14733,
+          "total_Rss_KiB": 26520
+        },
+        {
+          "application_Pss_KiB": 14735,
+          "session_helpers_Pss_KiB": 0,
+          "total_Pss_KiB": 14735,
+          "total_Rss_KiB": 26520
+        },
+        {
+          "application_Pss_KiB": 14735,
+          "session_helpers_Pss_KiB": 0,
+          "total_Pss_KiB": 14735,
+          "total_Rss_KiB": 26520
+        },
+        {
+          "application_Pss_KiB": 14735,
+          "session_helpers_Pss_KiB": 0,
+          "total_Pss_KiB": 14735,
+          "total_Rss_KiB": 26520
+        },
+        {
+          "application_Pss_KiB": 14735,
+          "session_helpers_Pss_KiB": 0,
+          "total_Pss_KiB": 14735,
+          "total_Rss_KiB": 26520
+        },
+        {
+          "application_Pss_KiB": 14735,
+          "session_helpers_Pss_KiB": 0,
+          "total_Pss_KiB": 14735,
+          "total_Rss_KiB": 26520
+        },
+        {
+          "application_Pss_KiB": 14735,
+          "session_helpers_Pss_KiB": 0,
+          "total_Pss_KiB": 14735,
+          "total_Rss_KiB": 26520
+        },
+        {
+          "application_Pss_KiB": 14634,
+          "session_helpers_Pss_KiB": 0,
+          "total_Pss_KiB": 14634,
+          "total_Rss_KiB": 26520
+        },
+        {
+          "application_Pss_KiB": 14676,
+          "session_helpers_Pss_KiB": 0,
+          "total_Pss_KiB": 14676,
+          "total_Rss_KiB": 26520
+        }
+      ],
+      "settle_seconds": 5,
+      "status": "measured"
+    }
+  },
+  "cleanup": "Only owned application trees, the private D-Bus session and Xvfb were stopped. The temporary HOME was removed.",
+  "limitations": [
+    "Xvfb has no hardware GPU presentation. These software OpenGL results do not rank native GPU desktops.",
+    "The display server and private D-Bus daemon are excluded. PSS does not measure GPU allocations.",
+    "One launch per terminal, five seconds of settling, then ten samples at 200 ms intervals.",
+    "PSS depends on library pages shared with other running processes. Font requests match; renderer implementations and actual glyph rasterization differ.",
+    "Padding is not pixel-matched: ztty requests 24 px; kitty requests 24 pt, the documented unit of window_padding_width."
+  ],
+  "load_average_at_start": [
+    11.69140625,
+    11.53173828125,
+    8.2236328125
+  ],
+  "padding_unit_source": "Installed kitty 0.50.0 kitty/options/definition.py, window_padding_width: window padding in pts.",
+  "preset": {
+    "font_pattern": "JetBrains Mono,JetBrainsMono Nerd Font,Caskaydia Mono,Cascadia Mono,monospace:size=13",
+    "font_size_pt": "13",
+    "kitty_padding_pt": 24.0,
+    "resolved_font_family": "JetBrainsMono Nerd Font",
+    "ztty_padding_px": 24
+  },
+  "recorded_utc": "2026-11-19T20:22:56.999951+00:00",
+  "schema": "oh-my-ztty.virtual-display-comparison.v2",
+  "scope": "One window at a time on a private Xvfb display, forced software OpenGL, the same installed preset zsh with completion initialized, the same resolved font family and nominal font size, and verified 100x28 PTY; padding units differ as recorded below. Application PSS includes terminal processes, direct helpers, and shell. Newly activated session helpers are listed separately.",
+  "system": {
+    "architecture": "x86_64",
+    "kernel": "7.3.4-arch1-1"
+  },
+  "versions": {
+    "kitty": "kitty 0.50.0 created by Kovid Goyal",
+    "zsh": "zsh 5.9.2 (x86_64-pc-linux-gnu)",
+    "ztty": "ztty 0.4.1"
+  },
+  "working_directory": "Temporary directory outside a Git repository."
+}

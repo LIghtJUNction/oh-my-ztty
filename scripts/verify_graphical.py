@@ -93,20 +93,23 @@ def main():
     archive = args.archive.resolve()
     with tarfile.open(archive) as tar:
         build = json.load(tar.extractfile("oh-my-ztty/BUILD.json"))
+        preset_lines = tar.extractfile("oh-my-ztty/config/ztty/config").read().decode().splitlines()
+        preset = {line.split("=", 1)[0].strip(): line.split("=", 1)[1].strip() for line in preset_lines if "=" in line and not line.lstrip().startswith("#")}
     report = {
         "schema": "oh-my-ztty.graphical.v1",
         "recorded_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "archive": archive.name,
         "archive_sha256": hashlib.sha256(archive.read_bytes()).hexdigest(),
         "build": build,
-        "scope": "One actual suite window on an isolated Xvfb display, 100x28 cells, monospace:size=12. X server excluded from application memory. No AI connection.",
+        "scope": "One actual suite window on an isolated Xvfb display, 100x28 cells, preset font and padding, temporary Git checkout. X server excluded from application memory. No AI connection.",
+        "preset": {"font_pattern": preset["font"], "padding_px": int(preset["window-padding"])},
         "kernel": os.uname().release,
         "architecture": os.uname().machine,
     }
     with tempfile.TemporaryDirectory(prefix="oh-my-ztty-gui-") as temporary:
         temp = Path(temporary)
         home = temp / "home"
-        demo = home / "demo"
+        demo = home / "work/oh-my-ztty"
         demo.mkdir(parents=True)
         runtime = temp / "runtime"
         runtime.mkdir(mode=0o700)
@@ -115,7 +118,11 @@ def main():
         env.update(HOME=str(home), XDG_DATA_HOME=str(home / ".local/share"),
                    XDG_CONFIG_HOME=str(home / ".config"), XDG_CACHE_HOME=str(home / ".cache"),
                    XDG_STATE_HOME=str(home / ".local/state"), XDG_RUNTIME_DIR=str(runtime),
-                   OMZTTY_SOCKET=address, ZTTY_SOCKET=address)
+                   OMZTTY_SOCKET=address, ZTTY_SOCKET=address, GIT_CONFIG_NOSYSTEM="1", GIT_CONFIG_GLOBAL="/dev/null")
+        run(["git", "-c", "init.defaultBranch=main", "init", "--quiet", demo], env)
+        run(["git", "-C", demo, "-c", "user.name=oh-my-ztty", "-c", "user.email=preview@example.invalid", "-c", "commit.gpgsign=false", "commit", "--quiet", "--allow-empty", "-m", "Preview workspace"], env)
+        if shutil.which("fc-match"):
+            report["preset"]["resolved_font_family"] = run(["fc-match", "--format", "%{family}", preset["font"]], env).stdout
         run(["sh", ROOT / "install.sh", "--from", archive], env)
         cli = home / ".local/bin/omztty"
         release_id = cli.resolve().parents[1].name
@@ -125,20 +132,12 @@ def main():
             raise RuntimeError("installer did not prepare its completion dump")
         source = home / "verify.zsh"
         source.write_text(
-            "clear\n"
-            "print -P '%F{green}oh-my-ztty%f  /  Project Z'\n"
-            "print -r -- 'A lean terminal workspace.'\n"
-            "print -r -- ''\n"
-            "ztty --version\n"
-            "zdot --version\n"
-            "ssmcp --version\n"
-            "print -r -- ''\n"
-            "print -r -- 'Completion  |  Suggestions  |  Syntax colors'\n"
-            "print -r -- 'Local AI context  |  Explicit connection'\n"
-            "print -r -- 'No background AI process.'\n"
-            "print -r -- ready > \"$HOME/gui-ready\"\n"
+            'ztty --version > "$HOME/component-versions"\n'
+            'zdot --version >> "$HOME/component-versions"\n'
+            'ssmcp --version >> "$HOME/component-versions"\n'
+            'print -r -- ready > "$HOME/gui-ready"\n'
         )
-        xvfb = subprocess.Popen(["Xvfb", "-displayfd", "1", "-screen", "0", "1280x800x24", "-nolisten", "tcp"],
+        xvfb = subprocess.Popen(["Xvfb", "-displayfd", "1", "-screen", "0", "1600x1000x24", "-nolisten", "tcp"],
                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
         launcher = None
         broker_pid = None
@@ -175,6 +174,8 @@ def main():
             wait_until(lambda: (home / "gui-ready").exists())
             time.sleep(0.2)
             report["geometry"] = {"cols": session["cols"], "rows": session["rows"]}
+            if report["geometry"] != {"cols": 100, "rows": 28}:
+                raise RuntimeError("terminal PTY does not match the requested 100x28 grid")
             report["before_completion"] = {"ztty_broker": memory(broker_pid), "zsh": memory(shell_pid), "waiting_launcher": memory(launcher.pid)}
             run(["xdotool", "type", "--window", window_id, "--delay", "0", "omztty "], env)
             run(["xdotool", "key", "--window", window_id, "Tab"], env)
@@ -193,11 +194,16 @@ def main():
             run(["xdotool", "type", "--window", window_id, "--delay", "0", 'source "$HOME/verify.zsh"'], env)
             run(["xdotool", "key", "--window", window_id, "Return"], env)
             wait_until(lambda: (home / "gui-ready").exists())
-            time.sleep(0.2)
+            report["component_versions"] = (home / "component-versions").read_text().splitlines()
+            run(["xdotool", "key", "--window", window_id, "ctrl+l"], env)
+            for command in ["omztty version", "git status --short --branch"]:
+                run(["xdotool", "type", "--window", window_id, "--delay", "0", command], env)
+                run(["xdotool", "key", "--window", window_id, "Return"], env)
+                time.sleep(0.2)
             screenshot = args.output / f"linux-{os.uname().machine}-terminal.png"
             run(["import", "-window", window_id, screenshot], env)
             report["screenshot"] = screenshot.name
-            report["graphical_checks"] = ["visible window", "keyboard command executed in preset zsh", "first completion returned to a usable shell", "actual component versions printed"]
+            report["graphical_checks"] = ["visible window", "keyboard command executed in preset zsh", "first completion returned to a usable shell", "actual component versions verified"]
             run([cli, "ztty", "close", "oh-my-ztty-verify"], env)
             launcher.wait(timeout=5)
         finally:
