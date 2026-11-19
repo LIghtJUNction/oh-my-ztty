@@ -1,6 +1,6 @@
 # Installation
 
-The release bundle includes ztty, ssmcp, zdot and zshard. Install system zsh 5.9 or newer first. The graphical terminal uses X11/XWayland and needs X11, Xrender, Xft and their fontconfig dependencies. The x86_64 bundle requires glibc 2.34 or newer and libgcc. Formal release validation targets Ubuntu 24.04; the ABI floor alone does not certify every distribution.
+The release bundle includes ztty, ssmcp, zdot and zshard. Install system zsh 5.9 or newer first. The graphical terminal uses X11/XWayland and needs X11, Xrender, Xft and their fontconfig dependencies. Both published architectures require glibc 2.34 or newer and libgcc for ztty and ssmcp; zdot is static. Formal release validation targets Ubuntu 24.04; the ABI floor alone does not certify every distribution.
 
 On Ubuntu 24.04, install the system dependencies with:
 
