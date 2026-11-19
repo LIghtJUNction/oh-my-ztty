@@ -6,7 +6,7 @@ oh-my-ztty assembles four independent projects into one versioned Linux environm
 
 | Component | Work it owns | When it runs |
 | --- | --- | --- |
-| ztty | Terminal window, rendering and PTY | While the terminal is open |
+| ztty | Terminal window, rendering and PTY | While its broker is running; detached sessions may outlive windows |
 | System zsh | Parsing and executing shell commands | While the shell is open |
 | zshard | Prompt, completion, editing hooks and plugin loading | Inside the existing zsh process |
 | zdot | Planning and managing dotfile links; explicit Git sync | For a requested command |

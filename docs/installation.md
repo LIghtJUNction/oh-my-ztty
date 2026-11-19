@@ -50,7 +50,7 @@ Each version has its own directory; a `current` symlink chooses the active one. 
 
 ## Dotfiles
 
-Start an explicit dotfile repository:
+Create a dotfile directory and profile (this does not initialize Git):
 
 ```sh
 omztty dot init --root "$HOME/dotfiles"

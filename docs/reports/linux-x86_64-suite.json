@@ -1,0 +1,185 @@
+{
+  "after_completion": {
+    "waiting_launcher": {
+      "Private_Clean_KiB": 4,
+      "Private_Dirty_KiB": 176,
+      "Pss_KiB": 907,
+      "Rss_KiB": 4376,
+      "Shared_Clean_KiB": 3348,
+      "Shared_Dirty_KiB": 848
+    },
+    "zsh": {
+      "Private_Clean_KiB": 1580,
+      "Private_Dirty_KiB": 2064,
+      "Pss_KiB": 3754,
+      "Rss_KiB": 7672,
+      "Shared_Clean_KiB": 4028,
+      "Shared_Dirty_KiB": 0
+    },
+    "ztty_broker": {
+      "Private_Clean_KiB": 1548,
+      "Private_Dirty_KiB": 2668,
+      "Pss_KiB": 7587,
+      "Rss_KiB": 14760,
+      "Shared_Clean_KiB": 9696,
+      "Shared_Dirty_KiB": 848
+    }
+  },
+  "architecture": "x86_64",
+  "archive": "oh-my-ztty-0.1.0-linux-x86_64.tar.gz",
+  "archive_sha256": "2a15f01039f2727de72ccf0e1d23d095b93afe5e926541fdfc0defba758036ca",
+  "before_completion": {
+    "waiting_launcher": {
+      "Private_Clean_KiB": 4,
+      "Private_Dirty_KiB": 176,
+      "Pss_KiB": 907,
+      "Rss_KiB": 4376,
+      "Shared_Clean_KiB": 3348,
+      "Shared_Dirty_KiB": 848
+    },
+    "zsh": {
+      "Private_Clean_KiB": 1304,
+      "Private_Dirty_KiB": 1388,
+      "Pss_KiB": 2804,
+      "Rss_KiB": 6724,
+      "Shared_Clean_KiB": 4032,
+      "Shared_Dirty_KiB": 0
+    },
+    "ztty_broker": {
+      "Private_Clean_KiB": 1548,
+      "Private_Dirty_KiB": 2668,
+      "Pss_KiB": 7587,
+      "Rss_KiB": 14760,
+      "Shared_Clean_KiB": 9696,
+      "Shared_Dirty_KiB": 848
+    }
+  },
+  "build": {
+    "platform": "linux-x86_64",
+    "schema": 1,
+    "source_commits": {
+      "ssmcp": "52a531a59e9ec9236a76eafc0f4f068799e44b15",
+      "zdot": "43cc523c0fd4331402d2393280509ac2c672a262",
+      "zshard": "00778761c8657b51f536550f486fe1f239a56358",
+      "ztty": "6b91e29e923aaee0207953f2b04393087f19e0d8"
+    },
+    "suite_version": "0.1.0"
+  },
+  "cleanup": "All owned application processes and Xvfb stopped; temporary HOME removed.",
+  "geometry": {
+    "cols": 100,
+    "rows": 28
+  },
+  "graphical_checks": [
+    "visible window",
+    "keyboard command executed in preset zsh",
+    "first completion returned to a usable shell",
+    "actual component versions printed"
+  ],
+  "kernel": "7.3.4-arch1-1",
+  "recorded_utc": "2026-11-19T19:30:29.198897+00:00",
+  "schema": "oh-my-ztty.graphical.v1",
+  "scope": "One actual suite window on an isolated Xvfb display, 100x28 cells, monospace:size=12. X server excluded from application memory. No AI connection.",
+  "screenshot": "linux-x86_64-terminal.png",
+  "startup": {
+    "definition": "Warm process wall time for an interactive zsh -c exit. Suite includes launcher and preset initialization; no prompt, Tab, model or network call. Vanilla disables user/global rc and is a minimum-feature baseline.",
+    "results": {
+      "suite_shell": {
+        "median_ms": 12.813588,
+        "min_ms": 5.425037,
+        "p95_ms": 14.291457,
+        "raw_ms": [
+          13.76248,
+          13.985623,
+          12.476023,
+          14.291457,
+          12.734486,
+          12.89269,
+          13.313467,
+          14.831189,
+          11.078875,
+          14.351523,
+          12.894809,
+          6.875898,
+          13.246369,
+          12.934235,
+          12.650946,
+          14.076608,
+          11.773988,
+          14.115717,
+          9.494241,
+          6.734285,
+          5.425037,
+          8.206075,
+          9.292341,
+          12.709707,
+          12.454931,
+          12.945139,
+          12.685934,
+          12.129082,
+          12.186515,
+          13.434601,
+          14.119473,
+          13.395985,
+          12.922168,
+          13.242321,
+          12.622531,
+          12.718722,
+          13.781241,
+          12.588363,
+          12.247235,
+          13.444155
+        ]
+      },
+      "vanilla_zsh": {
+        "median_ms": 3.350196,
+        "min_ms": 1.470464,
+        "p95_ms": 3.689251,
+        "raw_ms": [
+          3.702402,
+          3.689251,
+          3.40974,
+          3.471771,
+          3.519487,
+          3.06508,
+          3.231209,
+          3.422187,
+          3.248464,
+          3.39259,
+          3.299937,
+          3.408861,
+          3.480041,
+          3.440517,
+          2.086161,
+          3.285701,
+          3.266787,
+          3.345427,
+          3.354965,
+          3.315445,
+          3.218216,
+          1.470464,
+          1.627433,
+          2.20525,
+          2.899192,
+          3.321839,
+          3.417005,
+          3.209129,
+          3.699457,
+          3.676494,
+          3.490422,
+          3.308465,
+          3.313666,
+          3.414668,
+          3.408509,
+          3.185777,
+          3.489377,
+          3.597624,
+          3.48301,
+          3.332769
+        ]
+      }
+    },
+    "samples_per_case": 40
+  },
+  "window_visible_ms": 85.295842
+}

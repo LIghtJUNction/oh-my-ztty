@@ -50,6 +50,10 @@ def memory(pid):
             values[fields[0].rstrip(":") + "_KiB"] = int(fields[1])
     return values
 
+def cache_snapshot(directory):
+    return {path.name: {"sha256": hashlib.sha256(path.read_bytes()).hexdigest(), "mtime_ns": path.stat().st_mtime_ns}
+            for path in sorted(directory.glob("zcompdump-*")) if path.is_file()}
+
 def find_session(value):
     if isinstance(value, dict):
         if "broker_pid" in value and "pid" in value and value.get("name") == "oh-my-ztty-verify":
@@ -114,6 +118,10 @@ def main():
                    OMZTTY_SOCKET=address, ZTTY_SOCKET=address)
         run(["sh", ROOT / "install.sh", "--from", archive], env)
         cli = home / ".local/bin/omztty"
+        cache_dir = home / ".cache/oh-my-ztty/zshard"
+        prepared_cache = cache_snapshot(cache_dir)
+        if not prepared_cache:
+            raise RuntimeError("installer did not prepare its completion dump")
         source = home / "verify.zsh"
         source.write_text(
             "clear\n"
@@ -176,6 +184,10 @@ def main():
             wait_until(lambda: (home / "tab-ready").exists())
             time.sleep(0.2)
             report["after_completion"] = {"ztty_broker": memory(broker_pid), "zsh": memory(shell_pid), "waiting_launcher": memory(launcher.pid)}
+            used_cache = cache_snapshot(cache_dir)
+            report["completion_cache"] = {"prepared": prepared_cache, "after_first_tab": used_cache, "reused": prepared_cache == used_cache}
+            if prepared_cache != used_cache:
+                raise RuntimeError("first Tab rebuilt the prepared completion dump: " + json.dumps(report["completion_cache"]))
             (home / "gui-ready").unlink()
             run(["xdotool", "type", "--window", window_id, "--delay", "0", 'source "$HOME/verify.zsh"'], env)
             run(["xdotool", "key", "--window", window_id, "Return"], env)

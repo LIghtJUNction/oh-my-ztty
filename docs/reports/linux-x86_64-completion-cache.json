@@ -1,0 +1,34 @@
+{
+  "archive": "oh-my-ztty-0.1.0-linux-x86_64.tar.gz",
+  "archive_sha256": "2a15f01039f2727de72ccf0e1d23d095b93afe5e926541fdfc0defba758036ca",
+  "build": {
+    "platform": "linux-x86_64",
+    "schema": 1,
+    "source_commits": {
+      "ssmcp": "52a531a59e9ec9236a76eafc0f4f068799e44b15",
+      "zdot": "43cc523c0fd4331402d2393280509ac2c672a262",
+      "zshard": "00778761c8657b51f536550f486fe1f239a56358",
+      "ztty": "6b91e29e923aaee0207953f2b04393087f19e0d8"
+    },
+    "suite_version": "0.1.0"
+  },
+  "cleanup": "All owned application processes and Xvfb stopped; temporary HOME removed.",
+  "completion_cache": {
+    "after_first_tab": {
+      "zcompdump-5.9.2": {
+        "mtime_ns": 1795116716866183453,
+        "sha256": "656d3f55f9fa0c2d38fdaaef6af2ed289cc2f89a5bd9342409ed6dd6e5698628"
+      }
+    },
+    "prepared": {
+      "zcompdump-5.9.2": {
+        "mtime_ns": 1795116716866183453,
+        "sha256": "656d3f55f9fa0c2d38fdaaef6af2ed289cc2f89a5bd9342409ed6dd6e5698628"
+      }
+    },
+    "reused": true
+  },
+  "method": "Snapshot dump hash and mtime immediately after the installer and after a real first Tab in an isolated graphical zsh session. Same published component binary inputs as the full suite report.",
+  "recorded_utc": "2026-11-19T19:31:56.467475+00:00",
+  "schema": "oh-my-ztty.completion-cache.v1"
+}
