@@ -19,9 +19,9 @@ for (const button of document.querySelectorAll('[data-copy]')) {
     if (!code) return;
     try {
       await navigator.clipboard.writeText(code.innerText);
-      button.textContent = 'Copied ✓';
+      button.textContent = 'Copied';
       status.textContent = 'Installation commands copied.';
-      setTimeout(() => {button.textContent = 'Copy ⧉';}, 2000);
+      setTimeout(() => {button.textContent = 'Copy';}, 2000);
     } catch {
       const range = document.createRange(); range.selectNodeContents(code);
       const selection = window.getSelection(); selection.removeAllRanges(); selection.addRange(range);

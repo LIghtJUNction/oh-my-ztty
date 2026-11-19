@@ -1,0 +1,79 @@
+name: Release
+on:
+  push:
+    tags: ["v[0-9]*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag to build
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: release-${{ github.event.inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+jobs:
+  bundle:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            arch: x86_64
+          - runner: ubuntu-24.04-arm
+            arch: aarch64
+    runs-on: ${{ matrix.runner }}
+    env:
+      RELEASE_TAG: ${{ github.event.inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.RELEASE_TAG }}
+          submodules: recursive
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Match immutable tag to suite version
+        run: test "$RELEASE_TAG" = "v$(cat VERSION)"
+      - name: Install build and shell prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y zsh
+          rustup toolchain install 1.100.0 --profile minimal
+          rustup default 1.100.0
+      - name: Check installer lifecycle
+        run: make check
+      - name: Build complete locked bundle
+        run: python3 scripts/build_bundle.py --arch "${{ matrix.arch }}"
+      - name: Smoke actual bundled programs in isolated HOME
+        run: python3 scripts/smoke_bundle.py dist/oh-my-ztty-*-linux-${{ matrix.arch }}.tar.gz
+      - uses: actions/upload-artifact@v7
+        with:
+          name: bundle-${{ matrix.arch }}
+          path: dist/*
+          if-no-files-found: error
+  publish:
+    needs: bundle
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_TAG: ${{ github.event.inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.RELEASE_TAG }}
+          persist-credentials: false
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: bundle-*
+          path: dist
+          merge-multiple: true
+      - name: Prepare bootstrap installer checksum
+        run: |
+          cp install.sh dist/install.sh
+          cd dist
+          sha256sum install.sh > install.sh.sha256
+      - name: Publish complete release
+        run: python3 scripts/publish_release.py --tag "$RELEASE_TAG"
