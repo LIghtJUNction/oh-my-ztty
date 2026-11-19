@@ -35,7 +35,7 @@ class Installation(unittest.TestCase):
     def tearDown(self):
         self.temp.cleanup()
 
-    def bundle(self, version):
+    def bundle(self, version, warm_exit=0):
         stage = self.work / ("stage-" + version) / "oh-my-ztty"
         stage.mkdir(parents=True)
         for rel in ["install.sh", "uninstall.sh", "bin/omztty", "bin/zshard",
@@ -50,7 +50,7 @@ class Installation(unittest.TestCase):
         shard = stage / "components/zshard"
         (shard / "bin").mkdir(parents=True)
         (shard / "zshard.zsh").write_text("typeset -g ZSHARD_TEST=loaded\n")
-        (shard / "bin/zshard").write_text("#!/bin/sh\nprintf 'zshard fixture\\n'\n")
+        (shard / "bin/zshard").write_text(f"#!/bin/sh\nprintf 'zshard fixture\\n'\nexit {warm_exit}\n")
         (shard / "bin/zshard").chmod(0o755)
         for name in ["ztty", "ssmcp", "zdot"]:
             executable = stage / "bin" / name
@@ -127,6 +127,15 @@ class Installation(unittest.TestCase):
         self.assertEqual(history.read_text(), "user history")
         self.assertFalse((self.data / "applications/oh-my-ztty.desktop").is_symlink())
 
+    def test_failed_cache_warm_preserves_previous_version(self):
+        self.install()
+        previous = os.readlink(self.base / "current")
+        broken = self.bundle("0.1.1", warm_exit=12)
+        result = self.install(broken, ok=False)
+        self.assertIn("completion cache preparation failed", result.stderr)
+        self.assertEqual(os.readlink(self.base / "current"), previous)
+        self.assertIn("0.1.0", self.cli("version").stdout)
+
     def test_modified_release_is_preserved(self):
         self.install()
         binary = self.base / "current/bin/ztty"
@@ -148,6 +157,21 @@ class Installation(unittest.TestCase):
         self.install(ok=False)
         self.assertFalse(self.base.exists())
         self.assertEqual(launcher.read_text(), "unrelated")
+
+    def test_terminal_uses_suite_socket_and_preserves_arguments(self):
+        self.install()
+        binary = self.base / "current/bin/ztty"
+        binary.write_text('#!/bin/sh\nprintf "%s\\n" "$ZTTY_SOCKET" "$@"\n')
+        self.env["ZTTY_SOCKET"] = "@unrelated-running-terminal"
+        direct = self.cli("ztty", "--version").stdout.splitlines()
+        self.assertEqual(direct[0], f"@oh-my-ztty-{os.getuid()}-0.1.0")
+        self.env["OMZTTY_SOCKET"] = "@suite-test-explicit"
+        terminal = self.cli("terminal", "--geometry", "100x28").stdout.splitlines()
+        self.assertEqual(terminal[0], "@suite-test-explicit")
+        self.assertEqual(terminal[1], "--config")
+        self.assertEqual(terminal[3:6], ["--geometry", "100x28", "-e"])
+        self.assertEqual(terminal[-1], "shell")
+        self.assertIn("home with spaces", terminal[-2])
 
     def test_archive_symlink_rejected(self):
         bad = self.work / "bad.tar.gz"

@@ -62,7 +62,9 @@ cleanup() {
     [ -z "$stage" ] || rm -rf -- "$stage"
     [ ! -d "$base" ] || rm -f -- "$base/.current.$$"
 }
-trap cleanup EXIT HUP INT TERM
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' HUP TERM
 fetch() {
     if command -v curl >/dev/null 2>&1; then
         curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 "$1" -o "$2"
@@ -121,6 +123,10 @@ else
     mv -T -- "$stage" "$release"
     stage=
 fi
+# Prepare the audited completion cache before switching an existing installation.
+ZSHARD_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/oh-my-ztty/zshard" \
+    HISTFILE=/dev/null "$release/bin/zshard" cache warm "$release/packaging/completions" \
+    || die "completion cache preparation failed; active version was not changed"
 if [ ! -L "$base/current" ] || [ "$(readlink "$base/current")" != "releases/$release_id" ]; then
     [ ! -e "$base/current" ] || [ -L "$base/current" ] || die "current path is not a managed link"
     ln -s "releases/$release_id" "$base/.current.$$"
