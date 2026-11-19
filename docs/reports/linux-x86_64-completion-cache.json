@@ -1,34 +1,35 @@
 {
-  "archive": "oh-my-ztty-0.1.0-linux-x86_64.tar.gz",
-  "archive_sha256": "2a15f01039f2727de72ccf0e1d23d095b93afe5e926541fdfc0defba758036ca",
+  "archive": "oh-my-ztty-0.1.1-linux-x86_64.tar.gz",
+  "archive_sha256": "6d4a608a037c625b76be3b2d19f269fef69046112868a732e9c8dbf7e69e7e6f",
   "build": {
     "platform": "linux-x86_64",
     "schema": 1,
     "source_commits": {
       "ssmcp": "52a531a59e9ec9236a76eafc0f4f068799e44b15",
       "zdot": "43cc523c0fd4331402d2393280509ac2c672a262",
-      "zshard": "00778761c8657b51f536550f486fe1f239a56358",
+      "zshard": "a2dd935ede92fb96a0dc0556ce16e5f7494a0448",
       "ztty": "6b91e29e923aaee0207953f2b04393087f19e0d8"
     },
-    "suite_version": "0.1.0"
+    "suite_version": "0.1.1"
   },
   "cleanup": "All owned application processes and Xvfb stopped; temporary HOME removed.",
   "completion_cache": {
     "after_first_tab": {
       "zcompdump-5.9.2": {
-        "mtime_ns": 1795116716866183453,
-        "sha256": "656d3f55f9fa0c2d38fdaaef6af2ed289cc2f89a5bd9342409ed6dd6e5698628"
+        "mtime_ns": 1795119631619699439,
+        "sha256": "6a35a128e14927fd185515a5be1a756db10f502875939c3cb3dd431f76cf3afd"
       }
     },
     "prepared": {
       "zcompdump-5.9.2": {
-        "mtime_ns": 1795116716866183453,
-        "sha256": "656d3f55f9fa0c2d38fdaaef6af2ed289cc2f89a5bd9342409ed6dd6e5698628"
+        "mtime_ns": 1795119631619699439,
+        "sha256": "6a35a128e14927fd185515a5be1a756db10f502875939c3cb3dd431f76cf3afd"
       }
     },
     "reused": true
   },
-  "method": "Snapshot dump hash and mtime immediately after the installer and after a real first Tab in an isolated graphical zsh session. Same published component binary inputs as the full suite report.",
-  "recorded_utc": "2026-11-19T19:31:56.467475+00:00",
-  "schema": "oh-my-ztty.completion-cache.v1"
+  "method": "Extracted from the same Ink graphical run: snapshot the release-specific completion dump SHA256 and mtime immediately after installation and after a real first Tab in the isolated preset shell.",
+  "recorded_utc": "2026-11-19T20:20:30.827763+00:00",
+  "schema": "oh-my-ztty.completion-cache.v1",
+  "source_report": "linux-x86_64-suite.json"
 }

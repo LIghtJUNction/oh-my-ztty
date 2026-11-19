@@ -1,11 +1,32 @@
-# Portable monospace font; no patched icon font required.
-font = monospace:size=12
-window-padding = 18
-background = #0b0d10
-foreground = #e2e5e9
+# Fontconfig tries these installed families in order, then ordinary monospace.
+# Patched icon fonts are optional; the prompt uses no private-use glyphs.
+font = JetBrains Mono,JetBrainsMono Nerd Font,Caskaydia Mono,Cascadia Mono,monospace:size=13
+window-padding = 24
+background = #11151c
+foreground = #dce4ee
 background-opacity = 100
+background-blur = false
 cursor-shape = bar
-cursor-color = #9ae6b4
+cursor-color = #94dcc6
 cursor-blink = true
-selection-background = #273b35
-selection-foreground = #ffffff
+cursor-blink-interval = 600
+selection-background = #2c405b
+selection-foreground = #edf2f7
+
+# A complete, quiet ANSI palette keeps commands and completion menus consistent.
+palette = 0=#394457
+palette = 1=#f08b8b
+palette = 2=#8ed1b2
+palette = 3=#e3c68d
+palette = 4=#8cafff
+palette = 5=#c5a3e8
+palette = 6=#86cdd7
+palette = 7=#c8d2e0
+palette = 8=#64748b
+palette = 9=#ff9d9a
+palette = 10=#b0e5c9
+palette = 11=#f2d9a7
+palette = 12=#adc6ff
+palette = 13=#ddc0fa
+palette = 14=#b0e4e8
+palette = 15=#edf2f7
