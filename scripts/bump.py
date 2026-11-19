@@ -10,6 +10,34 @@ ROOT = Path(__file__).resolve().parents[1]
 def git(*args):
     return subprocess.check_output(["git", *args], cwd=ROOT, text=True).strip()
 
+
+def planned_files(current, version):
+    """Update current-release guidance while preserving historical evidence."""
+    changes = {ROOT / "VERSION": version + "\n"}
+    installer = ROOT / "install.sh"
+    text, count = re.subn(r"(?m)^VERSION=" + re.escape(current) + r"$",
+                          "VERSION=" + version, installer.read_text())
+    if count != 1:
+        raise SystemExit("Installer must contain one matching VERSION assignment")
+    changes[installer] = text
+
+    overview = ROOT / "site/content/index.md"
+    old = f"The current suite release is **{current}**"
+    text = overview.read_text()
+    if text.count(old) != 1:
+        raise SystemExit("Overview must declare the current suite release once")
+    changes[overview] = text.replace(old, f"The current suite release is **{version}**")
+
+    guide = ROOT / "site/content/installation.md"
+    text = guide.read_text()
+    old_tag = f"https://github.com/LIghtJUNction/oh-my-ztty/releases/tag/v{current}"
+    old_archive = f"oh-my-ztty-{current}-linux-"
+    if old_tag not in text or old_archive not in text:
+        raise SystemExit("Installation guide must identify the current release and archive")
+    text = text.replace(old_tag, f"https://github.com/LIghtJUNction/oh-my-ztty/releases/tag/v{version}")
+    changes[guide] = text.replace(old_archive, f"oh-my-ztty-{version}-linux-")
+    return changes
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("part", choices=["major", "minor", "patch"])
@@ -33,22 +61,18 @@ def main():
             raise SystemExit(f"Tag already exists: {tag}")
         if git("ls-remote", "--tags", "origin", "refs/tags/" + tag):
             raise SystemExit(f"Remote tag already exists: {tag}")
-    installer = ROOT / "install.sh"
-    text = installer.read_text()
-    text, count = re.subn(r"(?m)^VERSION=[0-9]+\.[0-9]+\.[0-9]+$", "VERSION=" + version, text)
-    if count != 1:
-        raise SystemExit("Installer must contain one VERSION assignment")
-    (ROOT / "VERSION").write_text(version + "\n")
-    installer.write_text(text)
+    changes = planned_files(current, version)
+    for path, text in changes.items():
+        path.write_text(text)
     if args.release:
         subprocess.run(["make", "check"], cwd=ROOT, check=True)
-        git("add", "VERSION", "install.sh")
+        git("add", *(str(path.relative_to(ROOT)) for path in changes))
         git("commit", "-m", "release: " + tag)
         git("tag", "-a", tag, "-m", "oh-my-ztty " + version)
         subprocess.run(["git", "push", "--atomic", "origin", "HEAD:refs/heads/" + branch, "refs/tags/" + tag], cwd=ROOT, check=True)
         print(f"Pushed {tag}; the formal release workflow builds and publishes both Linux architectures.")
     else:
-        print(f"{current} -> {version}; VERSION and install.sh updated. Run make check before committing.")
+        print(f"{current} -> {version}; VERSION, installer and current-release docs updated. Run make check before committing.")
 
 if __name__ == "__main__":
     main()
