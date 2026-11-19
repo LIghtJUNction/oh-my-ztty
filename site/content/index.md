@@ -23,7 +23,7 @@ Installation is per user. The suite keeps its configuration in a separate direct
 | Component | Pinned version | Responsibility |
 | --- | --- | --- |
 | [ztty](https://github.com/LIghtJUNction/ztty) | 0.4.1 | Terminal window, rendering and PTY |
-| [zshard](https://github.com/LIghtJUNction/zshard) | 0.1.2 | Prompt, completion, suggestions, highlighting and plugins |
+| [zshard](https://github.com/LIghtJUNction/zshard) | 0.1.3 | Prompt, completion, suggestions, highlighting and plugins |
 | [zdot](https://github.com/LIghtJUNction/zdot) | 0.1.1 | Dotfile plans, managed links, backups and Git sync |
 | [ssmcp](https://github.com/LIghtJUNction/ssmcp) | 0.10.10 | An explicit MCP connection to your workspace |
 

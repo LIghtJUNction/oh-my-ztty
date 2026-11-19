@@ -18,8 +18,10 @@ To load it in future shells, put the first line in [local.zsh](configuration.md#
 | Interface | When the file is sourced |
 | --- | --- |
 | `zshard load FILE` | Immediately |
-| `zshard defer FILE` | At the first ZLE editing line |
+| `zshard defer FILE` | At the next ZLE editing line |
 | `zshard lazy COMMAND FILE` | When that command is first used |
+
+Each deferred batch attempts every queued plugin once. A failure does not discard the later plugins; the batch returns its first nonzero status. Plugins queued during a batch wait for the next editing line. Failed plugins are not retried automatically.
 
 A lazy plugin must define its command or make the external executable available. The wrapper preserves the original argument boundaries.
 
@@ -32,7 +34,7 @@ A remote plugin needs a full 40-character Git commit and an entry file inside th
 ```zsh
 zshard plugin add hello \
   https://github.com/LIghtJUNction/zshard.git \
-  a2dd935ede92fb96a0dc0556ce16e5f7494a0448 \
+  a55c2d08b4299b25ec007b45641df87e8c0d0bbb \
   examples/hello.plugin.zsh
 zshard plugin verify hello
 zshard use hello
@@ -75,4 +77,4 @@ Register a directory of standard zsh `_command` completion files with `zshard co
 
 Register a prompt callback with `zshard theme FUNCTION`. It receives the last exit status and elapsed whole seconds and assigns `PROMPT` and `RPROMPT`. Keep external commands out of the callback to retain the default prompt's process behavior.
 
-See the [complete extension reference](https://github.com/LIghtJUNction/zshard/blob/v0.1.2/docs/plugins.md) and the [working hello plugin](https://github.com/LIghtJUNction/zshard/blob/v0.1.2/examples/hello.plugin.zsh).
+See the [complete extension reference](https://github.com/LIghtJUNction/zshard/blob/v0.1.3/docs/plugins.md) and the [working hello plugin](https://github.com/LIghtJUNction/zshard/blob/v0.1.3/examples/hello.plugin.zsh).
