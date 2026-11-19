@@ -60,7 +60,7 @@ Configure an installed AI provider's executable and arguments as the `ZSHARD_AI_
 Download the archive and its matching `.sha256` file from the same release, then run:
 
 ```sh
-sh install.sh --from ./oh-my-ztty-0.1.0-linux-x86_64.tar.gz
+sh install.sh --from ./oh-my-ztty-0.1.1-linux-x86_64.tar.gz
 ```
 
 Use the aarch64 archive on ARM64. An explicit `--sha256 HEX` can replace the sidecar file when the digest has already been obtained from the release record.
@@ -71,7 +71,7 @@ Use the aarch64 archive on ARM64. An explicit `--sha256 HEX` can replace the sid
 omztty update
 ```
 
-Each version has its own directory; a `current` symlink chooses the active one. Before changing that link, the installer prepares an audited completion cache using the system functions, zshard and suite completions. The first Tab can reuse that cache. Changing completion paths or plugins causes normal revalidation. A failed preparation leaves the previously active version selected. Installing the same archive again verifies the existing installation. If an installed version's files were modified, the installer preserves them and reports the conflict.
+Each version has its own directory; a `current` symlink chooses the active one. Completion caches also use the immutable release directory name, so upgrades and rollback use their matching inputs. Before changing that link, the installer prepares an audited completion cache using the system functions, zshard and suite completions. The first Tab can reuse that cache. Changing completion paths or plugins causes normal revalidation. A failed preparation leaves the previously active version selected. Installing the same archive again verifies the existing installation. If an installed version's files were modified, the installer preserves them and reports the conflict.
 
 ## Dotfiles
 

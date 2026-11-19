@@ -1,7 +1,7 @@
 #!/bin/sh
 # Per-user release installation; never changes the login shell.
 set -eu
-VERSION=0.1.0
+VERSION=0.1.1
 die() { printf 'oh-my-ztty: %s\n' "$*" >&2; exit 1; }
 usage() {
     cat <<'EOF'
@@ -124,6 +124,7 @@ else
     stage=
 fi
 # Prepare the audited completion cache before switching an existing installation.
+ZDOTDIR="$release/config/zsh" \
 ZSHARD_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/oh-my-ztty/zshard/$release_id" \
     HISTFILE=/dev/null "$release/bin/zshard" cache warm "$release/packaging/completions" \
     || die "completion cache preparation failed; active version was not changed"
