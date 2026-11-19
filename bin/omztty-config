@@ -1,0 +1,103 @@
+#!/bin/sh
+# Explicit, user-scoped configuration deployment through the bundled zdot.
+set -eu
+umask 077
+root=${OMZTTY_ROOT:?run this through omztty config}
+config=${XDG_CONFIG_HOME:-"$HOME/.config"}
+statehome=${XDG_STATE_HOME:-"$HOME/.local/state"}
+profile="$config/oh-my-ztty/profile"
+state="$statehome/zdot/oh-my-ztty"
+die() { printf 'oh-my-ztty config: %s\n' "$*" >&2; exit 1; }
+usage() {
+    cat <<'EOF'
+Usage: omztty config COMMAND
+  init                Copy the bundled Ink defaults into an editable profile
+  plan [--json]       Preview the complete home configuration deployment
+  apply [--backup]    Link the profile through zdot; back up conflicts explicitly
+  status              Inspect every managed configuration
+  remove              Restore the files saved before adoption
+  path                Print the editable profile directory
+  audit               Inspect managed files and known retired shell frameworks
+  sync status|pull|push  Use zdot's explicit Git synchronization
+Personal shell additions live in ~/.config/oh-my-ztty/local.zsh.
+Configuration commands do not install applications or start background services.
+EOF
+}
+case "$config:$statehome:$HOME" in *'
+'*) die 'paths must not contain a newline' ;; esac
+for value in "$config" "$statehome" "$HOME"; do
+    case "$value" in /*) ;; *) die 'HOME and XDG paths must be absolute' ;; esac
+done
+case "$config" in
+    "$HOME"/*) config_relative=${config#"$HOME"/} ;;
+    *) die 'XDG_CONFIG_HOME must be below HOME for this home deployment' ;;
+esac
+case "/$config_relative/" in */../*|*/./*) die 'XDG_CONFIG_HOME must not contain dot segments' ;; esac
+action=${1:-help}
+[ "$#" -eq 0 ] || shift
+case "$action" in
+    help|-h|--help) usage; exit 0 ;;
+    path) [ "$#" -eq 0 ] || die 'path takes no arguments'; printf '%s\n' "$profile"; exit 0 ;;
+    init)
+        [ "$#" -eq 0 ] || die 'init takes no arguments'
+        if [ -e "$profile" ] || [ -L "$profile" ]; then
+            [ -d "$profile" ] && [ ! -L "$profile" ] &&
+              [ "$(cat "$profile/.omztty-profile" 2>/dev/null)" = omztty-profile-v1 ] ||
+              die "preserving an existing, unowned profile: $profile"
+            printf 'Profile already exists: %s\n' "$profile"
+            exit 0
+        fi
+        defaults="$root/components/zrc/profiles/ink"
+        [ -f "$defaults/profile.zdot" ] || die 'this bundle does not include zrc defaults'
+        mkdir -p -- "$config/oh-my-ztty"
+        stage=$(mktemp -d "$config/oh-my-ztty/.profile.XXXXXXXX")
+        trap 'rm -rf -- "$stage"' EXIT
+        trap 'exit 130' INT
+        trap 'exit 143' HUP TERM
+        cp -R -- "$defaults/files" "$stage/files"
+        tab=$(printf '\t')
+        while IFS="$tab" read -r source destination; do
+            case "$source" in ''|'#'*) printf '%s\n' "$source"; continue ;; esac
+            case "$destination" in
+                .config/*) destination="$config_relative/${destination#.config/}" ;;
+            esac
+            printf '%s\t%s\n' "$source" "$destination"
+        done < "$defaults/profile.zdot" > "$stage/profile.zdot"
+        cp -- "$root/config/home/.zshrc" "$stage/files/.zshrc"
+        mkdir -p -- "$stage/files/.config/ztty"
+        cp -- "$root/config/ztty/config" "$stage/files/.config/ztty/config"
+        printf 'files/.zshrc\t.zshrc\nfiles/.config/ztty\t%s/ztty\n' "$config_relative" >> "$stage/profile.zdot"
+        printf '%s\n' omztty-profile-v1 > "$stage/.omztty-profile"
+        cp -- "$root/VERSION" "$stage/.suite-version"
+        mv -T -- "$stage" "$profile"
+        printf 'Prepared %s\nNext: omztty config plan\nApply: omztty config apply --backup\n' "$profile"
+        exit 0 ;;
+    plan|apply|status|remove|audit|sync) ;;
+    *) usage >&2; exit 2 ;;
+esac
+[ -d "$profile" ] && [ ! -L "$profile" ] &&
+  [ "$(cat "$profile/.omztty-profile" 2>/dev/null)" = omztty-profile-v1 ] ||
+  die 'no owned profile; run omztty config init'
+case "$action" in
+    plan) [ "$#" -eq 0 ] || { [ "$#" -eq 1 ] && [ "$1" = --json ]; } || die 'plan accepts only --json' ;;
+    apply) [ "$#" -eq 0 ] || { [ "$#" -eq 1 ] && [ "$1" = --backup ]; } || die 'apply accepts only --backup' ;;
+    status|remove|audit) [ "$#" -eq 0 ] || die "$action takes no arguments" ;;
+    sync)
+        [ "$#" -eq 1 ] || die 'sync requires status, pull, or push'
+        case "$1" in status|pull|push) ;; *) die 'sync requires status, pull, or push' ;; esac
+        exec "$root/bin/zdot" sync --root "$profile" "$1" ;;
+esac
+if [ "$action" = audit ]; then
+    "$root/bin/zdot" status --root "$profile" --target "$HOME" --state-dir "$state"
+    printf '\nKnown legacy shell locations:\n'
+    count=0
+    for name in .oh-my-zsh .zim .zimrc .zinit .zplug .zprezto .p10k.zsh .config/starship.toml .local/share/zinit .local/share/antidote; do
+        if [ -e "$HOME/$name" ] || [ -L "$HOME/$name" ]; then
+            printf 'review  %s\n' "$HOME/$name"
+            count=$((count + 1))
+        fi
+    done
+    [ "$count" -ne 0 ] || printf 'No known legacy shell locations remain.\n'
+    exit 0
+fi
+exec "$root/bin/zdot" "$action" --root "$profile" --target "$HOME" --state-dir "$state" "$@"
