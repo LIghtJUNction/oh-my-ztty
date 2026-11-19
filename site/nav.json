@@ -1,0 +1,73 @@
+{
+  "groups": [
+    {
+      "label": "Getting started",
+      "pages": [
+        {
+          "slug": "",
+          "title": "Overview",
+          "source": "index.md",
+          "description": "A versioned Linux terminal environment built on Project Z."
+        },
+        {
+          "slug": "installation",
+          "title": "Installation",
+          "source": "installation.md",
+          "description": "Install, update and remove the suite with a verified per-user installer."
+        }
+      ]
+    },
+    {
+      "label": "Guides",
+      "pages": [
+        {
+          "slug": "configuration",
+          "title": "Configuration",
+          "source": "configuration.md",
+          "description": "Set shell options, personal aliases, plugins and prompt behavior."
+        },
+        {
+          "slug": "plugins",
+          "title": "Plugins",
+          "source": "plugins.md",
+          "description": "Load local plugins and keep remote plugins pinned to reviewed commits."
+        },
+        {
+          "slug": "ai",
+          "title": "AI integration",
+          "source": "ai.md",
+          "description": "Export explicit context, connect through ssmcp and review proposed commands."
+        },
+        {
+          "slug": "dotfiles",
+          "title": "Dotfiles",
+          "source": "dotfiles.md",
+          "description": "Preview and manage dotfile links, backups and explicit Git synchronization."
+        }
+      ]
+    },
+    {
+      "label": "Reference",
+      "pages": [
+        {
+          "slug": "performance",
+          "title": "Performance",
+          "source": "performance.md",
+          "description": "Measured startup, first completion and memory, with methods and raw evidence."
+        },
+        {
+          "slug": "architecture",
+          "title": "Architecture",
+          "source": "architecture.md",
+          "description": "Understand process boundaries, no_std code, source pins and installation state."
+        },
+        {
+          "slug": "development",
+          "title": "Development",
+          "source": "development.md",
+          "description": "Work across submodules, validate a combination and publish a version bump."
+        }
+      ]
+    }
+  ]
+}
