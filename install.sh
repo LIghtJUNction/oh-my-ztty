@@ -35,6 +35,7 @@ done
 case "$(uname -m)" in x86_64|amd64) arch=x86_64 ;; aarch64|arm64) arch=aarch64 ;; *) die "unsupported architecture" ;; esac
 for tool in tar sha256sum awk sed grep tr readlink mktemp; do command -v "$tool" >/dev/null 2>&1 || die "required command not found: $tool"; done
 command -v zsh >/dev/null 2>&1 || die "install zsh with your distribution package manager first"
+zsh -dfc 'autoload -Uz is-at-least; is-at-least 5.9 "$ZSH_VERSION"' || die "zsh 5.9 or newer is required"
 datahome=${XDG_DATA_HOME:-"$HOME/.local/share"}
 case "$datahome:$bindir" in *'
 '*) die "installation paths must not contain a newline" ;; esac

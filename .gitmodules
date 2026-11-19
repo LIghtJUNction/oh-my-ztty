@@ -4,3 +4,9 @@
 [submodule "components/ssmcp"]
 	path = components/ssmcp
 	url = https://github.com/LIghtJUNction/ssmcp.git
+[submodule "components/zshard"]
+	path = components/zshard
+	url = https://github.com/LIghtJUNction/zshard.git
+[submodule "components/zdot"]
+	path = components/zdot
+	url = https://github.com/LIghtJUNction/zdot.git

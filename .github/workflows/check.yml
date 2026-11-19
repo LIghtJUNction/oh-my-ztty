@@ -1,0 +1,15 @@
+name: Manual validation
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  local-equivalent:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: recursive
+          persist-credentials: false
+      - run: sudo apt-get update && sudo apt-get install -y zsh
+      - run: make check
