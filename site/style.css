@@ -151,6 +151,7 @@ h2:hover .heading-anchor, h3:hover .heading-anchor, .heading-anchor:focus { opac
 .search-result-title { display: block; color: var(--text); font-size: 14px; font-weight: 500; margin-bottom: 5px; }
 .search-result:hover .search-result-title { color: var(--accent); }
 .search-result-excerpt { display: block; font-size: 12px; line-height: 1.6; color: var(--muted); }
+.search-status, .search-result-title, .search-result-excerpt { overflow-wrap: anywhere; }
 .search-footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 11px 18px; border-top: 1px solid var(--line); color: var(--subtle); font-size: 10px; }
 .search-footer kbd { display: inline-block; margin: 0 3px; min-width: 17px; text-align: center; }
 @media (min-width: 1600px) { .docs-layout { column-gap: 72px; } }
