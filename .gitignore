@@ -1,0 +1,6 @@
+/.cache/
+/dist/
+/target/
+/.ssmcp/
+__pycache__/
+*.pyc

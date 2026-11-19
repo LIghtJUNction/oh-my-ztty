@@ -1,0 +1,88 @@
+#!/bin/sh
+set -eu
+self=$(readlink -f -- "$0")
+root=${self%/*}
+root=${root%/*}
+export OMZTTY_ROOT="$root"
+usage() {
+    cat <<'EOF'
+oh-my-ztty — a lean terminal workspace
+Usage: omztty COMMAND [ARGS...]
+  shell       Open the preset zsh (accepts zsh arguments)
+  terminal    Open ztty with the preset zsh (accepts ztty options)
+  ai          Connect this directory through bundled ssmcp
+  dot         Run bundled zdot
+  zshard      Manage shell plugins
+  ztty|ssmcp  Run a bundled component directly
+  doctor      Check installed components and system dependencies
+  version     Show the suite version
+  update      Install the latest published suite
+  uninstall   Remove suite-owned files and links
+No daemon or connection is started until you explicitly request it.
+EOF
+}
+case "${1:-help}" in
+    -h|--help|help) usage; exit 0 ;;
+    -V|--version|version) printf 'oh-my-ztty %s\n' "$(cat "$root/VERSION")"; exit 0 ;;
+esac
+cmd=$1; shift
+case "$cmd" in
+    shell|terminal)
+        command -v zsh >/dev/null 2>&1 || { printf 'zsh is required\n' >&2; exit 1; }
+        export PATH="$root/bin:$PATH"
+        export ZDOTDIR="$root/config/zsh"
+        export ZSHARD_HOME="$root/components/zshard"
+        export ZSHARD_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/oh-my-ztty/zshard"
+        state="${XDG_STATE_HOME:-$HOME/.local/state}/oh-my-ztty"
+        [ -d "$state" ] || (umask 077; mkdir -p -- "$state")
+        export HISTFILE="$state/history"
+        if [ "$cmd" = shell ]; then exec zsh -d "$@"; fi
+        exec "$root/bin/ztty" --config "$root/config/ztty/config" "$@" -e "$root/bin/omztty" shell ;;
+    ai)
+        export PATH="$root/bin:$PATH"
+        export ZSHARD_HOME="$root/components/zshard"
+        action=${1:-help}
+        [ "$#" -eq 0 ] || shift
+        case "$action" in
+            context|ask) exec "$root/components/zshard/bin/zshard" ai "$action" "$@" ;;
+            connect) exec "$root/bin/ssmcp" "$@" ;;
+            propose) printf 'Open omztty shell, then use: zai propose "command"\nThe proposal is placed in the editable buffer for review.\n'; exit 2 ;;
+            help|-h|--help) printf 'Usage: omztty ai context | connect [ssmcp options] | ask TEXT\nContext is local JSON; connect starts ssmcp explicitly.\n' ;;
+            *) printf 'Unknown AI action: %s\n' "$action" >&2; exit 2 ;;
+        esac ;;
+    ssmcp) exec "$root/bin/ssmcp" "$@" ;;
+    dot|zdot) exec "$root/bin/zdot" "$@" ;;
+    zshard) exec "$root/components/zshard/bin/zshard" "$@" ;;
+    ztty) exec "$root/bin/ztty" "$@" ;;
+    doctor)
+        failed=0
+        printf 'oh-my-ztty %s\n' "$(cat "$root/VERSION")"
+        for tool in zsh git; do
+            if command -v "$tool" >/dev/null 2>&1; then printf 'ok   system %s\n' "$tool"; else printf 'miss system %s\n' "$tool"; failed=1; fi
+        done
+        for tool in ztty ssmcp zdot; do
+            if "$root/bin/$tool" --version >/dev/null 2>&1; then
+                printf 'ok   '; "$root/bin/$tool" --version
+            else printf 'fail bundled %s\n' "$tool"; failed=1; fi
+        done
+        if [ -f "$root/components/zshard/zshard.zsh" ]; then printf 'ok   zshard\n'; else printf 'miss zshard\n'; failed=1; fi
+        if [ -n "${DISPLAY:-}" ]; then printf 'ok   X11/XWayland display configured\n'; else printf 'info no DISPLAY; shell and AI commands still work\n'; fi
+        printf 'No connection or background service was started.\n'
+        exit "$failed" ;;
+    update)
+        [ "$#" -eq 0 ] || { printf 'usage: omztty update\n' >&2; exit 2; }
+        tmp=$(mktemp -d "${TMPDIR:-/tmp}/oh-my-ztty-update.XXXXXXXX")
+        trap 'rm -rf -- "$tmp"' EXIT HUP INT TERM
+        url=https://github.com/LIghtJUNction/oh-my-ztty/releases/latest/download
+        curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 "$url/install.sh" -o "$tmp/install.sh"
+        curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 "$url/install.sh.sha256" -o "$tmp/install.sh.sha256"
+        (cd "$tmp" && sha256sum -c install.sh.sha256)
+        base=$(CDPATH= cd -- "$root/../.." && pwd -P)
+        [ -f "$base/.owner" ] || { printf 'Update requires an installed suite\n' >&2; exit 1; }
+        XDG_DATA_HOME=$(dirname -- "$base") OMZTTY_BIN_DIR=$(cat "$base/.bin-dir") sh "$tmp/install.sh" ;;
+    uninstall)
+        [ "$#" -eq 0 ] || { printf 'usage: omztty uninstall\n' >&2; exit 2; }
+        base=$(CDPATH= cd -- "$root/../.." && pwd -P)
+        exec sh "$root/uninstall.sh" --root "$base" ;;
+    *) printf 'Unknown command: %s\n' "$cmd" >&2; usage >&2; exit 2 ;;
+esac

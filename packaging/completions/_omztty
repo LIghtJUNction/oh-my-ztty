@@ -1,0 +1,2 @@
+#compdef omztty
+_arguments '1:command:(shell terminal ai dot zdot zshard ztty ssmcp doctor version update uninstall)' '*:argument:_files'

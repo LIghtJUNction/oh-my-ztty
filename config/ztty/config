@@ -1,0 +1,11 @@
+# Portable monospace font; no patched icon font required.
+font = monospace:size=12
+window-padding = 18
+background = #0b0d10
+foreground = #e2e5e9
+background-opacity = 100
+cursor-shape = bar
+cursor-color = #9ae6b4
+cursor-blink = true
+selection-background = #273b35
+selection-foreground = #ffffff
