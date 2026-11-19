@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "components": {
+    "ztty": {
+      "repository": "LIghtJUNction/ztty",
+      "tag": "v0.4.1",
+      "assets": {
+        "x86_64": {
+          "url": "https://github.com/LIghtJUNction/ztty/releases/download/v0.4.1/ztty-linux-x86_64.tar.gz",
+          "sha256": "8a65f736f13c1c7a415997a38853f1eb876a3a9edea5fa7c7880178a2b9a289c"
+        },
+        "aarch64": {
+          "url": "https://github.com/LIghtJUNction/ztty/releases/download/v0.4.1/ztty-linux-aarch64.tar.gz",
+          "sha256": "c40eed517d36703f76e76bf907ef1e49d02ec67d9ed0cc7fd044d254f942974f"
+        }
+      }
+    },
+    "ssmcp": {
+      "repository": "LIghtJUNction/ssmcp",
+      "tag": "v0.10.10",
+      "assets": {
+        "x86_64": {
+          "url": "https://github.com/LIghtJUNction/ssmcp/releases/download/v0.10.10/ssmcp-x86_64-unknown-linux-gnu.tar.gz",
+          "sha256": "42c22dabfe41d4fc2fecbabaaf222c9d35bb9b77b4550c4daccada4290530920"
+        },
+        "aarch64": {
+          "url": "https://github.com/LIghtJUNction/ssmcp/releases/download/v0.10.10/ssmcp-aarch64-unknown-linux-gnu.tar.gz",
+          "sha256": "4065ded7d71f5d7cb1ee33f32c5f306402f3825825aa68fa549bf9c998c080ce"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,6 @@
+[submodule "components/ztty"]
+	path = components/ztty
+	url = https://github.com/LIghtJUNction/ztty.git
+[submodule "components/ssmcp"]
+	path = components/ssmcp
+	url = https://github.com/LIghtJUNction/ssmcp.git

@@ -1,0 +1,6 @@
+#!/bin/sh
+set -eu
+self=$(readlink -f -- "$0")
+root=${self%/*}
+root=${root%/*}
+exec "$root/components/zshard/bin/zshard" "$@"

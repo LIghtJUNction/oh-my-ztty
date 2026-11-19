@@ -1,0 +1,50 @@
+.TH OMZTTY 1 "2026-11" "oh-my-ztty" "User Commands"
+.SH NAME
+omztty \- a lean Project Z terminal workspace
+.SH SYNOPSIS
+.B omztty
+.I COMMAND
+.RI [ ARGS... ]
+.SH DESCRIPTION
+Launches a preset zsh environment in the current terminal or bundled ztty.
+The suite includes zshard, zdot and ssmcp. No service is started implicitly.
+.SH COMMANDS
+.TP
+.B shell
+Run zsh with the suite configuration. Additional arguments are passed to zsh.
+.TP
+.B terminal
+Open ztty running the suite shell. Additional arguments are ztty options.
+.TP
+.B ai
+Connect the current directory using bundled ssmcp.
+.TP
+.B dot
+Run bundled zdot.
+.TP
+.B zshard
+Manage shell plugins.
+.TP
+.B doctor
+Check system and bundled components without connecting to a remote service.
+.TP
+.B update
+Install the latest published release, verifying its checksum.
+.TP
+.B uninstall
+Remove suite-owned runtime files and links. Preserve user configuration and history.
+.SH FILES
+.TP
+.I ~/.config/oh-my-ztty/local.zsh
+Optional user customization. XDG_CONFIG_HOME is respected.
+.TP
+.I ~/.local/share/oh-my-ztty
+Versioned runtime. XDG_DATA_HOME is respected.
+.TP
+.I ~/.local/state/oh-my-ztty/history
+Shell history. XDG_STATE_HOME is respected.
+.SH SEE ALSO
+.BR zsh (1),
+.BR git (1),
+.BR zdot (1),
+.BR ssmcp (1)
