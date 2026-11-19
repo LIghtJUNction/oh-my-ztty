@@ -1,6 +1,6 @@
 # Performance protocol
 
-The suite is designed to minimize work at shell startup and avoid an additional resident process. Measurements separate the operations that users actually experience.
+The suite is designed to minimize work at shell startup and avoid an extra shell or AI daemon. The graphical terminal uses ztty's resident broker, which is included in terminal process measurements. Measurements separate the operations that users actually experience.
 
 ## What to measure
 

@@ -26,6 +26,14 @@ case "${1:-help}" in
     -V|--version|version) printf 'oh-my-ztty %s\n' "$(cat "$root/VERSION")"; exit 0 ;;
 esac
 cmd=$1; shift
+suite_socket() {
+    if [ -n "${OMZTTY_SOCKET:-}" ]; then
+        export ZTTY_SOCKET="$OMZTTY_SOCKET"
+    else
+        IFS= read -r version < "$root/VERSION"
+        export ZTTY_SOCKET="@oh-my-ztty-$(id -u)-$version"
+    fi
+}
 case "$cmd" in
     shell|terminal)
         command -v zsh >/dev/null 2>&1 || { printf 'zsh is required\n' >&2; exit 1; }
@@ -37,6 +45,7 @@ case "$cmd" in
         [ -d "$state" ] || (umask 077; mkdir -p -- "$state")
         export HISTFILE="$state/history"
         if [ "$cmd" = shell ]; then exec zsh -d "$@"; fi
+        suite_socket
         exec "$root/bin/ztty" --config "$root/config/ztty/config" "$@" -e "$root/bin/omztty" shell ;;
     ai)
         export PATH="$root/bin:$PATH"
@@ -53,7 +62,7 @@ case "$cmd" in
     ssmcp) exec "$root/bin/ssmcp" "$@" ;;
     dot|zdot) exec "$root/bin/zdot" "$@" ;;
     zshard) exec "$root/components/zshard/bin/zshard" "$@" ;;
-    ztty) exec "$root/bin/ztty" "$@" ;;
+    ztty) suite_socket; exec "$root/bin/ztty" "$@" ;;
     doctor)
         failed=0
         printf 'oh-my-ztty %s\n' "$(cat "$root/VERSION")"
@@ -72,7 +81,9 @@ case "$cmd" in
     update)
         [ "$#" -eq 0 ] || { printf 'usage: omztty update\n' >&2; exit 2; }
         tmp=$(mktemp -d "${TMPDIR:-/tmp}/oh-my-ztty-update.XXXXXXXX")
-        trap 'rm -rf -- "$tmp"' EXIT HUP INT TERM
+        trap 'rm -rf -- "$tmp"' EXIT
+        trap 'exit 130' INT
+        trap 'exit 143' HUP TERM
         url=https://github.com/LIghtJUNction/oh-my-ztty/releases/latest/download
         curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 "$url/install.sh" -o "$tmp/install.sh"
         curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 "$url/install.sh.sha256" -o "$tmp/install.sh.sha256"

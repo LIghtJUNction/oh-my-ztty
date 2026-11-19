@@ -1,6 +1,6 @@
 # Installation
 
-The release bundle includes ztty, ssmcp, zdot and zshard. Install system zsh first. The graphical terminal also needs the X11/XWayland and fontconfig libraries used by the bundled ztty build.
+The release bundle includes ztty, ssmcp, zdot and zshard. Install system zsh 5.9 or newer first. The graphical terminal also needs the X11/XWayland and fontconfig libraries used by the bundled ztty build.
 
 ## Install a release
 
@@ -26,6 +26,8 @@ omztty terminal
 
 The first command starts a shell in the current terminal. The second opens ztty with that same environment. The suite supplies its own zsh configuration directory; your account's login shell and original `.zshrc` remain available.
 
+The terminal launcher uses a suite-specific ztty broker socket, `@oh-my-ztty-<uid>-<suite-version>`. Set `OMZTTY_SOCKET` to select another socket explicitly. The terminal uses ztty's resident broker; starting `omztty shell` alone does not start a terminal or AI daemon.
+
 Inside the preset shell, `zai context` produces a small context record for AI tools. `zai connect` starts ssmcp in the current directory. Configure and authenticate ssmcp using its own instructions. Merely starting the shell creates no remote connection.
 
 ## Offline installation
@@ -44,7 +46,7 @@ Use the aarch64 archive on ARM64. An explicit `--sha256 HEX` can replace the sid
 omztty update
 ```
 
-Each version has its own directory; a `current` symlink chooses the active one. Installing the same archive again verifies the existing installation. If an installed version's files were modified, the installer preserves them and reports the conflict.
+Each version has its own directory; a `current` symlink chooses the active one. Before changing that link, the installer prepares an audited completion cache using the system functions, zshard and suite completions. The first Tab can reuse that cache. Changing completion paths or plugins causes normal revalidation. A failed preparation leaves the previously active version selected. Installing the same archive again verifies the existing installation. If an installed version's files were modified, the installer preserves them and reports the conflict.
 
 ## Dotfiles
 
