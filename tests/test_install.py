@@ -59,7 +59,7 @@ class Installation(unittest.TestCase):
             f"printf 'zshard fixture\\n'\nexit {warm_exit}\n"
         )
         (shard / "bin/zshard").chmod(0o755)
-        for name in ["ztty", "ssmcp", "zdot"]:
+        for name in ["ztty", "ssmcp", "zdot", "zfetch"]:
             executable = stage / "bin" / name
             executable.write_text(f"#!/bin/sh\nprintf '{name} fixture\\n'\n")
             executable.chmod(0o755)

@@ -1,6 +1,6 @@
 # oh-my-ztty
 
-A lean Linux terminal setup built on Project Z: **ztty + zsh + zshard + zrc + zdot + ssmcp**.
+A lean Linux terminal setup built on Project Z: **ztty + zsh + zshard + zrc + zdot + zfetch + ssmcp**.
 
 [Website](https://lightjunction.github.io/oh-my-ztty/) · [中文](README.zh-CN.md) · [Install guide](docs/installation.md) · [Performance](docs/performance.md)
 
@@ -24,6 +24,7 @@ Linux x86_64 and ARM64. Requires system zsh; the graphical terminal uses X11/fon
 | [zshard](https://github.com/LIghtJUNction/zshard) | Original zsh framework: completion, suggestions, highlighting and lazy plugins |
 | [zrc](https://github.com/LIghtJUNction/zrc) | Native Neovim and terminal-tool configuration with one warm Ink palette |
 | [zdot](https://github.com/LIghtJUNction/zdot) | `no_std` dotfiles manager with plans, reversible links and explicit Git sync |
+| [zfetch](https://github.com/LIghtJUNction/zfetch) | On-demand native system overview, zero crate dependencies |
 | [ssmcp](https://github.com/LIghtJUNction/ssmcp) | On-demand MCP workspace connection for AI |
 
 Each is a separate open-source repository, pinned here as a Git submodule. zsh is supplied by your Linux distribution.
@@ -49,6 +50,7 @@ One editable profile manages zsh, ztty, Neovim, Kitty, Foot, Ghostty, tmux, fzf,
 ```sh
 omztty terminal        # Open ztty with the suite's zsh configuration
 omztty shell           # Try the shell in your current terminal
+omztty info            # Native system overview
 omztty doctor          # Check binaries and system dependencies
 omztty ai context      # Emit explicit shell context
 omztty ai connect      # Start ssmcp in your workspace

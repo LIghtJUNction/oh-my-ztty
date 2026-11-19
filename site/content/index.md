@@ -1,6 +1,6 @@
 # Overview
 
-oh-my-ztty assembles a terminal, a zsh framework, a native application configuration framework, a dotfile manager and an MCP client into one versioned Linux environment. System zsh runs your commands; the suite supplies the configuration and the tools around it.
+oh-my-ztty assembles a terminal, a zsh framework, a native application configuration framework, a dotfile manager, a native system overview and an MCP client into one versioned Linux environment. System zsh runs your commands; the suite supplies the configuration and the tools around it.
 
 The current suite release is **0.2.0**, available for Linux x86_64 and ARM64.
 
@@ -26,6 +26,7 @@ Installation is per user. The suite keeps its runtime in a separate directory. U
 | [zshard](https://github.com/LIghtJUNction/zshard) | 0.2.0 | Prompt, completion, suggestions, highlighting and plugins |
 | [zrc](https://github.com/LIghtJUNction/zrc) | 0.1.0 | Native editor and terminal-tool profiles |
 | [zdot](https://github.com/LIghtJUNction/zdot) | 0.2.0 | Dotfile plans, managed links, backups and Git sync |
+| [zfetch](https://github.com/LIghtJUNction/zfetch) | 0.1.0 | Native system overview on request |
 | [ssmcp](https://github.com/LIghtJUNction/ssmcp) | 0.10.10 | An explicit MCP connection to your workspace |
 
 Each component has its own repository and release. Git submodules record the exact source revisions used by the suite.

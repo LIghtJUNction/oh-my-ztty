@@ -71,12 +71,13 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--arch", choices=ARCHES, default=platform.machine())
     parser.add_argument("--zdot", type=Path, help="existing binary matching the target architecture")
+    parser.add_argument("--zfetch", type=Path, help="existing zfetch binary matching the target architecture")
     parser.add_argument("--output", type=Path, default=ROOT / "dist")
     args = parser.parse_args()
     version = (ROOT / "VERSION").read_text().strip()
     lock = json.loads((ROOT / "dependencies.lock.json").read_text())
     sources = {}
-    for name in ["ztty", "ssmcp", "zshard", "zdot", "zrc"]:
+    for name in ["ztty", "ssmcp", "zshard", "zdot", "zrc", "zfetch"]:
         source = ROOT / "components" / name
         sha = run(["git", "rev-parse", "HEAD"], cwd=source)
         sources[name] = sha
@@ -93,6 +94,17 @@ def main():
                         "--manifest-path", str(ROOT / "components/zdot/Cargo.toml")],
                        check=True, cwd=ROOT / "components/zdot", env={**os.environ, "CARGO_TARGET_DIR": str(target_dir)})
         args.zdot = target_dir / target / "release/zdot"
+    if args.zfetch is None:
+        if platform.machine() != args.arch:
+            raise RuntimeError("cross packaging requires --zfetch with a cross-built binary")
+        target = f"{args.arch}-unknown-linux-gnu"
+        target_dir = ROOT / "target" / "zfetch"
+        subprocess.run(["cargo", "build", "--locked", "--release", "--target", target,
+                        "--manifest-path", str(ROOT / "components/zfetch/Cargo.toml")],
+                       check=True, cwd=ROOT / "components/zfetch",
+                       env={**os.environ, "CARGO_TARGET_DIR": str(target_dir)})
+        args.zfetch = target_dir / target / "release/zfetch"
+    check_elf(args.zfetch, args.arch)
     check_elf(args.zdot, args.arch)
     args.output.mkdir(parents=True, exist_ok=True)
     (ROOT / ".cache").mkdir(exist_ok=True)
@@ -108,13 +120,14 @@ def main():
         tracked_component("zshard", stage / "components/zshard")
         tracked_component("zrc", stage / "components/zrc")
         copy(args.zdot, stage / "bin/zdot")
+        copy(args.zfetch, stage / "bin/zfetch")
         for name, spec in lock["components"].items():
             archive = download(spec["assets"][args.arch])
             extract_member(archive, name, stage / "bin" / name)
             extract_member(archive, "LICENSE", stage / "licenses" / f"{name}.txt")
             if name == "ssmcp":
                 extract_member(archive, "code-mode.js", stage / "bin/code-mode.js", required=False)
-        for name in ["ztty", "ssmcp", "zdot"]:
+        for name in ["ztty", "ssmcp", "zdot", "zfetch"]:
             binary = stage / "bin" / name
             binary.chmod(0o755)
             check_elf(binary, args.arch)
@@ -122,7 +135,7 @@ def main():
             (stage / "bin" / name).chmod(0o755)
         (stage / "install.sh").chmod(0o755)
         (stage / "uninstall.sh").chmod(0o755)
-        for name in ["zshard", "zdot", "zrc"]:
+        for name in ["zshard", "zdot", "zrc", "zfetch"]:
             copy(ROOT / "components" / name / "LICENSE", stage / "licenses" / f"{name}.txt")
         (stage / "PLATFORM").write_text(f"linux-{args.arch}\n")
         metadata = {"schema": 1, "suite_version": version, "platform": f"linux-{args.arch}", "source_commits": sources}
