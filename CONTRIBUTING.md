@@ -32,7 +32,7 @@ Commit and publish component changes before advancing the parent's gitlink. Keep
 ## Pin a published version
 
 ```sh
-python3 scripts/workspace.py pin zshard v0.1.0
+python3 scripts/workspace.py pin zshard v0.1.1
 python3 scripts/workspace.py check
 git add components/zshard
 git commit -m "Update zshard"
@@ -53,7 +53,7 @@ python3 scripts/bump.py patch
 
 This updates version files for review. Use `minor` or `major` for larger changes.
 
-From a clean, validated branch, the release form checks, commits, tags and pushes:
+From a clean, validated `main` branch (required by zdot), the release form checks, commits, tags and pushes:
 
 ```sh
 python3 scripts/bump.py patch --release
