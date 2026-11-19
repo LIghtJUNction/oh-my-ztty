@@ -28,8 +28,12 @@ Manage shell plugins.
 .B doctor
 Check system and bundled components without connecting to a remote service.
 .TP
-.B update
+.B update [\-\-desktop | \-\-no-desktop]
 Install the latest published release, verifying its checksum.
+The saved desktop entry choice is preserved unless explicitly changed.
+\-\-desktop enables the managed entry; \-\-no-desktop removes only a link
+that still points to this suite. Foreign files and links are preserved.
+The preference is saved only after installation succeeds.
 .TP
 .B uninstall
 Remove suite-owned runtime files and links. Preserve user configuration and history.

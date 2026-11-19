@@ -16,7 +16,7 @@ Usage: omztty COMMAND [ARGS...]
   ztty|ssmcp  Run a bundled component directly
   doctor      Check installed components and system dependencies
   version     Show the suite version
-  update      Install the latest published suite
+  update      Install the latest suite [--desktop | --no-desktop]
   uninstall   Remove suite-owned files and links
 No daemon or connection is started until you explicitly request it.
 EOF
@@ -80,7 +80,12 @@ case "$cmd" in
         printf 'No connection or background service was started.\n'
         exit "$failed" ;;
     update)
-        [ "$#" -eq 0 ] || { printf 'usage: omztty update\n' >&2; exit 2; }
+        for option in "$@"; do
+            case "$option" in
+                --desktop|--no-desktop) ;;
+                *) printf 'usage: omztty update [--desktop | --no-desktop]\n' >&2; exit 2 ;;
+            esac
+        done
         tmp=$(mktemp -d "${TMPDIR:-/tmp}/oh-my-ztty-update.XXXXXXXX")
         trap 'rm -rf -- "$tmp"' EXIT
         trap 'exit 130' INT
@@ -91,7 +96,7 @@ case "$cmd" in
         (cd "$tmp" && sha256sum -c install.sh.sha256)
         base=$(CDPATH= cd -- "$root/../.." && pwd -P)
         [ -f "$base/.owner" ] || { printf 'Update requires an installed suite\n' >&2; exit 1; }
-        XDG_DATA_HOME=$(dirname -- "$base") OMZTTY_BIN_DIR=$(cat "$base/.bin-dir") sh "$tmp/install.sh" ;;
+        XDG_DATA_HOME=$(dirname -- "$base") OMZTTY_BIN_DIR=$(cat "$base/.bin-dir") sh "$tmp/install.sh" "$@" ;;
     uninstall)
         [ "$#" -eq 0 ] || { printf 'usage: omztty uninstall\n' >&2; exit 2; }
         base=$(CDPATH= cd -- "$root/../.." && pwd -P)

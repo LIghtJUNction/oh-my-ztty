@@ -3,9 +3,12 @@
 from pathlib import Path
 import hashlib
 import io
+import json
 import os
+import re
 import shutil
 import subprocess
+import sys
 import tarfile
 import tempfile
 import unittest
@@ -76,8 +79,51 @@ class Installation(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0, result.stdout)
         return result
 
-    def install(self, archive=None, ok=True):
-        return self.run_command(["sh", ROOT / "install.sh", "--from", archive or self.archive], ok)
+    def install(self, archive=None, ok=True, desktop=None):
+        args = ["sh", ROOT / "install.sh", "--from", archive or self.archive]
+        if desktop is not None:
+            args.append("--desktop" if desktop else "--no-desktop")
+        return self.run_command(args, ok)
+
+    def serve_update(self, version, archive):
+        """Serve only the expected release URLs through a local curl stub."""
+        downloads = self.work / "downloads"
+        downloads.mkdir()
+        installer = downloads / "install.sh"
+        installer.write_text(re.sub(r"(?m)^VERSION=\S+$", "VERSION=" + version,
+                                    (ROOT / "install.sh").read_text()))
+        installer_digest = installer.with_name("install.sh.sha256")
+        installer_digest.write_text(f"{sha(installer)}  install.sh\n")
+        asset = downloads / f"oh-my-ztty-{version}-linux-{os.uname().machine}.tar.gz"
+        shutil.copy2(archive, asset)
+        asset_digest = asset.with_name(asset.name + ".sha256")
+        asset_digest.write_text(f"{sha(asset)}  {asset.name}\n")
+        release_url = "https://github.com/LIghtJUNction/oh-my-ztty/releases"
+        installer_url = release_url + "/latest/download/install.sh"
+        asset_url = release_url + f"/download/v{version}/{asset.name}"
+        sources = {
+            installer_url: str(installer),
+            installer_url + ".sha256": str(installer_digest),
+            asset_url: str(asset),
+            asset_url + ".sha256": str(asset_digest),
+        }
+        mapping = downloads / "urls.json"
+        mapping.write_text(json.dumps(sources))
+        fake_bin = self.work / "fake-bin"
+        fake_bin.mkdir()
+        curl = fake_bin / "curl"
+        curl.write_text(f"#!{sys.executable}\n" + """import json, os, shutil, sys
+from pathlib import Path
+args = sys.argv[1:]
+urls = [arg for arg in args if arg.startswith("https://")]
+sources = json.loads(Path(os.environ["OMZTTY_TEST_FETCH_MAP"]).read_text())
+if len(urls) != 1 or urls[0] not in sources or args.count("-o") != 1:
+    raise SystemExit("unexpected curl invocation: " + repr(args))
+shutil.copyfile(sources[urls[0]], args[args.index("-o") + 1])
+""")
+        curl.chmod(0o755)
+        self.env["OMZTTY_TEST_FETCH_MAP"] = str(mapping)
+        self.env["PATH"] = str(fake_bin) + os.pathsep + self.env["PATH"]
 
     def cli(self, *args, ok=True):
         return self.run_command([self.bindir / "omztty", *args], ok)
@@ -105,6 +151,140 @@ class Installation(unittest.TestCase):
         self.assertTrue(desktop.is_symlink())
         if shutil.which("desktop-file-validate"):
             self.run_command(["desktop-file-validate", desktop])
+
+    def test_desktop_choice_survives_repeat_upgrade_and_reenable(self):
+        desktop = self.data / "applications/oh-my-ztty.desktop"
+        preference = self.base / ".desktop-enabled"
+        self.install(desktop=False)
+        self.assertFalse(desktop.is_symlink())
+        self.assertEqual(preference.read_text(), "0\n")
+        self.install()
+        self.assertFalse(desktop.is_symlink())
+        newer = self.bundle("0.1.1")
+        self.install(newer)
+        self.assertFalse(desktop.is_symlink())
+        self.assertEqual(preference.read_text(), "0\n")
+        self.install(newer, desktop=True)
+        self.assertEqual(os.readlink(desktop), str(self.base / "oh-my-ztty.desktop"))
+        self.assertEqual(preference.read_text(), "1\n")
+        self.install(newer, desktop=False)
+        self.assertFalse(desktop.is_symlink())
+        self.assertFalse((self.base / ".desktop-path").exists())
+        self.install(newer)
+        self.assertFalse(desktop.is_symlink())
+        self.assertEqual(preference.read_text(), "0\n")
+
+    def test_update_preserves_desktop_choice_and_accepts_overrides(self):
+        self.install(desktop=False)
+        self.serve_update("0.1.1", self.bundle("0.1.1"))
+        desktop = self.data / "applications/oh-my-ztty.desktop"
+        preference = self.base / ".desktop-enabled"
+        self.cli("update")
+        self.assertIn("0.1.1", self.cli("version").stdout)
+        self.assertFalse(desktop.is_symlink())
+        self.assertEqual(preference.read_text(), "0\n")
+        self.cli("update", "--desktop")
+        self.assertEqual(os.readlink(desktop), str(self.base / "oh-my-ztty.desktop"))
+        self.assertEqual(preference.read_text(), "1\n")
+        self.cli("update", "--no-desktop")
+        self.assertFalse(desktop.is_symlink())
+        self.assertEqual(preference.read_text(), "0\n")
+        result = self.cli("update", "--unknown", ok=False)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("usage: omztty update", result.stderr)
+
+    def test_legacy_desktop_choice_is_migrated(self):
+        newer = self.bundle("0.1.1")
+        for enabled in (False, True):
+            with self.subTest(enabled=enabled):
+                self.install(desktop=enabled)
+                # Old releases stored a desktop path only when the entry was enabled.
+                preference = self.base / ".desktop-enabled"
+                preference.unlink()
+                self.install(newer)
+                desktop = self.data / "applications/oh-my-ztty.desktop"
+                self.assertEqual(desktop.is_symlink(), enabled)
+                self.assertEqual(preference.read_text(), ("1" if enabled else "0") + "\n")
+                self.cli("uninstall")
+
+    def test_disabling_preserves_foreign_desktop_files_and_links(self):
+        desktop = self.data / "applications/oh-my-ztty.desktop"
+        foreign = self.home / "foreign.desktop"
+        foreign.write_text("user-owned desktop entry\n")
+        for kind in ("file", "symlink"):
+            with self.subTest(kind=kind):
+                self.install()
+                desktop.unlink()
+                if kind == "symlink":
+                    desktop.symlink_to(foreign)
+                else:
+                    desktop.write_text(foreign.read_text())
+                self.install(desktop=False)
+                self.install()
+                self.assertEqual(desktop.read_text(), foreign.read_text())
+                self.assertEqual(desktop.is_symlink(), kind == "symlink")
+                if kind == "symlink":
+                    self.assertEqual(os.readlink(desktop), str(foreign))
+                previous = os.readlink(self.base / "current")
+                result = self.install(desktop=True, ok=False)
+                self.assertIn("desktop entry already exists", result.stderr)
+                self.assertEqual(os.readlink(self.base / "current"), previous)
+                self.assertEqual((self.base / ".desktop-enabled").read_text(), "0\n")
+                self.assertEqual(desktop.read_text(), "user-owned desktop entry\n")
+                self.cli("uninstall")
+                self.assertEqual(desktop.read_text(), foreign.read_text())
+                desktop.unlink()
+
+    def test_unreadable_desktop_record_preserves_installation(self):
+        self.install()
+        desktop = self.data / "applications/oh-my-ztty.desktop"
+        record = self.base / ".desktop-path"
+        preference = self.base / ".desktop-enabled"
+        previous = os.readlink(self.base / "current")
+        record_before = record.read_bytes()
+        preference_before = preference.read_bytes()
+        # Inject a read failure even when the test process can bypass file modes.
+        fake_bin = self.work / "failing-cat-bin"
+        fake_bin.mkdir()
+        cat = fake_bin / "cat"
+        cat.write_text(
+            '#!/bin/sh\n'
+            'if [ "$#" -eq 1 ] && [ "$1" = "$OMZTTY_TEST_DESKTOP_RECORD" ]; then exit 23; fi\n'
+            'exec "$OMZTTY_TEST_REAL_CAT" "$@"\n'
+        )
+        cat.chmod(0o755)
+        self.env["OMZTTY_TEST_REAL_CAT"] = shutil.which("cat", path=self.env["PATH"])
+        self.env["OMZTTY_TEST_DESKTOP_RECORD"] = str(record)
+        self.env["PATH"] = str(fake_bin) + os.pathsep + self.env["PATH"]
+        result = self.install(desktop=False, ok=False)
+        self.assertIn("cannot read recorded desktop entry path", result.stderr)
+        self.assertEqual(os.readlink(self.base / "current"), previous)
+        self.assertEqual(os.readlink(desktop), str(self.base / "oh-my-ztty.desktop"))
+        self.assertEqual(record.read_bytes(), record_before)
+        self.assertEqual(preference.read_bytes(), preference_before)
+
+    def test_failed_preparation_preserves_desktop_preference(self):
+        broken = self.bundle("0.1.1", warm_exit=12)
+        for enabled in (False, True):
+            with self.subTest(enabled=enabled):
+                self.install(desktop=enabled)
+                previous = os.readlink(self.base / "current")
+                preference = (self.base / ".desktop-enabled").read_text()
+                result = self.install(broken, desktop=not enabled, ok=False)
+                self.assertIn("completion cache preparation failed", result.stderr)
+                self.assertEqual(os.readlink(self.base / "current"), previous)
+                self.assertEqual((self.base / ".desktop-enabled").read_text(), preference)
+                self.assertEqual((self.data / "applications/oh-my-ztty.desktop").is_symlink(), enabled)
+                self.cli("uninstall")
+
+    def test_failed_first_preparation_does_not_record_desktop_choice(self):
+        broken = self.bundle("0.1.1", warm_exit=12)
+        self.install(broken, desktop=False, ok=False)
+        self.assertFalse((self.base / ".desktop-enabled").exists())
+        self.assertFalse((self.base / "current").is_symlink())
+        self.install()
+        self.assertTrue((self.data / "applications/oh-my-ztty.desktop").is_symlink())
+        self.assertEqual((self.base / ".desktop-enabled").read_text(), "1\n")
 
     def test_checksum_failure_is_non_mutating(self):
         self.archive.with_name(self.archive.name + ".sha256").write_text("0" * 64 + "  fixture\n")
