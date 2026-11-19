@@ -36,6 +36,14 @@ The terminal launcher uses a suite-specific ztty broker socket, `@oh-my-ztty-<ui
 
 Inside the preset shell, `zai context` produces a small context record for AI tools. `zai connect` starts ssmcp in the current directory. Configure and authenticate ssmcp using its own instructions. Merely starting the shell creates no remote connection.
 
+## Ink appearance
+
+The default Ink preset uses a graphite background, a complete low-saturation ANSI palette, 24 px padding and a 13 pt font request. Fontconfig tries installed JetBrains Mono, JetBrainsMono Nerd Font, Caskaydia Mono, Cascadia Mono and ordinary monospace in that order. The prompt does not require private-use icon glyphs. Personal Fontconfig rules may change the selected family.
+
+The two-line prompt separates the path and cached Git branch from command input. It shows a nonzero exit code and commands lasting at least two seconds. Its theme callback uses zsh builtins only.
+
+To use zshard's own minimal prompt, put `OMZTTY_THEME=framework` in `options.zsh`. To install a custom prompt, register it with `zshard theme YOUR_FUNCTION` in `local.zsh`; that file is loaded after Ink. See the [theme API](https://github.com/LIghtJUNction/zshard/blob/v0.1.2/docs/plugins.md).
+
 ## Personal configuration and plugins
 
 Create configuration below `${XDG_CONFIG_HOME:-$HOME/.config}/oh-my-ztty`. The suite reads two optional files:

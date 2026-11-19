@@ -4,42 +4,50 @@ The default path keeps work inside zsh, defers completion initialization and loa
 
 ## Framework comparison
 
-The framework experiment used an Intel Core i9-12900HX, Arch Linux, zsh 5.9.2 and zshard runtime commit `6d2ff96a593f9d34a53455fa12b64348be4d0cf5`, included in v0.1.1. Each case has 31 interleaved launches after three warmups. Times include process creation and initialization, with prompt rendering excluded for every case.
+The framework experiment used an Intel Core i9-12900HX, Arch Linux, zsh 5.9.2 and zshard runtime commit `3367c8dadef1a06a047ce9b47aa9446fe219550c`, included in v0.1.2. Each case has 31 interleaved launches after three warmups. Times include process creation and initialization, with prompt rendering excluded for every case.
 
 | Configuration | Median, ms | p95, ms | Idle PSS, KiB |
 | --- | ---: | ---: | ---: |
-| Plain zsh | 1.514 | 1.811 | 1,533 |
-| zsh with audited completion | 12.098 | 14.869 | 3,324 |
-| zshard, completion deferred | 3.427 | 4.306 | 2,171 |
-| zshard, completion ready | 13.553 | 15.120 | 3,447 |
-| Oh My Zsh, git + robbyrussell | 25.650 | 29.645 | 3,816 |
+| Plain zsh | 1.679 | 2.005 | 767 |
+| zsh with audited completion | 12.291 | 15.236 | 2,308 |
+| zshard, completion deferred | 4.106 | 5.114 | 1,161 |
+| zshard, completion ready | 19.185 | 24.213 | 2,500 |
+| Oh My Zsh, git + robbyrussell | 28.403 | 33.335 | 2,824 |
 
-In this experiment, the Oh My Zsh initialization time was 7.48 times the deferred zshard time, or 1.89 times its completion-ready time. The configurations have different feature sets: the Oh My Zsh case uses its git plugin and robbyrussell theme without additional suggestion or highlighting plugins. It is pinned at `c0140703a53eb0d22be44f7bac318d0baacc927c`.
+In this experiment, the Oh My Zsh initialization time was 6.92 times the deferred zshard time, or 1.48 times its completion-ready time. The configurations have different feature sets: the Oh My Zsh case uses its git plugin and robbyrussell theme without additional suggestion or highlighting plugins. It is pinned at `c0140703a53eb0d22be44f7bac318d0baacc927c`.
 
-The first Tab took a median of **9.929 ms** with a warm completion dump. Creating a fresh dump took **147.113 ms**. Deferred initialization does not remove that work. The suite installer prepares the audited dump before activating a release, and the graphical verification checks that the installed dump's hash and modification time remain unchanged after a real first Tab. Changes to completion directories can require a new dump.
+The first Tab took a median of **15.848 ms** with a warm completion dump. Creating a fresh dump took **147.310 ms**. Deferred initialization does not remove that work. The suite installer prepares the audited dump before activating a release, and the graphical verification checks that the installed dump's hash and modification time remain unchanged after a real first Tab.
 
-See the [component methodology](https://github.com/LIghtJUNction/zshard/blob/v0.1.1/docs/performance.md) and [individual samples](https://github.com/LIghtJUNction/zshard/blob/v0.1.1/docs/benchmarks/release-0.1.1.json). These are workstation observations, not a ranking of all shells or plugin combinations.
+Version 0.1.2 checks the current file list and native audit exclusions before cache reuse. It detects ownership changes and same-count file replacement while keeping native `compinit -i` auditing. The extra validation is included in these figures. See the [cache compatibility record](https://github.com/LIghtJUNction/zshard/blob/v0.1.2/docs/completion-cache.md).
+
+The [component methodology](https://github.com/LIghtJUNction/zshard/blob/v0.1.2/docs/performance.md) and [individual samples](https://github.com/LIghtJUNction/zshard/blob/v0.1.2/docs/benchmarks/release-0.1.2.json) identify the exact configuration. These are workstation observations, not a ranking of all shells or plugin combinations. PSS depends on other processes sharing mapped pages; compare values within one recorded run.
 
 ## Complete suite
 
-The integration build used the pinned zshard v0.1.1 files and published x86_64 executables for ztty v0.4.1, zdot v0.1.1 and ssmcp v0.10.10. Its archive SHA-256 and all four source commits are in the [raw integration report](reports/linux-x86_64-suite.json). Official release archives are built separately on GitHub's native runners; their checksums identify those exact bytes.
+The integration build contains zshard v0.1.2 and the published x86_64 executables for ztty v0.4.1, zdot v0.1.1 and ssmcp v0.10.10. It uses the Ink preset shipped in oh-my-ztty v0.1.1. Its archive SHA-256 is `6d4a608a037c625b76be3b2d19f269fef69046112868a732e9c8dbf7e69e7e6f`; the [raw integration report](reports/linux-x86_64-suite.json) records all four source commits. Official release archives are built separately on GitHub's native runners; their published checksums identify those exact bytes.
 
-The live test opened one 100 × 28 cell window on an isolated Xvfb display with `monospace:size=12`, typed commands into the actual preset shell, pressed Tab, and verified that the shell remained usable. No AI connection was active. The X server is excluded from application memory.
+The live test opened one 100 × 28 cell window on an isolated Xvfb display, entered a temporary Git checkout, typed commands into the actual preset shell and pressed Tab. It used Ink's 24 px padding and 13 pt font request; Fontconfig resolved the fallback list to JetBrainsMono Nerd Font in that temporary home. Installed fonts and personal Fontconfig rules can produce a different family. No AI connection was active. The X server is excluded from application memory.
 
 | Live process | Before first Tab, PSS KiB | After first Tab, PSS KiB |
 | --- | ---: | ---: |
-| ztty broker and renderer | 7,587 | 7,587 |
-| Preset zsh | 2,804 | 3,754 |
-| Waiting ztty launcher/client | 907 | 907 |
-| **Total** | **11,298 (11.03 MiB)** | **12,248 (11.96 MiB)** |
+| ztty broker and renderer | 10,425 | 10,425 |
+| Preset zsh | 2,718 | 3,746 |
+| Waiting ztty launcher/client | 850 | 850 |
+| **Total** | **13,993 (13.67 MiB)** | **15,021 (14.67 MiB)** |
 
 These are resident-memory samples at the stated idle points, not peak allocations or an active MCP session. RSS includes shared mappings in every process; PSS divides shared pages among the processes mapping them. PSS is used for the totals to reduce double counting. Other running applications and library sharing can affect it.
 
-A separate 40-sample interleaved test measured the complete `omztty shell -i -c exit` path at a median of **12.814 ms**, p95 **14.291 ms**. The plain zsh minimum-feature baseline in that same run was **3.350 ms**, p95 **3.689 ms**. This includes launcher and preset initialization but excludes prompt rendering and first Tab. Do not compare times across the framework and suite experiments as if they were one controlled run.
+A separate 40-sample interleaved test measured the complete `omztty shell -i -c exit` path at a median of **10.914 ms**, p95 **13.057 ms**. The plain zsh minimum-feature baseline in that same run was **2.700 ms**, p95 **3.893 ms**. This includes launcher and preset initialization but excludes prompt rendering and first Tab. Do not compare times across the framework and suite experiments as if they were one controlled run.
 
-The window first became observable after **85.3 ms** in one launch. That is a diagnostic reading with a 20 ms polling interval, not a statistically measured rendering latency.
+The window first became observable after **114.8 ms** in one launch. That is a diagnostic reading with a 20 ms polling interval, not a statistically measured rendering latency.
 
-The [cache-reuse record](reports/linux-x86_64-completion-cache.json) contains the installed dump's before/after hash and timestamp. The [terminal screenshot](reports/linux-x86_64-terminal.png) records the tested environment.
+The [cache-reuse record](reports/linux-x86_64-completion-cache.json) contains the installed dump's before/after hash and timestamp. Both remained unchanged after the real first Tab. The [terminal screenshot](reports/linux-x86_64-terminal.png) records the tested preset.
+
+### Virtual-display diagnostic
+
+A separate [reproducible terminal diagnostic](reports/linux-x86_64-terminal-comparison.json) opened one window at a time, used the same installed preset shell with completion initialized, verified a 100 × 28 PTY, waited five seconds and sampled PSS ten times. It recorded a median **14,735 KiB** for the ztty application tree and **178,062 KiB** for kitty 0.50.0, including its direct helper and the shell.
+
+This run forced software OpenGL on Xvfb. It excludes the display server and private D-Bus daemon, and cannot measure GPU allocations or represent a native GPU desktop. Both terminals requested the resolved font family at 13 pt, but the recorded padding settings differ in units: ztty uses 24 px and kitty uses 24 pt. There was one launch per terminal. These observations are a diagnostic record, not a controlled rendering-performance ranking or a general memory advantage claim.
 
 ## Native dotfile manager
 
@@ -67,7 +75,7 @@ make -C components/zdot benchmark
 The full-suite graphical check uses a release archive and its SHA-256 sidecar:
 
 ```sh
-python3 scripts/verify_graphical.py dist/oh-my-ztty-0.1.0-linux-x86_64.tar.gz \
+python3 scripts/verify_graphical.py dist/oh-my-ztty-0.1.1-linux-x86_64.tar.gz \
   --output /tmp/oh-my-ztty-evidence --samples 40
 ```
 

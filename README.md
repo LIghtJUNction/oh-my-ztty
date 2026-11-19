@@ -27,6 +27,12 @@ Linux x86_64 and ARM64. Requires system zsh; the graphical terminal uses X11/fon
 
 Each is a separate open-source repository, pinned here as a Git submodule. zsh is supplied by your Linux distribution.
 
+## Ink preset
+
+A graphite palette, generous spacing and a two-line prompt with the path, cached Git branch and command status. The prompt uses zsh builtins; installed fonts fall back through Fontconfig. [Customize the preset](docs/installation.md#ink-appearance).
+
+![Ink preset running real commands in ztty](docs/reports/linux-x86_64-terminal.png)
+
 ## Everyday commands
 
 ```sh

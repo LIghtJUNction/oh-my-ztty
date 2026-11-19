@@ -32,7 +32,7 @@ Commit and publish component changes before advancing the parent's gitlink. Keep
 ## Pin a published version
 
 ```sh
-python3 scripts/workspace.py pin zshard v0.1.1
+python3 scripts/workspace.py pin zshard v0.1.2
 python3 scripts/workspace.py check
 git add components/zshard
 git commit -m "Update zshard"
