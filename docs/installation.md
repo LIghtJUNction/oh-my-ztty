@@ -19,7 +19,9 @@ sh install.sh
 
 Read the downloaded script before executing it. It downloads the bundle for your Linux architecture, checks its SHA-256 and content manifest, and installs under `${XDG_DATA_HOME:-$HOME/.local/share}/oh-my-ztty`. Linux x86_64 and aarch64 are supported.
 
-The default command directory is `~/.local/bin`. Use `--bin-dir /absolute/path` to select another directory and `--no-desktop` to omit the desktop entry. Add your command directory to PATH if it is not already there.
+The default command directory is `~/.local/bin`. Use `--bin-dir /absolute/path` to select another directory. Add your command directory to PATH if it is not already there.
+
+A new installation creates a desktop entry by default. Use `--no-desktop` to disable it or `--desktop` to enable it. Repeat installations and updates reuse the last successful choice when neither option is supplied. Disabling an existing installation removes only desktop links that still point to this suite; replacement files and foreign links are preserved. Enabling the entry stops if an unrelated file or link already occupies its path.
 
 An unrelated `omztty` executable causes installation to stop. Other existing tools, including ztty and ssmcp, are preserved; `omztty` selects its bundled tools explicitly.
 
@@ -78,6 +80,15 @@ Use the aarch64 archive on ARM64. An explicit `--sha256 HEX` can replace the sid
 ```sh
 omztty update
 ```
+
+To change the desktop entry choice during an update:
+
+```sh
+omztty update --no-desktop
+omztty update --desktop
+```
+
+For installations created by v0.1.1 or older, the first successful installation with this installer infers the choice from the existing desktop-entry record: present means enabled, absent means disabled. Either explicit option overrides that choice. The installer saves the preference after installation succeeds; failed preparation leaves the previous choice intact.
 
 Each version has its own directory; a `current` symlink chooses the active one. Completion caches also use the immutable release directory name, so upgrades and rollback use their matching inputs. Before changing that link, the installer prepares an audited completion cache using the system functions, zshard and suite completions. The first Tab can reuse that cache. Changing completion paths or plugins causes normal revalidation. A failed preparation leaves the previously active version selected. Installing the same archive again verifies the existing installation. If an installed version's files were modified, the installer preserves them and reports the conflict.
 

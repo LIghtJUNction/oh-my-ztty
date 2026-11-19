@@ -6,14 +6,15 @@ die() { printf 'oh-my-ztty: %s\n' "$*" >&2; exit 1; }
 usage() {
     cat <<'EOF'
 Usage: sh install.sh [--version X.Y.Z] [--from ARCHIVE] [--sha256 HEX]
-                     [--bin-dir DIR] [--no-desktop]
+                     [--bin-dir DIR] [--desktop | --no-desktop]
 Installs into $XDG_DATA_HOME/oh-my-ztty (default ~/.local/share).
 Commands go in ~/.local/bin; existing ztty/ssmcp/zdot commands are preserved.
 --from requires a .sha256 sidecar or an explicit --sha256.
+Desktop entry preference is remembered; --desktop enables it, --no-desktop disables it.
 Run omztty shell or omztty terminal. Your login shell and .zshrc stay yours.
 EOF
 }
-archive= expected= desktop=1
+archive= expected= desktop=
 bindir=${OMZTTY_BIN_DIR:-"$HOME/.local/bin"}
 while [ "$#" -gt 0 ]; do
     case "$1" in
@@ -26,6 +27,7 @@ while [ "$#" -gt 0 ]; do
                 --bin-dir) bindir=$2 ;;
             esac
             shift 2 ;;
+        --desktop) desktop=1; shift ;;
         --no-desktop) desktop=0; shift ;;
         -h|--help) usage; exit 0 ;;
         *) die "unknown option: $1" ;;
@@ -51,15 +53,44 @@ fi
 if [ -e "$bindir/omztty" ] || [ -L "$bindir/omztty" ]; then
     [ -L "$bindir/omztty" ] && [ "$(readlink "$bindir/omztty")" = "$base/current/bin/omztty" ] || die "command path already exists: $bindir/omztty"
 fi
+desktop_preference="$base/.desktop-enabled"
+saved_desktop=
+if [ -e "$desktop_preference" ] || [ -L "$desktop_preference" ]; then
+    [ -f "$desktop_preference" ] && [ ! -L "$desktop_preference" ] || die "desktop preference is not a regular file"
+    saved_desktop=$(cat "$desktop_preference")
+    case "$saved_desktop" in 0|1) ;; *) die "desktop preference must be 0 or 1" ;; esac
+fi
+if [ -z "$desktop" ]; then
+    if [ -n "$saved_desktop" ]; then
+        desktop=$saved_desktop
+    elif [ -L "$base/current" ]; then
+        # Releases before this preference file recorded only enabled desktop entries.
+        if [ -f "$base/.desktop-path" ]; then desktop=1; else desktop=0; fi
+    else
+        # A failed first preparation may leave an owned root without an active release.
+        desktop=1
+    fi
+fi
 desktop_path="$datahome/applications/oh-my-ztty.desktop"
+recorded_desktop=
+if [ "$desktop" = 0 ] && [ -f "$base/.desktop-path" ]; then
+    recorded_desktop=$(cat "$base/.desktop-path") || die "cannot read recorded desktop entry path"
+fi
+remove_desktop_link() {
+    if [ -L "$1" ] && [ "$(readlink -- "$1")" = "$base/oh-my-ztty.desktop" ]; then
+        rm -- "$1"
+    fi
+}
 if [ "$desktop" = 1 ] && { [ -e "$desktop_path" ] || [ -L "$desktop_path" ]; }; then
     [ -L "$desktop_path" ] && [ "$(readlink "$desktop_path")" = "$base/oh-my-ztty.desktop" ] || die "desktop entry already exists: $desktop_path"
 fi
 tmp=$(mktemp -d "${TMPDIR:-/tmp}/oh-my-ztty.XXXXXXXX")
 stage=
+preference_tmp=
 cleanup() {
     rm -rf -- "$tmp"
     [ -z "$stage" ] || rm -rf -- "$stage"
+    [ -z "$preference_tmp" ] || rm -f -- "$preference_tmp"
     [ ! -d "$base" ] || rm -f -- "$base/.current.$$"
 }
 trap cleanup EXIT
@@ -164,6 +195,18 @@ EOF
     if ! cmp -s "$tmp/oh-my-ztty.desktop" "$base/oh-my-ztty.desktop"; then cp "$tmp/oh-my-ztty.desktop" "$base/oh-my-ztty.desktop"; fi
     [ -L "$desktop_path" ] || ln -s "$base/oh-my-ztty.desktop" "$desktop_path"
     if [ ! -f "$base/.desktop-path" ] || [ "$(cat "$base/.desktop-path")" != "$desktop_path" ]; then printf '%s\n' "$desktop_path" > "$base/.desktop-path"; fi
+else
+    # Only suite-owned links are removed; a replacement file or foreign link stays.
+    remove_desktop_link "$desktop_path"
+    [ -z "$recorded_desktop" ] || remove_desktop_link "$recorded_desktop"
+    rm -f -- "$base/.desktop-path"
+fi
+# Publish the preference only after preparation and installation have succeeded.
+if [ "$saved_desktop" != "$desktop" ]; then
+    preference_tmp=$(mktemp "$base/.desktop-enabled.XXXXXXXX")
+    printf '%s\n' "$desktop" > "$preference_tmp"
+    mv -Tf -- "$preference_tmp" "$desktop_preference"
+    preference_tmp=
 fi
 printf 'Installed oh-my-ztty %s\nRun: %s shell\nOpen a window: %s terminal\nUninstall: %s uninstall\n' "$installed_version" "$bindir/omztty" "$bindir/omztty" "$bindir/omztty"
 case ":$PATH:" in *":$bindir:"*) ;; *) printf 'Add %s to PATH to use the short command names.\n' "$bindir" ;; esac
