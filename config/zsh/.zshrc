@@ -10,7 +10,7 @@ path=("$OMZTTY_ROOT/bin" "$HOME/.local/bin" "${path[@]}")
 typeset -g ZSHARD_CACHE_DIR=${ZSHARD_CACHE_DIR:-${XDG_CACHE_HOME:-$HOME/.cache}/oh-my-ztty/zshard/${OMZTTY_ROOT:t}}
 typeset -g HISTFILE=${XDG_STATE_HOME:-$HOME/.local/state}/oh-my-ztty/history
 [[ -d ${HISTFILE:h} ]] || (umask 077; command mkdir -p -- "${HISTFILE:h}")
-fpath=("${XDG_DATA_HOME:-$HOME/.local/share}/oh-my-ztty/completions" "$OMZTTY_ROOT/packaging/completions" "${fpath[@]}")
+fpath=("${XDG_CONFIG_HOME:-$HOME/.config}/oh-my-ztty/completions" "$OMZTTY_ROOT/packaging/completions" "${fpath[@]}")
 if [[ -r "${XDG_CONFIG_HOME:-$HOME/.config}/oh-my-ztty/options.zsh" ]]; then
     source "${XDG_CONFIG_HOME:-$HOME/.config}/oh-my-ztty/options.zsh"
 fi

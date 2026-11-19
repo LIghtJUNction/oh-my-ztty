@@ -13,3 +13,6 @@
 [submodule "components/zrc"]
 	path = components/zrc
 	url = https://github.com/LIghtJUNction/zrc.git
+[submodule "components/zfetch"]
+	path = components/zfetch
+	url = https://github.com/LIghtJUNction/zfetch.git

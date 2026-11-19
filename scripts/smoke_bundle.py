@@ -43,6 +43,8 @@ def main():
         run(cli, "dot", "--help")
         run(cli, "ssmcp", "--help")
         run(cli, "ztty", "--version")
+        info = json.loads(run(cli, "info", "--json"))
+        assert info["schema"] == "zfetch.system.v1"
         # Exercise adoption with the actual no_std binary, including conflict recovery.
         original = "print -r -- ORIGINAL_SHELL_CONFIG\\n"
         (home / ".zshrc").write_text(original)

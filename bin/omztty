@@ -15,6 +15,7 @@ Usage: omztty COMMAND [ARGS...]
   dot         Run bundled zdot
   zshard      Manage shell plugins
   ztty|ssmcp  Run a bundled component directly
+  info        Show the lightweight native system overview
   doctor      Check installed components and system dependencies
   version     Show the suite version
   update      Install the latest suite [--desktop | --no-desktop]
@@ -61,6 +62,7 @@ case "$cmd" in
             help|-h|--help) printf 'Usage: omztty ai context | connect [ssmcp options] | ask TEXT\nContext is local JSON; connect starts ssmcp explicitly.\n' ;;
             *) printf 'Unknown AI action: %s\n' "$action" >&2; exit 2 ;;
         esac ;;
+    info|zfetch) exec "$root/bin/zfetch" "$@" ;;
     ssmcp) exec "$root/bin/ssmcp" "$@" ;;
     config) exec sh "$root/bin/omztty-config" "$@" ;;
     dot|zdot) exec "$root/bin/zdot" "$@" ;;
@@ -72,7 +74,7 @@ case "$cmd" in
         for tool in zsh git; do
             if command -v "$tool" >/dev/null 2>&1; then printf 'ok   system %s\n' "$tool"; else printf 'miss system %s\n' "$tool"; failed=1; fi
         done
-        for tool in ztty ssmcp zdot; do
+        for tool in ztty ssmcp zdot zfetch; do
             if "$root/bin/$tool" --version >/dev/null 2>&1; then
                 printf 'ok   '; "$root/bin/$tool" --version
             else printf 'fail bundled %s\n' "$tool"; failed=1; fi

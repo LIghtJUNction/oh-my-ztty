@@ -131,7 +131,7 @@ payload="$tmp/oh-my-ztty"
 installed_version=$(cat "$payload/VERSION")
 valid_version "$installed_version" || die "bundle version is invalid"
 [ "$(cat "$payload/PLATFORM")" = "linux-$arch" ] || die "bundle architecture does not match this machine"
-for exe in omztty ztty ssmcp zdot zshard; do [ -x "$payload/bin/$exe" ] || die "bundle missing executable: $exe"; done
+for exe in omztty ztty ssmcp zdot zshard zfetch; do [ -x "$payload/bin/$exe" ] || die "bundle missing executable: $exe"; done
 [ -f "$payload/components/zshard/zshard.zsh" ] || die "bundle missing zshard"
 release_id="$installed_version-linux-$arch"
 release="$base/releases/$release_id"
@@ -164,7 +164,7 @@ if [ ! -L "$base/current" ] || [ "$(readlink "$base/current")" != "releases/$rel
     ln -s "releases/$release_id" "$base/.current.$$"
     mv -Tf -- "$base/.current.$$" "$base/current"
 fi
-for exe in omztty ztty ssmcp zdot zshard; do
+for exe in omztty ztty ssmcp zdot zshard zfetch; do
     target="$base/current/bin/$exe"
     if [ -e "$bindir/$exe" ] || [ -L "$bindir/$exe" ]; then
         if [ -L "$bindir/$exe" ] && [ "$(readlink "$bindir/$exe")" = "$target" ]; then :; else

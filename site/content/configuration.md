@@ -22,13 +22,13 @@ The profile covers zsh, ztty, Neovim, Kitty, Foot, Ghostty, tmux, fzf, bat, ripg
 | `~/.config/oh-my-ztty/local.zsh` | Personal shell additions |
 | `~/.local/state/zdot/oh-my-ztty/` | Deployment journal and original files |
 | `~/.local/state/oh-my-ztty/history` | Interactive shell history |
-| `~/.local/share/oh-my-ztty/completions/` | Personal completion files loaded on demand |
+| `~/.config/oh-my-ztty/completions/` | Personal completion files loaded on demand |
 
-The corresponding XDG variables change these roots. `omztty config path` prints the profile directory. Repeating `init` and updating the suite preserve the editable profile.
+The corresponding XDG variables change these roots; XDG_CONFIG_HOME must be inside HOME for a home deployment. `omztty config path` prints the profile directory. Repeating `init` and updating the suite preserve the editable profile.
 
 ## Neovim
 
-Run `nvim` for the Ink welcome page, or open a file normally. The editor has a native status line, diagnostics, a project picker and a searchable shortcut panel. It needs no plugin bootstrap, download or patched icon font.
+Neovim 0.11 or newer is required for this profile. Run `nvim` for the Ink welcome page, or open a file normally. The editor has a native status line, diagnostics, a project picker and a searchable shortcut panel. It needs no plugin bootstrap, download or patched icon font.
 
 | Key | Action |
 | --- | --- |
@@ -56,7 +56,7 @@ Edit linked application files normally or use the source under the profile direc
 Git's module contains display settings only. Activate it once if desired:
 
 ```sh
-git config --global --add include.path "$HOME/.config/zrc/git.inc"
+git config --global --add include.path "${XDG_CONFIG_HOME:-$HOME/.config}/zrc/git.inc"
 ```
 
 Identity, credentials and signing settings remain in the user's existing Git configuration. The suite does not publish personal profiles or choose a Git remote. After initializing a profile repository and configuring its remote, synchronization is explicit:

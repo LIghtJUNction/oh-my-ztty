@@ -30,7 +30,7 @@ if [ "$deployment" = 1 ]; then
 elif [ "$managed_shell" = 1 ]; then
     die "the managed shell has no recovery journal; installation was preserved"
 fi
-for exe in omztty ztty ssmcp zdot zshard; do
+for exe in omztty ztty ssmcp zdot zshard zfetch; do
     link="$bindir/$exe"
     if [ -L "$link" ] && [ "$(readlink "$link")" = "$base/current/bin/$exe" ]; then rm -- "$link"; fi
 done
