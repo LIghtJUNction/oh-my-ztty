@@ -1,6 +1,6 @@
 # Installation
 
-The release bundle includes ztty, zshard, zdot and ssmcp. Installation from a release does not require Rust or Python.
+The release bundle includes ztty, zshard, zrc, zdot, zfetch and ssmcp. Installation and configuration commands from a release do not require Rust or Python.
 
 ## Requirements
 
@@ -8,11 +8,14 @@ The release bundle includes ztty, zshard, zdot and ssmcp. Installation from a re
 | --- | --- |
 | Operating system | Linux x86_64 or ARM64 |
 | Shell | System zsh 5.9 or newer |
+| Editor profile | Neovim 0.11 or newer, installed separately |
 | Graphical session | X11 or XWayland |
 | Graphics libraries | X11, Xrender, Xft and Fontconfig |
 | Binary ABI | glibc 2.34 or newer and libgcc for ztty and ssmcp |
 
 The formal native validation platform is Ubuntu 24.04 on both architectures. The glibc symbol floor alone does not establish compatibility with every distribution. zdot is a static executable without a glibc dependency.
+
+Application and language-server installation is separate from configuration deployment.
 
 On Ubuntu 24.04, install the basic dependencies with:
 
@@ -47,7 +50,28 @@ omztty shell
 omztty terminal
 ```
 
-The first command starts the preset inside your current terminal. The second opens ztty with the same configuration. The suite uses its own zsh configuration directory; your account's login shell and original `.zshrc` remain available.
+The first command starts the preset inside your current terminal. The second opens ztty with the same configuration. These commands try the environment in a separate shell session. Adopt the home profile below to make its configuration the default; account login-shell records remain unchanged.
+
+## Adopt the default workspace
+
+```sh
+omztty config init
+omztty config plan --json
+omztty config apply --backup
+omztty config status
+```
+
+The profile unifies zsh, ztty, Neovim and everyday terminal-tool configurations. Read the plan before applying it. `--backup` preserves conflicting originals, and `omztty config remove` restores them. Git display colors use the explicit include in [configuration](configuration.md).
+
+Open a new terminal after adoption. Editable files live under `${XDG_CONFIG_HOME:-$HOME/.config}/oh-my-ztty/profile`. The journal and backups live under `${XDG_STATE_HOME:-$HOME/.local/state}/zdot/oh-my-ztty`. HOME adoption requires an absolute `XDG_CONFIG_HOME` within HOME; roots outside HOME are rejected.
+
+Personal completion files belong in `${XDG_CONFIG_HOME:-$HOME/.config}/oh-my-ztty/completions/`. The preset registers that directory for on-demand loading. It stays outside the runtime and survives updates and uninstallation.
+
+## System overview
+
+Run `omztty info` to display system information through the bundled zfetch utility. `omztty zfetch` invokes the same tool directly. The shell does not run it automatically.
+
+The standalone Arch Linux package names are `zfetch-project-z` and `zfetch-project-z-bin`. See the [zfetch repository](https://github.com/LIghtJUNction/zfetch) for publication status and installation details.
 
 ## Install options
 
@@ -98,8 +122,8 @@ Before activation, the installer prepares an audited completion cache. A failed 
 omztty uninstall
 ```
 
-Uninstallation removes suite-owned installation files and links that still point to them. Personal configuration, history, dotfile repositories and unrelated commands are preserved.
+Uninstallation restores the adopted `omztty config` home profile before removing the runtime. Failed restoration or inconsistent deployment records preserve the installation for recovery. After restoration, suite-owned installation files and links are removed; personal profiles, additions, completion files and history are retained.
 
-Dotfile deployments have a separate lifecycle. Use [zdot remove](dotfiles.md#remove-a-deployment) first if you also want to remove those managed links.
+Independent repositories deployed through `omztty dot` have a separate lifecycle. Use [zdot remove](dotfiles.md#remove-a-deployment) first if you also want to restore those deployments.
 
-The [public installation audit](https://github.com/LIghtJUNction/oh-my-ztty/blob/main/docs/reports/public-release-0.1.1.json) verifies the downloaded installer, repeated installation, configuration and history preservation, and removal of managed command, desktop and manual-page links.
+The [earlier 0.1.1 installation audit](https://github.com/LIghtJUNction/oh-my-ztty/blob/main/docs/reports/public-release-0.1.1.json) records that release’s installer and managed-link lifecycle; it predates the unified home profile described here.

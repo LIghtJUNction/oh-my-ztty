@@ -1,6 +1,8 @@
 # Installation
 
-The release bundle includes ztty, ssmcp, zdot and zshard. Install system zsh 5.9 or newer first. The graphical terminal uses X11/XWayland and needs X11, Xrender, Xft and their fontconfig dependencies. Both published architectures require glibc 2.34 or newer and libgcc for ztty and ssmcp; zdot is static. Formal release validation targets Ubuntu 24.04; the ABI floor alone does not certify every distribution.
+The release bundle includes ztty, zshard, zrc, zdot, zfetch and ssmcp. Installation and configuration commands from a release do not require Rust or Python. Install system zsh 5.9 or newer first. The graphical terminal uses X11/XWayland and needs X11, Xrender, Xft and their fontconfig dependencies. Both published architectures require glibc 2.34 or newer and libgcc for ztty and ssmcp; zdot is static. Formal release validation targets Ubuntu 24.04; the ABI floor alone does not certify every distribution.
+
+Using the editor profile requires Neovim 0.11 or newer, installed separately. The configuration commands do not install applications or language servers.
 
 On Ubuntu 24.04, install the system dependencies with:
 
@@ -32,19 +34,40 @@ omztty shell
 omztty terminal
 ```
 
-The first command starts a shell in the current terminal. The second opens ztty with that same environment. The suite supplies its own zsh configuration directory; your account's login shell and original `.zshrc` remain available.
+The first command starts a shell in the current terminal. The second opens ztty with that same environment. These commands try the preset in a separate shell session. Use the explicit home-adoption steps below to make it the default configuration; account login-shell records remain unchanged.
 
 The terminal launcher uses a suite-specific ztty broker socket, `@oh-my-ztty-<uid>-<suite-version>`. Set `OMZTTY_SOCKET` to select another socket explicitly. The terminal uses ztty's resident broker; starting `omztty shell` alone does not start a terminal or AI daemon.
 
 Inside the preset shell, `zai context` produces a small context record for AI tools. `zai connect` starts ssmcp in the current directory. Configure and authenticate ssmcp using its own instructions. Merely starting the shell creates no remote connection.
 
+## Adopt the default workspace
+
+```sh
+omztty config init
+omztty config plan --json
+omztty config apply --backup
+omztty config status
+```
+
+The editable profile covers zsh, ztty, Neovim, Kitty, Foot, Ghostty, tmux, fzf, bat, ripgrep and Git display settings. Existing files are backed up before deployment when `--backup` is supplied. Git display colors use the explicit include described in [configuration](configuration.md); identity and signing remain in the user's Git configuration.
+
+Open a new terminal after adoption. The profile lives under `${XDG_CONFIG_HOME:-$HOME/.config}/oh-my-ztty/profile`; its journal and backups live under `${XDG_STATE_HOME:-$HOME/.local/state}/zdot/oh-my-ztty`. HOME adoption requires an absolute `XDG_CONFIG_HOME` within HOME. Roots outside HOME are refused.
+
+Repeated `config init` and suite updates preserve the editable profile. Use `omztty config remove` to restore the saved originals, or `omztty config audit` to inspect managed files and known legacy framework locations. See [configuration and recovery](configuration.md) for application coverage and local extensions.
+
+## System overview
+
+Run `omztty info` to display the system overview through bundled zfetch, or use `omztty zfetch` to invoke it directly. The shell does not run zfetch automatically.
+
+The standalone Arch Linux package names are `zfetch-project-z` and `zfetch-project-z-bin`. Consult the [zfetch repository](https://github.com/LIghtJUNction/zfetch) for publication status and installation details.
+
 ## Ink appearance
 
-The default Ink preset uses a graphite background, a complete low-saturation ANSI palette, 24 px padding and a 13 pt font request. Fontconfig tries installed JetBrains Mono, JetBrainsMono Nerd Font, Caskaydia Mono, Cascadia Mono and ordinary monospace in that order. The prompt does not require private-use icon glyphs. Personal Fontconfig rules may change the selected family.
+The default Ink preset uses a warm graphite background, linen text and copper accents, a complete ANSI palette, 28 px padding and a 13 pt font request. Fontconfig tries installed JetBrains Mono, JetBrainsMono Nerd Font, Caskaydia Mono, Cascadia Mono and ordinary monospace in that order. The prompt does not require private-use icon glyphs. Personal Fontconfig rules may change the selected family.
 
 The two-line prompt separates the path and cached Git branch from command input. It shows a nonzero exit code and commands lasting at least two seconds. Its theme callback uses zsh builtins only.
 
-To use zshard's own minimal prompt, put `OMZTTY_THEME=framework` in `options.zsh`. To install a custom prompt, register it with `zshard theme YOUR_FUNCTION` in `local.zsh`; that file is loaded after Ink. See the [theme API](https://github.com/LIghtJUNction/zshard/blob/v0.1.2/docs/plugins.md).
+To use zshard's own minimal prompt, put `OMZTTY_THEME=framework` in `options.zsh`. To install a custom prompt, register it with `zshard theme YOUR_FUNCTION` in `local.zsh`; that file is loaded after Ink. See the [theme API](https://github.com/LIghtJUNction/zshard/blob/v0.2.0/docs/plugins.md).
 
 ## Personal configuration and plugins
 
@@ -55,7 +78,7 @@ Create configuration below `${XDG_CONFIG_HOME:-$HOME/.config}/oh-my-ztty`. The s
 | `options.zsh` | Before framework initialization | Startup options such as `ZSHARD_KEYMAP=vi` or `ZSHARD_COMPLETION=eager` |
 | `local.zsh` | After framework initialization | Aliases, plugin loading, themes and the `ZSHARD_AI_COMMAND` provider argv array |
 
-Both files remain outside the installed release and survive upgrades and uninstallation. To try the included example plugin, add this to `local.zsh`:
+Both files remain outside the installed release and survive upgrades and uninstallation. Personal completion files belong in `${XDG_CONFIG_HOME:-$HOME/.config}/oh-my-ztty/completions/`, which the preset adds to `fpath` for on-demand loading; that directory is also retained. To try the included example plugin, add this to `local.zsh`:
 
 ```zsh
 zshard load "$ZSHARD_HOME/examples/hello.plugin.zsh"
@@ -70,7 +93,7 @@ Configure an installed AI provider's executable and arguments as the `ZSHARD_AI_
 Download the archive and its matching `.sha256` file from the same release, then run:
 
 ```sh
-sh install.sh --from ./oh-my-ztty-0.1.1-linux-x86_64.tar.gz
+sh install.sh --from ./oh-my-ztty-0.2.0-linux-x86_64.tar.gz
 ```
 
 Use the aarch64 archive on ARM64. An explicit `--sha256 HEX` can replace the sidecar file when the digest has already been obtained from the release record.
@@ -115,4 +138,6 @@ Conflicts stop by default. Read [zdot's documentation](https://github.com/LIghtJ
 omztty uninstall
 ```
 
-The uninstaller removes this suite's installation and links that still point to it. Files you replaced and unrelated tools are preserved. Dotfile repositories and their links are separate from the suite installation; remove a managed dotfile profile with zdot before uninstalling zdot if you want those links removed too.
+The uninstaller first restores the adopted `omztty config` home profile, including originals saved by `apply --backup`. If restoration fails or the deployment records are inconsistent, it preserves the installed runtime for recovery. After successful restoration it removes the installation and suite-owned links.
+
+Personal profiles, shell additions, completion files and history remain outside the runtime and are preserved. Independent repositories deployed through `omztty dot` keep their separate lifecycle; use their `zdot remove` command first if you also want to restore those deployments.
