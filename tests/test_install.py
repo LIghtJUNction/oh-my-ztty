@@ -52,7 +52,7 @@ class Installation(unittest.TestCase):
         (shard / "zshard.zsh").write_text("typeset -g ZSHARD_TEST=loaded\n")
         (shard / "bin/zshard").write_text(
             "#!/bin/sh\n"
-            'printf "%s\\n" "$ZSHARD_CACHE_DIR" > "$HOME/fixture-cache-dir"\n'
+            'printf "%s\\n" "$ZSHARD_CACHE_DIR" "$ZDOTDIR" > "$HOME/fixture-cache-dir"\n'
             f"printf 'zshard fixture\\n'\nexit {warm_exit}\n"
         )
         (shard / "bin/zshard").chmod(0o755)
@@ -93,11 +93,12 @@ class Installation(unittest.TestCase):
         self.assertEqual(current_inode, (self.base / "current").lstat().st_ino)
         self.assertEqual(first, (self.base / "current").resolve())
         self.assertEqual(foreign.read_text(), "user-owned")
-        result = self.cli("shell", "-ic", 'print -r -- "$ZSHARD_TEST" "$ZSHARD_CACHE_DIR"')
+        result = self.cli("shell", "-ic", 'print -rl -- "$ZSHARD_TEST" "$ZSHARD_CACHE_DIR" "$ZDOTDIR"')
         self.assertIn("loaded", result.stdout)
         expected_cache = self.home / ".cache/oh-my-ztty/zshard" / first.name
-        self.assertEqual((self.home / "fixture-cache-dir").read_text().strip(), str(expected_cache))
-        self.assertEqual(result.stdout.strip().splitlines()[-1], "loaded " + str(expected_cache))
+        expected_zdotdir = first / "config/zsh"
+        self.assertEqual((self.home / "fixture-cache-dir").read_text().splitlines(), [str(expected_cache), str(expected_zdotdir)])
+        self.assertEqual(result.stdout.strip().splitlines(), ["loaded", str(expected_cache), str(expected_zdotdir)])
         self.assertNotIn("UNWANTED_USER_RC", result.stdout)
         self.assertEqual((self.home / ".zshrc").read_text(), "print UNWANTED_USER_RC\n")
         desktop = self.data / "applications/oh-my-ztty.desktop"

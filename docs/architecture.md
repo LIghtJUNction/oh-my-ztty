@@ -18,7 +18,7 @@ The shell startup path does not download plugins, call an AI provider or launch 
 
 The new zdot library and executable use Rust `no_std`, with Project Z's `zclap` parser configured without its default `std` feature. Its Linux backend uses direct system calls. Development scripts and tests run outside that production dependency graph.
 
-zshard is written in zsh. ztty retains its own native terminal architecture and system graphics dependencies. The included ssmcp release has its existing Rust standard-library and networking dependencies. These are separate processes; ssmcp's runtime is started on demand.
+zshard is written in zsh. The pinned ztty core and executable also use Rust `no_std`; its graphical front end retains its X11 and system-library dependencies. The included ssmcp release has its existing Rust standard-library and networking dependencies. These are separate processes; ssmcp's runtime is started on demand.
 
 This boundary matters when measuring memory: report the terminal, shell and an active MCP client separately, then state which processes are included in any total.
 
