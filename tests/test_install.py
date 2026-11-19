@@ -50,7 +50,11 @@ class Installation(unittest.TestCase):
         shard = stage / "components/zshard"
         (shard / "bin").mkdir(parents=True)
         (shard / "zshard.zsh").write_text("typeset -g ZSHARD_TEST=loaded\n")
-        (shard / "bin/zshard").write_text(f"#!/bin/sh\nprintf 'zshard fixture\\n'\nexit {warm_exit}\n")
+        (shard / "bin/zshard").write_text(
+            "#!/bin/sh\n"
+            'printf "%s\\n" "$ZSHARD_CACHE_DIR" > "$HOME/fixture-cache-dir"\n'
+            f"printf 'zshard fixture\\n'\nexit {warm_exit}\n"
+        )
         (shard / "bin/zshard").chmod(0o755)
         for name in ["ztty", "ssmcp", "zdot"]:
             executable = stage / "bin" / name
@@ -89,8 +93,11 @@ class Installation(unittest.TestCase):
         self.assertEqual(current_inode, (self.base / "current").lstat().st_ino)
         self.assertEqual(first, (self.base / "current").resolve())
         self.assertEqual(foreign.read_text(), "user-owned")
-        result = self.cli("shell", "-ic", "print -r -- $ZSHARD_TEST")
+        result = self.cli("shell", "-ic", 'print -r -- "$ZSHARD_TEST" "$ZSHARD_CACHE_DIR"')
         self.assertIn("loaded", result.stdout)
+        expected_cache = self.home / ".cache/oh-my-ztty/zshard" / first.name
+        self.assertEqual((self.home / "fixture-cache-dir").read_text().strip(), str(expected_cache))
+        self.assertEqual(result.stdout.strip().splitlines()[-1], "loaded " + str(expected_cache))
         self.assertNotIn("UNWANTED_USER_RC", result.stdout)
         self.assertEqual((self.home / ".zshrc").read_text(), "print UNWANTED_USER_RC\n")
         desktop = self.data / "applications/oh-my-ztty.desktop"

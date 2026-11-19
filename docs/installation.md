@@ -1,6 +1,12 @@
 # Installation
 
-The release bundle includes ztty, ssmcp, zdot and zshard. Install system zsh 5.9 or newer first. The graphical terminal also needs the X11/XWayland and fontconfig libraries used by the bundled ztty build.
+The release bundle includes ztty, ssmcp, zdot and zshard. Install system zsh 5.9 or newer first. The graphical terminal uses X11/XWayland and needs X11, Xrender, Xft and their fontconfig dependencies. The x86_64 bundle requires glibc 2.34 or newer and libgcc. Formal release validation targets Ubuntu 24.04; the ABI floor alone does not certify every distribution.
+
+On Ubuntu 24.04, install the system dependencies with:
+
+```sh
+sudo apt-get install zsh git curl libx11-6 libxrender1 libxft2 libfontconfig1
+```
 
 ## Install a release
 
@@ -29,6 +35,25 @@ The first command starts a shell in the current terminal. The second opens ztty 
 The terminal launcher uses a suite-specific ztty broker socket, `@oh-my-ztty-<uid>-<suite-version>`. Set `OMZTTY_SOCKET` to select another socket explicitly. The terminal uses ztty's resident broker; starting `omztty shell` alone does not start a terminal or AI daemon.
 
 Inside the preset shell, `zai context` produces a small context record for AI tools. `zai connect` starts ssmcp in the current directory. Configure and authenticate ssmcp using its own instructions. Merely starting the shell creates no remote connection.
+
+## Personal configuration and plugins
+
+Create configuration below `${XDG_CONFIG_HOME:-$HOME/.config}/oh-my-ztty`. The suite reads two optional files:
+
+| File | Loaded when | Intended use |
+| --- | --- | --- |
+| `options.zsh` | Before framework initialization | Startup options such as `ZSHARD_KEYMAP=vi` or `ZSHARD_COMPLETION=eager` |
+| `local.zsh` | After framework initialization | Aliases, plugin loading, themes and the `ZSHARD_AI_COMMAND` provider argv array |
+
+Both files remain outside the installed release and survive upgrades and uninstallation. To try the included example plugin, add this to `local.zsh`:
+
+```zsh
+zshard load "$ZSHARD_HOME/examples/hello.plugin.zsh"
+```
+
+For remote plugins, install a reviewed full Git commit explicitly, then put `zshard use NAME` in `local.zsh`. [The plugin guide](https://github.com/LIghtJUNction/zshard/blob/main/docs/plugins.md) documents locking, restoration, lazy loading, hooks and themes.
+
+Configure an installed AI provider's executable and arguments as the `ZSHARD_AI_COMMAND` array in `local.zsh`, then use `zai ask` inside the preset shell or `omztty ai ask` from another shell. The provider receives the context and request on standard input. Its output is displayed, without automatic command evaluation. The `context` and `connect` subcommands remain independent of that provider configuration.
 
 ## Offline installation
 

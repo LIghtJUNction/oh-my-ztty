@@ -14,7 +14,7 @@ sh install.sh
 ~/.local/bin/omztty shell
 ```
 
-支持 Linux x86_64、ARM64。系统需提供 zsh；图形终端使用 X11/fontconfig。安装包预装全部四个 Project Z 组件，按用户安装，可重复执行。
+支持 Linux x86_64、ARM64。系统需提供 zsh 5.9+；图形终端使用 X11/XWayland，正式构建在 Ubuntu 24.04 验证。安装包预装全部四个 Project Z 组件，按用户安装，可重复执行。
 
 ## 四个独立项目
 

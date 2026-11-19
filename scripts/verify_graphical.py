@@ -118,7 +118,8 @@ def main():
                    OMZTTY_SOCKET=address, ZTTY_SOCKET=address)
         run(["sh", ROOT / "install.sh", "--from", archive], env)
         cli = home / ".local/bin/omztty"
-        cache_dir = home / ".cache/oh-my-ztty/zshard"
+        release_id = cli.resolve().parents[1].name
+        cache_dir = home / ".cache/oh-my-ztty/zshard" / release_id
         prepared_cache = cache_snapshot(cache_dir)
         if not prepared_cache:
             raise RuntimeError("installer did not prepare its completion dump")
