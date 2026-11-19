@@ -2,7 +2,7 @@
 
 oh-my-ztty assembles a terminal, a zsh framework, a native application configuration framework, a dotfile manager, a native system overview and an MCP client into one versioned Linux environment. System zsh runs your commands; the suite supplies the configuration and the tools around it.
 
-The current suite release is **0.2.0**, available for Linux x86_64 and ARM64.
+The current suite release is **0.2.1**, available for Linux x86_64 and ARM64.
 
 ## Quick start
 
