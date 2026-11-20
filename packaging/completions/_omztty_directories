@@ -1,0 +1,3 @@
+# Complete directories without the regular-file fallback in _files.
+local expl
+_wanted directories expl directory _path_files -/ "$@"

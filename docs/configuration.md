@@ -40,6 +40,28 @@ The profile keeps a verified snapshot of shipped defaults in `.baseline/`, separ
 
 Profiles created before snapshots were introduced use the recorded installed release once, then save a snapshot on successful refresh. Keep that old release until the first refresh completes. A missing, modified or mismatched baseline stops refresh before any profile changes. Repeating refresh at the same suite version does nothing. Refresh handles changes to existing defaults; a changed default file layout or mapping requires a deliberate profile review and is rejected without edits.
 
+## Native completion
+
+Press Tab after a command, an option or a partial value. The suite includes native zsh completion for its tools, with the same behavior through the `omztty` wrappers.
+
+| Command | Completion |
+| --- | --- |
+| `ssmcp` | Account, session, browser setup, UI, service and recovery commands; options, themes, log formats and path arguments |
+| `ztty` | Session actions, terminal settings and command completion after `-e` or `--` |
+| `zdot` | Deployment commands, synchronization actions and repository paths |
+| `zfetch` | Output format and color options |
+| `zshard` | Plugin actions, locally installed plugin names, hooks and completion directories |
+| `zai` | AI actions and ssmcp arguments after `connect` |
+| `omztty` | Suite commands and their nested component arguments |
+
+For example, type `ssmcp --theme n` and press Tab to complete `nord`. Try `ssmcp sessions lo`, `zshard plugin ver`, or `ztty -e git checko` for nested commands. `omztty ai connect`, `zai connect` and `zshard ai connect` all share the ssmcp completion.
+
+Completion uses local command definitions and filesystem entries. It starts no component program and makes no relay request; enter remote client identifiers, session names and account values explicitly. The ssmcp definitions match the client's pinned release in `dependencies.lock.json`.
+
+Personal `_command` files in `${XDG_CONFIG_HOME:-$HOME/.config}/oh-my-ztty/completions/` take precedence over included definitions, in both lazy and eager modes. Open a new suite shell after adding one. Existing system completions, including Git, remain available.
+
+The per-user installer prepares an audited completion cache. The default lazy mode loads it on the first Tab; adding or changing completion inputs triggers normal revalidation. Use `ZSHARD_COMPLETION=eager` in `options.zsh` to initialize at startup, or `off` to disable completion.
+
 ## Neovim
 
 Neovim 0.11 or newer is required for this profile. Run `nvim` for the Ink welcome page, or open a file normally. The editor has a native status line, diagnostics, a project picker and a searchable shortcut panel. It needs no plugin bootstrap, download or patched icon font.

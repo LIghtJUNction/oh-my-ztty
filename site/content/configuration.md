@@ -128,11 +128,25 @@ Highlighting recognizes the first command token. It is not a full shell grammar 
 
 ## Completion
 
-Press Tab to complete `omztty` subcommands, options and paths. Completion follows nested commands such as `omztty config sync`, offers terminal backend choices, and switches to command completion after `omztty terminal -e` or `--`.
+Press Tab after a command, an option or a partial value. The suite includes native zsh completion for its tools, with the same behavior through the `omztty` wrappers.
 
-Put personal `_command` completion files in `${XDG_CONFIG_HOME:-$HOME/.config}/oh-my-ztty/completions/`, then open a new suite shell. This directory stays outside the runtime and survives updates. A registered component completion takes precedence over the suite's fallback.
+| Command | Completion |
+| --- | --- |
+| `ssmcp` | Account, session, browser setup, UI, service and recovery commands; options, themes, log formats and path arguments |
+| `ztty` | Session actions, terminal settings and command completion after `-e` or `--` |
+| `zdot` | Deployment commands, synchronization actions and repository paths |
+| `zfetch` | Output format and color options |
+| `zshard` | Plugin actions, locally installed plugin names, hooks and completion directories |
+| `zai` | AI actions and ssmcp arguments after `connect` |
+| `omztty` | Suite commands and their nested component arguments |
 
-The per-user installer prepares a completion cache. With the default lazy setting, the shell initializes completion on the first Tab and checks any existing cache against its current inputs. See [startup options](#startup-options) to select eager loading or disable completion.
+For example, type `ssmcp --theme n` and press Tab to complete `nord`. Try `ssmcp sessions lo`, `zshard plugin ver`, or `ztty -e git checko` for nested commands. `omztty ai connect`, `zai connect` and `zshard ai connect` all share the ssmcp completion.
+
+Completion uses local command definitions and filesystem entries. It starts no component program and makes no relay request; enter remote client identifiers, session names and account values explicitly. The ssmcp definitions match the client's pinned release in `dependencies.lock.json`.
+
+Personal `_command` files in `${XDG_CONFIG_HOME:-$HOME/.config}/oh-my-ztty/completions/` take precedence over included definitions, in both lazy and eager modes. Open a new suite shell after adding one. Existing system completions, including Git, remain available.
+
+The per-user installer prepares an audited completion cache. The default lazy mode loads it on the first Tab; adding or changing completion inputs triggers normal revalidation. Use `ZSHARD_COMPLETION=eager` in `options.zsh` to initialize at startup, or `off` to disable completion.
 
 ## Aliases and plugins
 

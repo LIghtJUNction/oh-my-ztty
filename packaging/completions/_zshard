@@ -1,0 +1,87 @@
+#compdef zshard
+autoload -Uz _omztty_directories
+
+# Read only local lock names. Never load or verify a plugin while completing.
+_omztty_zshard_plugin_names() {
+    local directory=${ZSHARD_PLUGIN_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/zshard/plugins}
+    local -a plugins
+    [[ -d $directory && ! -L $directory ]] || return 1
+    plugins=("$directory"/*.lock(.N:t:r))
+    (( $#plugins )) && compadd -a plugins
+}
+
+local context state state_descr line
+typeset -A opt_args
+local -a actions=(
+    'load:Load a local plugin once' 'defer:Load a plugin after the prompt'
+    'lazy:Load a plugin on first command use' 'use:Load an installed plugin'
+    'unload:Run an installed plugin cleanup' 'plugin:Manage pinned plugins'
+    'hook:Register a shell hook' 'unhook:Remove a shell hook'
+    'completions:Register a completion directory' 'theme:Set a prompt function'
+    'ai:Use explicit AI actions' 'cache:Prepare completion cache'
+    'complete:Initialize completion now' 'doctor:Inspect runtime settings'
+    'version:Show version' 'help:Show help'
+)
+if (( CURRENT == 2 )); then
+    _arguments -C '(-h --help)'{-h,--help}'[Show help]' \
+        '--version[Show version]' '1:action:->action'
+    [[ $state == action ]] && _describe 'action' actions
+    return
+fi
+
+case $words[2] in
+    load|defer)
+        (( CURRENT == 3 )) && _files ;;
+    lazy)
+        if (( CURRENT == 3 )); then _message 'new command name'
+        elif (( CURRENT == 4 )); then _files
+        fi ;;
+    use|unload)
+        (( CURRENT == 3 )) && _omztty_zshard_plugin_names ;;
+    hook|unhook)
+        if (( CURRENT == 3 )); then
+            compadd -- chpwd precmd preexec periodic zshaddhistory zshexit zsh_directory_name
+        elif (( CURRENT == 4 )); then
+            compadd -k functions
+        fi ;;
+    completions)
+        (( CURRENT == 3 )) && _omztty_directories ;;
+    theme)
+        (( CURRENT == 3 )) && compadd -k functions ;;
+    cache)
+        if (( CURRENT == 3 )); then compadd -- warm
+        elif [[ $words[3] == warm ]]; then _omztty_directories
+        fi ;;
+    plugin)
+        if (( CURRENT == 3 )); then
+            local -a operations=(
+                'add:Install a pinned plugin' 'list:List installed pins'
+                'verify:Check an installed pin' 'remove:Remove an installed plugin'
+                'export:Print the pin manifest' 'restore:Restore pins from a manifest'
+            )
+            _describe 'plugin operation' operations
+        else
+            case $words[3] in
+                verify|remove)
+                    (( CURRENT == 4 )) && _omztty_zshard_plugin_names ;;
+                restore)
+                    (( CURRENT == 4 )) && _files ;;
+                add)
+                    case $CURRENT in
+                        4) _message 'new plugin name' ;;
+                        5) _message 'HTTPS or SSH repository URL' ;;
+                        6) _message 'full 40-character commit SHA' ;;
+                        7) _message 'entry file relative to the plugin checkout' ;;
+                    esac ;;
+                *) return 1 ;;
+            esac
+        fi ;;
+    ai)
+        local -a words=("$words[@]")
+        shift words
+        local -i CURRENT=$(( CURRENT - 1 ))
+        words[1]=zai
+        local service=zai curcontext="$curcontext"
+        _normal ;;
+    *) return 1 ;;
+esac

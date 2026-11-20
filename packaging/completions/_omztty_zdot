@@ -1,0 +1,35 @@
+# Shared native completion used by the direct command and omztty wrapper.
+autoload -Uz _omztty_directories
+local -a options=(
+    '--root[Dotfile repository]:directory:_omztty_directories'
+    '(-h --help)'{-h,--help}'[Show help]'
+    '(-V --version)'{-V,--version}'[Show version]'
+)
+local action=''
+local -i index=2
+while (( index < CURRENT )); do
+    case $words[index] in
+        --root|--target|--profile|--state-dir) (( index += 2 )) ;;
+        --root=*|--target=*|--profile=*|--state-dir=*|--backup|--json|-h|--help|-V|--version)
+            (( ++index )) ;;
+        *) action=$words[index]; break ;;
+    esac
+done
+case $action in
+    sync)
+        _arguments "$options[@]" '1:command:(sync)' '2:operation:(status pull push)'
+        ;;
+    init)
+        _arguments "$options[@]" '1:command:(init)' '--json[Emit machine-readable output]'
+        ;;
+    *)
+        options+=(
+            '--target[Target home directory]:directory:_omztty_directories'
+            '--profile[Repository-relative manifest]:file:_files'
+            '--state-dir[Private journal directory]:directory:_omztty_directories'
+            '--json[Emit machine-readable output]'
+        )
+        [[ $action == (plan|apply) ]] && options+=('--backup[Preserve conflicting files]')
+        _arguments "$options[@]" '1:command:(init plan apply status remove sync)'
+        ;;
+esac
