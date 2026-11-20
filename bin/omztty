@@ -126,7 +126,7 @@ case "$cmd" in
         XDG_DATA_HOME=$(dirname -- "$base") OMZTTY_BIN_DIR=$(cat "$base/.bin-dir") sh "$tmp/install.sh" "$@" ;;
     uninstall)
         if [ -f "$root/PACKAGE_MANAGER" ]; then
-            printf 'This installation is managed by pacman.\nRemove with: sudo pacman -Rns oh-my-ztty-bin\n' >&2
+            printf 'This installation is managed by pacman.\nRemove with: sudo pacman -R oh-my-ztty-bin\n' >&2
             exit 2
         fi
         [ "$#" -eq 0 ] || { printf 'usage: omztty uninstall\n' >&2; exit 2; }

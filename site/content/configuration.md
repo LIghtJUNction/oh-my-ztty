@@ -28,8 +28,9 @@ The corresponding XDG variables change these roots; XDG_CONFIG_HOME must be insi
 
 ## Refresh defaults after an upgrade
 
+Update the suite with `omztty update` for a per-user installation, or `yay -Syu oh-my-ztty-bin` for the AUR package. Then refresh its defaults:
+
 ```sh
-omztty update
 omztty config refresh
 ```
 
@@ -89,7 +90,7 @@ omztty config remove
 
 `remove` uses the saved manifest, checks link ownership and restores originals. A destination replaced outside zdot is preserved and reported. To change manifest mappings, remove the deployment, edit the manifest and apply it again.
 
-Uninstalling the suite restores this adopted home profile first. A restoration failure preserves the installed runtime for recovery. Other deployments made through `omztty dot` remain independently managed.
+For a per-user installation, `omztty uninstall` restores this adopted home profile first. A restoration failure preserves the installed runtime for recovery. For the AUR package, run `omztty config remove` before `sudo pacman -R oh-my-ztty-bin`; package removal leaves home files in place. Other deployments made through `omztty dot` remain independently managed.
 
 Legacy framework removal is a deliberate maintenance step after the replacement works. Packages required by other installed software stay under the package manager's dependency rules.
 

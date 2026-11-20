@@ -44,7 +44,7 @@ class PackagedInstallationTests(unittest.TestCase):
 
     def test_packaged_update_and_uninstall_do_not_mutate_files(self):
         for command, hint in (("update", "yay -Syu oh-my-ztty-bin"),
-                              ("uninstall", "sudo pacman -Rns oh-my-ztty-bin")):
+                              ("uninstall", "sudo pacman -R oh-my-ztty-bin")):
             with self.subTest(command=command):
                 result = subprocess.run([str(self.commands / "omztty"), command],
                                         env=self.env, capture_output=True, text=True)
