@@ -1,0 +1,95 @@
+{
+  "schema": "oh-my-ztty.release-acceptance.v1",
+  "suite_version": "0.2.3",
+  "source_tree": "50721d16333ae313449f88935b1827e05d8327fb",
+  "component_sources": {
+    "ztty": "c4f8f48c9598284a589e609f25242b49ceabfea8",
+    "ssmcp": "52a531a59e9ec9236a76eafc0f4f068799e44b15",
+    "zshard": "1cfa1a1eb761d14e2ccfd5381282b6ccd1491cff",
+    "zdot": "e6b5feb98b05c59e0986624c0742dfe4a9187a2a",
+    "zrc": "f4a0fe84c3499c00c5a01f1831e34fcbf5d5790c",
+    "zfetch": "f19b278676206d76626dd01e4b89f7ad9ce9318f"
+  },
+  "steps": [
+    {
+      "name": "suite-check",
+      "exit_code": 0,
+      "seconds": 22.361411560006673,
+      "log": "suite-check.log"
+    },
+    {
+      "name": "bundle-x86_64",
+      "exit_code": 0,
+      "seconds": 1.0158372099976987,
+      "log": "bundle-x86_64.log"
+    },
+    {
+      "name": "bundle-aarch64",
+      "exit_code": 0,
+      "seconds": 0.8656346969946753,
+      "log": "bundle-aarch64.log"
+    },
+    {
+      "name": "smoke",
+      "exit_code": 0,
+      "seconds": 1.5168583740014583,
+      "log": "smoke.log"
+    },
+    {
+      "name": "graphical",
+      "exit_code": 0,
+      "seconds": 2.9207150589936646,
+      "log": "graphical.log"
+    }
+  ],
+  "bundles": {
+    "x86_64": {
+      "sha256": "f0c13b4112e2461f99ea8dfff37c70b61b92ba954ad21818e553cdb5ae9991cd",
+      "bytes": 5476305,
+      "manifest_files": 84,
+      "build": {
+        "platform": "linux-x86_64",
+        "schema": 1,
+        "source_commits": {
+          "ssmcp": "52a531a59e9ec9236a76eafc0f4f068799e44b15",
+          "zdot": "e6b5feb98b05c59e0986624c0742dfe4a9187a2a",
+          "zfetch": "f19b278676206d76626dd01e4b89f7ad9ce9318f",
+          "zrc": "f4a0fe84c3499c00c5a01f1831e34fcbf5d5790c",
+          "zshard": "1cfa1a1eb761d14e2ccfd5381282b6ccd1491cff",
+          "ztty": "c4f8f48c9598284a589e609f25242b49ceabfea8"
+        },
+        "suite_version": "0.2.3"
+      }
+    },
+    "aarch64": {
+      "sha256": "e4868bd52047f4211a3b1fe0da53b26ed9f3edd417af3895f3384a3950b6719f",
+      "bytes": 5250791,
+      "manifest_files": 84,
+      "build": {
+        "platform": "linux-aarch64",
+        "schema": 1,
+        "source_commits": {
+          "ssmcp": "52a531a59e9ec9236a76eafc0f4f068799e44b15",
+          "zdot": "e6b5feb98b05c59e0986624c0742dfe4a9187a2a",
+          "zfetch": "f19b278676206d76626dd01e4b89f7ad9ce9318f",
+          "zrc": "f4a0fe84c3499c00c5a01f1831e34fcbf5d5790c",
+          "zshard": "1cfa1a1eb761d14e2ccfd5381282b6ccd1491cff",
+          "ztty": "c4f8f48c9598284a589e609f25242b49ceabfea8"
+        },
+        "suite_version": "0.2.3"
+      }
+    }
+  },
+  "scope": "Both architecture bundles and manifests; native x86_64 installer, shell and graphical checks. ARM native execution is supplied by the formal release workflow.",
+  "graphical_checks": [
+    "visible window",
+    "keyboard command executed in preset zsh",
+    "first completion returned to a usable shell",
+    "actual component versions verified"
+  ],
+  "completion_cache_reused": true,
+  "private_display_cleanup": true,
+  "host_display_unchanged": true,
+  "ok": true,
+  "remaining_children": ""
+}

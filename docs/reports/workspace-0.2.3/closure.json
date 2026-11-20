@@ -1,0 +1,16 @@
+{
+  "schema": "oh-my-ztty.validation-closure.v1",
+  "source_tree": "50721d16333ae313449f88935b1827e05d8327fb",
+  "suite_test_count": 70,
+  "unit": {
+    "LoadState": "not-found",
+    "ActiveState": "inactive",
+    "SubState": "dead",
+    "MainPID": "0",
+    "ControlGroup": ""
+  },
+  "remaining_children": 0,
+  "host_display_unchanged": true,
+  "private_display_cleanup": true,
+  "ok": true
+}

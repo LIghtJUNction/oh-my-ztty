@@ -1,0 +1,99 @@
+{
+  "upgrade": {
+    "schema": "oh-my-ztty.installed-upgrade.v1",
+    "old_version": "0.2.1",
+    "new_version": "0.2.3",
+    "source_commit": "915db41a5791b906db72ef79f18cea6b658db521",
+    "checks": [
+      {
+        "name": "history-checkpoint",
+        "exit_code": 0,
+        "seconds": 0.11432635500386823
+      },
+      {
+        "name": "public-update",
+        "exit_code": 0,
+        "seconds": 4.824435046000872
+      },
+      {
+        "name": "config-refresh",
+        "exit_code": 0,
+        "seconds": 0.3144301150023239
+      },
+      {
+        "name": "profile-verification",
+        "exit_code": 0,
+        "seconds": 0.16496592600014992
+      },
+      {
+        "name": "doctor",
+        "exit_code": 0,
+        "seconds": 0.032232798999757506
+      },
+      {
+        "name": "profile-status",
+        "exit_code": 0,
+        "seconds": 0.016224606995820068
+      },
+      {
+        "name": "refresh-repeat",
+        "exit_code": 0,
+        "seconds": 0.11485090700443834
+      },
+      {
+        "name": "adopted-shell-after-completion-initialization",
+        "exit_code": 0,
+        "seconds": 0.3039688480057521
+      },
+      {
+        "name": "neovim-profile",
+        "exit_code": 0,
+        "seconds": 0.030522348009981215
+      }
+    ],
+    "verification_note": "The initial shell probe incorrectly expected lazy completion to be initialized at startup. The corrected probe invokes zshard complete, then checks registration and loaded source. Actual update and profile checks already passed.",
+    "manifest_verified": true,
+    "manifest_file_count": 84,
+    "current_target": "releases/0.2.3-linux-x86_64",
+    "installed_version": "0.2.3",
+    "preexisting_old_runtime_processes_still_running": 4,
+    "profile_verification_passed": true,
+    "ok": true
+  },
+  "profile": {
+    "passed": true,
+    "installed_version": "0.2.3",
+    "profile_version": "0.2.3",
+    "current_pointer_correct": true,
+    "managed_mapping_count": 21,
+    "preserved_anchors": [
+      "desktop_link",
+      "desktop_source",
+      "profile_manifest",
+      "terminal_preference"
+    ],
+    "captured_files": 30,
+    "unchanged_files": 28,
+    "changed_default_paths": [
+      "files/.config/nvim/lua/zrc/context.lua",
+      "files/.zshrc"
+    ],
+    "verified_default_update_count": 2,
+    "unexpected_change_count": 0,
+    "missing_path_count": 0,
+    "history": {
+      "shape_preserved": true,
+      "content_preserved": true,
+      "integrity": "unchanged",
+      "size_delta_bytes": 0,
+      "appended_bytes": 0
+    },
+    "default_snapshot": {
+      "present": true,
+      "version": "0.2.3",
+      "public_defaults_only": true,
+      "verified": true
+    },
+    "scope": "Private content and its hashes are excluded. History comparison uses a stable checkpoint immediately before installation."
+  }
+}

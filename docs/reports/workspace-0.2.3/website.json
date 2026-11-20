@@ -1,0 +1,39 @@
+{
+  "schema": "oh-my-ztty.website-verification.v1",
+  "url": "https://lightjunction.github.io/oh-my-ztty/",
+  "source_commit": "d2fa82b706c9f7c78c5d331a718e6f241f1fd276",
+  "deployment": "https://github.com/LIghtJUNction/oh-my-ztty/actions/runs/44685625981",
+  "heading": "A working terminal setup for Linux",
+  "desktop": {
+    "documentWidth": 1348,
+    "heading": "A working terminal setup for Linux",
+    "height": 936,
+    "width": 1363
+  },
+  "narrow": {
+    "documentWidth": 337,
+    "headingWidth": 295,
+    "height": 234,
+    "width": 340
+  },
+  "scope": "Live Chromium desktop and 400% zoom checks; narrow viewport is a desktop approximation, not a physical phone. New heading and copy observed, no document-level horizontal overflow. Browser zoom restored to 100%.",
+  "ok": true,
+  "documentation": {
+    "pages": 9,
+    "generated_files": 17,
+    "validated_local_links": 490,
+    "pr": 5
+  },
+  "screenshots": [
+    {
+      "file": "website.jpg",
+      "bytes": 93836,
+      "sha256": "025fec8ce31b6f817642d7fc18027bd69799f5e4abdd95a47875859150eb9250"
+    },
+    {
+      "file": "website-narrow.jpg",
+      "bytes": 10389,
+      "sha256": "66018e06e6c2bfb9d719ce3912d131c9da51ffb890bfd7c7b71539f03174149f"
+    }
+  ]
+}

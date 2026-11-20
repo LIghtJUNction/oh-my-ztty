@@ -1,0 +1,89 @@
+{
+  "schema": "oh-my-ztty.public-release.v1",
+  "version": "0.2.3",
+  "source_commit": "915db41a5791b906db72ef79f18cea6b658db521",
+  "source_tree": "50721d16333ae313449f88935b1827e05d8327fb",
+  "release_url": "https://github.com/LIghtJUNction/oh-my-ztty/releases/tag/v0.2.3",
+  "release_id": 452325630,
+  "assets": {
+    "install.sh": {
+      "sha256": "63357dcfc811c8e43657797b4f242c499cbd3b90d829fe5eb1926bfb74a2342b",
+      "bytes": 10917,
+      "url": "https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.3/install.sh",
+      "github_digest": "sha256:63357dcfc811c8e43657797b4f242c499cbd3b90d829fe5eb1926bfb74a2342b"
+    },
+    "install.sh.sha256": {
+      "sha256": "b0492a50a9f836b3b17a89adbabd7f6756e0a46804e30bf16b571fa2d53816bd",
+      "bytes": 77,
+      "url": "https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.3/install.sh.sha256",
+      "github_digest": "sha256:b0492a50a9f836b3b17a89adbabd7f6756e0a46804e30bf16b571fa2d53816bd"
+    },
+    "oh-my-ztty-0.2.3-linux-aarch64.tar.gz": {
+      "sha256": "8b0d7c8ff30f165e51e8dd5c1e65506fc57c382709aac7bb122cdc35e16a1da6",
+      "bytes": 5282585,
+      "url": "https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.3/oh-my-ztty-0.2.3-linux-aarch64.tar.gz",
+      "github_digest": "sha256:8b0d7c8ff30f165e51e8dd5c1e65506fc57c382709aac7bb122cdc35e16a1da6"
+    },
+    "oh-my-ztty-0.2.3-linux-aarch64.tar.gz.sha256": {
+      "sha256": "3df1849c5108b0dc32a50488a285b0463b4924406cf9d7294280bd6ec80919f4",
+      "bytes": 104,
+      "url": "https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.3/oh-my-ztty-0.2.3-linux-aarch64.tar.gz.sha256",
+      "github_digest": "sha256:3df1849c5108b0dc32a50488a285b0463b4924406cf9d7294280bd6ec80919f4"
+    },
+    "oh-my-ztty-0.2.3-linux-x86_64.tar.gz": {
+      "sha256": "58862acd3c4ce0584b60b00494b620336dd91b188ca9d8102f3cb867a99f1cef",
+      "bytes": 5487437,
+      "url": "https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.3/oh-my-ztty-0.2.3-linux-x86_64.tar.gz",
+      "github_digest": "sha256:58862acd3c4ce0584b60b00494b620336dd91b188ca9d8102f3cb867a99f1cef"
+    },
+    "oh-my-ztty-0.2.3-linux-x86_64.tar.gz.sha256": {
+      "sha256": "44626a77f79219a006ac986a1c7147175ac62042c09dfc9171600c85288a5fb7",
+      "bytes": 103,
+      "url": "https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.3/oh-my-ztty-0.2.3-linux-x86_64.tar.gz.sha256",
+      "github_digest": "sha256:44626a77f79219a006ac986a1c7147175ac62042c09dfc9171600c85288a5fb7"
+    }
+  },
+  "bundles": {
+    "x86_64": {
+      "manifest_files": 84,
+      "build": {
+        "platform": "linux-x86_64",
+        "schema": 1,
+        "source_commits": {
+          "ssmcp": "52a531a59e9ec9236a76eafc0f4f068799e44b15",
+          "zdot": "e6b5feb98b05c59e0986624c0742dfe4a9187a2a",
+          "zfetch": "f19b278676206d76626dd01e4b89f7ad9ce9318f",
+          "zrc": "f4a0fe84c3499c00c5a01f1831e34fcbf5d5790c",
+          "zshard": "1cfa1a1eb761d14e2ccfd5381282b6ccd1491cff",
+          "ztty": "c4f8f48c9598284a589e609f25242b49ceabfea8"
+        },
+        "suite_version": "0.2.3"
+      },
+      "candidate_comparison": {
+        "identical_archive": false,
+        "changed_files": []
+      }
+    },
+    "aarch64": {
+      "manifest_files": 84,
+      "build": {
+        "platform": "linux-aarch64",
+        "schema": 1,
+        "source_commits": {
+          "ssmcp": "52a531a59e9ec9236a76eafc0f4f068799e44b15",
+          "zdot": "e6b5feb98b05c59e0986624c0742dfe4a9187a2a",
+          "zfetch": "f19b278676206d76626dd01e4b89f7ad9ce9318f",
+          "zrc": "f4a0fe84c3499c00c5a01f1831e34fcbf5d5790c",
+          "zshard": "1cfa1a1eb761d14e2ccfd5381282b6ccd1491cff",
+          "ztty": "c4f8f48c9598284a589e609f25242b49ceabfea8"
+        },
+        "suite_version": "0.2.3"
+      },
+      "candidate_comparison": {
+        "identical_archive": false,
+        "changed_files": []
+      }
+    }
+  },
+  "ok": true
+}

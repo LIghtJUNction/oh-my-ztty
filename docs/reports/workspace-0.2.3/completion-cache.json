@@ -1,0 +1,105 @@
+{
+  "archive": "$WORKTREE/.cache/iteration-0.2.3/official/oh-my-ztty-0.2.3-linux-x86_64.tar.gz",
+  "archive_sha256": "58862acd3c4ce0584b60b00494b620336dd91b188ca9d8102f3cb867a99f1cef",
+  "scope": "fresh official install in private HOME; explicit zshard complete; no live AI or graphical session",
+  "install": {
+    "returncode": 0,
+    "elapsed_seconds": 0.950665
+  },
+  "configuration": {
+    "init_returncode": 0,
+    "apply_returncode": 0
+  },
+  "installer_dump": {
+    "sha256": "5084033b4ec0b4121f516a1caab74f54b0713a2d32116ed9063955304c93cc47",
+    "size": 100268,
+    "mtime_ns": 1795155047811696000,
+    "inode": 184962180
+  },
+  "private_marker_note": "Appended an inert global marker only to the disposable private dump, to prove it was sourced; unchanged hash/mtime/inode also proves no rebuild.",
+  "marked_dump": {
+    "sha256": "49e62424561df6a292b72de8ad56bee26470a4a40c15cf6fa086a2629ba55328",
+    "size": 100305,
+    "mtime_ns": 1795155048045700400,
+    "inode": 184962180
+  },
+  "cases": [
+    {
+      "name": "ordinary_zsh_first",
+      "returncode": 0,
+      "process_seconds": 0.023314,
+      "values": {
+        "ROOT": "$WORKTREE/.cache/iteration-0.2.3/adopted-cache-probe-lyotv0d5/home/.local/share/oh-my-ztty/releases/0.2.3-linux-x86_64",
+        "CACHE": "$WORKTREE/.cache/iteration-0.2.3/adopted-cache-probe-lyotv0d5/home/.cache/oh-my-ztty/zshard/0.2.3-linux-x86_64",
+        "READY_BEFORE": "0",
+        "COMPLETE_STATUS": "0",
+        "COMPLETE_SECONDS": "0.015750",
+        "READY_AFTER": "1",
+        "CACHE_MARKER": "1",
+        "OMZTTY_COMPLETER": "_omztty",
+        "FPATH": "$WORKTREE/.cache/iteration-0.2.3/adopted-cache-probe-lyotv0d5/home/.local/share/oh-my-ztty/releases/0.2.3-linux-x86_64/components/zshard/completions|$WORKTREE/.cache/iteration-0.2.3/adopted-cache-probe-lyotv0d5/home/.config/oh-my-ztty/completions|$WORKTREE/.cache/iteration-0.2.3/adopted-cache-probe-lyotv0d5/home/.local/share/oh-my-ztty/releases/0.2.3-linux-x86_64/packaging/completions|/usr/local/share/zsh/site-functions|/usr/share/zsh/site-functions|/usr/share/zsh/functions/Calendar|/usr/share/zsh/functions/Chpwd|/usr/share/zsh/functions/Completion|/usr/share/zsh/functions/Completion/Base|/usr/share/zsh/functions/Completion/Linux|/usr/share/zsh/functions/Completion/Unix|/usr/share/zsh/functions/Completion/X|/usr/share/zsh/functions/Completion/Zsh|/usr/share/zsh/functions/Exceptions|/usr/share/zsh/functions/MIME|/usr/share/zsh/functions/Math|/usr/share/zsh/functions/Misc|/usr/share/zsh/functions/Newuser|/usr/share/zsh/functions/Prompts|/usr/share/zsh/functions/TCP|/usr/share/zsh/functions/VCS_Info|/usr/share/zsh/functions/VCS_Info/Backends|/usr/share/zsh/functions/Zftp|/usr/share/zsh/functions/Zle"
+      },
+      "stderr": "",
+      "dump_unchanged": true,
+      "dump": {
+        "sha256": "49e62424561df6a292b72de8ad56bee26470a4a40c15cf6fa086a2629ba55328",
+        "size": 100305,
+        "mtime_ns": 1795155048045700400,
+        "inode": 184962180
+      }
+    },
+    {
+      "name": "launcher_first",
+      "returncode": 0,
+      "process_seconds": 0.021898,
+      "values": {
+        "ROOT": "$WORKTREE/.cache/iteration-0.2.3/adopted-cache-probe-lyotv0d5/home/.local/share/oh-my-ztty/releases/0.2.3-linux-x86_64",
+        "CACHE": "$WORKTREE/.cache/iteration-0.2.3/adopted-cache-probe-lyotv0d5/home/.cache/oh-my-ztty/zshard/0.2.3-linux-x86_64",
+        "READY_BEFORE": "0",
+        "COMPLETE_STATUS": "0",
+        "COMPLETE_SECONDS": "0.014946",
+        "READY_AFTER": "1",
+        "CACHE_MARKER": "1",
+        "OMZTTY_COMPLETER": "_omztty",
+        "FPATH": "$WORKTREE/.cache/iteration-0.2.3/adopted-cache-probe-lyotv0d5/home/.local/share/oh-my-ztty/releases/0.2.3-linux-x86_64/components/zshard/completions|$WORKTREE/.cache/iteration-0.2.3/adopted-cache-probe-lyotv0d5/home/.config/oh-my-ztty/completions|$WORKTREE/.cache/iteration-0.2.3/adopted-cache-probe-lyotv0d5/home/.local/share/oh-my-ztty/releases/0.2.3-linux-x86_64/packaging/completions|/usr/local/share/zsh/site-functions|/usr/share/zsh/site-functions|/usr/share/zsh/functions/Calendar|/usr/share/zsh/functions/Chpwd|/usr/share/zsh/functions/Completion|/usr/share/zsh/functions/Completion/Base|/usr/share/zsh/functions/Completion/Linux|/usr/share/zsh/functions/Completion/Unix|/usr/share/zsh/functions/Completion/X|/usr/share/zsh/functions/Completion/Zsh|/usr/share/zsh/functions/Exceptions|/usr/share/zsh/functions/MIME|/usr/share/zsh/functions/Math|/usr/share/zsh/functions/Misc|/usr/share/zsh/functions/Newuser|/usr/share/zsh/functions/Prompts|/usr/share/zsh/functions/TCP|/usr/share/zsh/functions/VCS_Info|/usr/share/zsh/functions/VCS_Info/Backends|/usr/share/zsh/functions/Zftp|/usr/share/zsh/functions/Zle"
+      },
+      "stderr": "",
+      "dump_unchanged": true,
+      "dump": {
+        "sha256": "49e62424561df6a292b72de8ad56bee26470a4a40c15cf6fa086a2629ba55328",
+        "size": 100305,
+        "mtime_ns": 1795155048045700400,
+        "inode": 184962180
+      }
+    },
+    {
+      "name": "ordinary_zsh_second",
+      "returncode": 0,
+      "process_seconds": 0.019065,
+      "values": {
+        "ROOT": "$WORKTREE/.cache/iteration-0.2.3/adopted-cache-probe-lyotv0d5/home/.local/share/oh-my-ztty/releases/0.2.3-linux-x86_64",
+        "CACHE": "$WORKTREE/.cache/iteration-0.2.3/adopted-cache-probe-lyotv0d5/home/.cache/oh-my-ztty/zshard/0.2.3-linux-x86_64",
+        "READY_BEFORE": "0",
+        "COMPLETE_STATUS": "0",
+        "COMPLETE_SECONDS": "0.014400",
+        "READY_AFTER": "1",
+        "CACHE_MARKER": "1",
+        "OMZTTY_COMPLETER": "_omztty",
+        "FPATH": "$WORKTREE/.cache/iteration-0.2.3/adopted-cache-probe-lyotv0d5/home/.local/share/oh-my-ztty/releases/0.2.3-linux-x86_64/components/zshard/completions|$WORKTREE/.cache/iteration-0.2.3/adopted-cache-probe-lyotv0d5/home/.config/oh-my-ztty/completions|$WORKTREE/.cache/iteration-0.2.3/adopted-cache-probe-lyotv0d5/home/.local/share/oh-my-ztty/releases/0.2.3-linux-x86_64/packaging/completions|/usr/local/share/zsh/site-functions|/usr/share/zsh/site-functions|/usr/share/zsh/functions/Calendar|/usr/share/zsh/functions/Chpwd|/usr/share/zsh/functions/Completion|/usr/share/zsh/functions/Completion/Base|/usr/share/zsh/functions/Completion/Linux|/usr/share/zsh/functions/Completion/Unix|/usr/share/zsh/functions/Completion/X|/usr/share/zsh/functions/Completion/Zsh|/usr/share/zsh/functions/Exceptions|/usr/share/zsh/functions/MIME|/usr/share/zsh/functions/Math|/usr/share/zsh/functions/Misc|/usr/share/zsh/functions/Newuser|/usr/share/zsh/functions/Prompts|/usr/share/zsh/functions/TCP|/usr/share/zsh/functions/VCS_Info|/usr/share/zsh/functions/VCS_Info/Backends|/usr/share/zsh/functions/Zftp|/usr/share/zsh/functions/Zle"
+      },
+      "stderr": "",
+      "dump_unchanged": true,
+      "dump": {
+        "sha256": "49e62424561df6a292b72de8ad56bee26470a4a40c15cf6fa086a2629ba55328",
+        "size": 100305,
+        "mtime_ns": 1795155048045700400,
+        "inode": 184962180
+      }
+    }
+  ],
+  "pass": true,
+  "same_physical_root": true,
+  "same_cache_path": true,
+  "same_fpath": true,
+  "private_home_removed": true
+}

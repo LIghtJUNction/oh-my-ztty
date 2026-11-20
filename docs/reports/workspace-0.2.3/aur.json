@@ -1,0 +1,107 @@
+{
+  "schema": 1,
+  "verified_at_utc": "2026-11-20T06:07:28.958607+00:00",
+  "suite": {
+    "version": "0.2.3",
+    "source_commit": "915db41a5791b906db72ef79f18cea6b658db521",
+    "source_tree": "50721d16333ae313449f88935b1827e05d8327fb",
+    "release_url": "https://github.com/LIghtJUNction/oh-my-ztty/releases/tag/v0.2.3",
+    "github_actions_run": "44684467902",
+    "assets": [
+      {
+        "name": "oh-my-ztty-0.2.3-linux-x86_64.tar.gz",
+        "url": "https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.3/oh-my-ztty-0.2.3-linux-x86_64.tar.gz",
+        "sha256": "58862acd3c4ce0584b60b00494b620336dd91b188ca9d8102f3cb867a99f1cef"
+      },
+      {
+        "name": "oh-my-ztty-0.2.3-linux-aarch64.tar.gz",
+        "url": "https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.3/oh-my-ztty-0.2.3-linux-aarch64.tar.gz",
+        "sha256": "8b0d7c8ff30f165e51e8dd5c1e65506fc57c382709aac7bb122cdc35e16a1da6"
+      }
+    ],
+    "source_cache_initially_empty": true
+  },
+  "aur": {
+    "name": "oh-my-ztty-bin",
+    "version": "0.2.3-1",
+    "maintainer": "lightjunction",
+    "package_url": "https://aur.archlinux.org/packages/oh-my-ztty-bin",
+    "git_url": "https://aur.archlinux.org/oh-my-ztty-bin.git",
+    "git_commit": "5ca2747d2e63c26defa5b27e2b35333f4027d0d1",
+    "rpc_url": "https://aur.archlinux.org/rpc/v5/info?arg%5B%5D=oh-my-ztty-bin",
+    "rpc_resultcount": 1,
+    "rpc_package_id": 2358814,
+    "anonymous_https_clone_matches": true,
+    "working_tree_clean": true
+  },
+  "builds": [
+    {
+      "arch": "x86_64",
+      "exit_code": 0,
+      "duration_seconds": 6.49,
+      "source_cache_initially_empty": true,
+      "download_url": "https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.3/oh-my-ztty-0.2.3-linux-x86_64.tar.gz",
+      "source_sha256": "58862acd3c4ce0584b60b00494b620336dd91b188ca9d8102f3cb867a99f1cef",
+      "package": "oh-my-ztty-bin-0.2.3-1-x86_64.pkg.tar.zst",
+      "package_sha256": "e0cc8018d06114a5d74f8d479c011caf5926589ad82b1953747708fe586ddf52"
+    },
+    {
+      "arch": "aarch64",
+      "exit_code": 0,
+      "duration_seconds": 6.43,
+      "source_cache_initially_empty": true,
+      "download_url": "https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.3/oh-my-ztty-0.2.3-linux-aarch64.tar.gz",
+      "source_sha256": "8b0d7c8ff30f165e51e8dd5c1e65506fc57c382709aac7bb122cdc35e16a1da6",
+      "package": "oh-my-ztty-bin-0.2.3-1-aarch64.pkg.tar.zst",
+      "package_sha256": "61dc7d896ffe48c4e5a7f5806f7838423b76d5b2023ebef48d6f4b8a22a886fb"
+    }
+  ],
+  "lifecycle": {
+    "schema": 1,
+    "package": "oh-my-ztty-bin-0.2.3-1-x86_64.pkg.tar.zst",
+    "sha256": "e0cc8018d06114a5d74f8d479c011caf5926589ad82b1953747708fe586ddf52",
+    "manifest_files": 84,
+    "checks": [
+      "usr-only package layout",
+      "relative launcher symlink",
+      "upstream manifest retained",
+      "native doctor",
+      "preset shell",
+      "packaged completion loaded",
+      "pacman-managed update/uninstall refusal",
+      "config adoption and ordinary zsh bootstrap",
+      "refresh preserves personal edits",
+      "remove restores original configuration",
+      "runtime files unchanged",
+      "valid desktop entry"
+    ],
+    "host_installation_changed": false,
+    "ok": true
+  },
+  "lint": {
+    "errors": 0,
+    "targets": 3,
+    "warnings": [
+      "Upstream static zdot/zfetch binaries lack PIE/FULL RELRO.",
+      "Upstream ztty is intentionally unstripped to preserve release MANIFEST.",
+      "Architecture-specific source arrays are intentional.",
+      "Shell helper dependencies are used at runtime although namcap cannot infer them.",
+      "ARM loader warning comes from package inspection on the x86_64 host."
+    ]
+  },
+  "layout": {
+    "runtime": "/usr/lib/oh-my-ztty",
+    "global_commands": [
+      "/usr/bin/omztty"
+    ],
+    "launcher_is_relative_symlink": true,
+    "package_manager_marker": "pacman",
+    "post_install_user_home_writes": false,
+    "package_self_update_enabled": false
+  },
+  "coverage": {
+    "x86_64": "Native extracted-package lifecycle and completion loading verified.",
+    "aarch64": "Package construction and all 84 upstream file checksums verified locally; native ARM acceptance is covered by upstream workflow 44684467902.",
+    "system_installation": "No host pacman installation or removal performed."
+  }
+}

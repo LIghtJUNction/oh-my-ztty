@@ -1,0 +1,26 @@
+{
+  "schema": "oh-my-ztty.figures.v1",
+  "files": [
+    {
+      "file": "terminal.png",
+      "source": "Local graphical acceptance of the exact v0.2.3 release tree",
+      "bytes": 24123,
+      "sha256": "79a00ba49ba001d0df3dccdddcc81ddf170c5e5541b3fe496733222729bd8db7",
+      "git_blob": "96ef76c751a0f0dd70a457423408aaf018a24302"
+    },
+    {
+      "file": "website.jpg",
+      "source": "Live deployed website; original browser JPEG bytes",
+      "bytes": 93836,
+      "sha256": "025fec8ce31b6f817642d7fc18027bd69799f5e4abdd95a47875859150eb9250",
+      "git_blob": "7afb8847abd21c8a768980332ab5dbdc9fcf9de8"
+    },
+    {
+      "file": "website-narrow.jpg",
+      "source": "Live desktop browser at 400% zoom; original browser JPEG bytes",
+      "bytes": 10389,
+      "sha256": "66018e06e6c2bfb9d719ce3912d131c9da51ffb890bfd7c7b71539f03174149f",
+      "git_blob": "14fc586c75615e07101d3c6031774a485b3a86aa"
+    }
+  ]
+}
