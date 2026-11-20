@@ -1,0 +1,708 @@
+{
+  "schema": "oh-my-ztty.release-verification.v1",
+  "version": "0.2.5",
+  "date": "2026-11-20",
+  "source_commit": "74e492c88a3ba8b6b59802a0fad3e74cf73712c7",
+  "tag": "v0.2.5",
+  "native_completion": {
+    "command_count": 33,
+    "commands": [
+      "omztty",
+      "ztty",
+      "zdot",
+      "zfetch",
+      "zshard",
+      "zai",
+      "ssmcp",
+      "codex",
+      "claude",
+      "gemini",
+      "opencode",
+      "pi",
+      "amp",
+      "go",
+      "node",
+      "npx",
+      "yarn",
+      "rustc",
+      "rustup",
+      "cmake",
+      "zcalld",
+      "ssmcpd",
+      "ztype",
+      "zuse",
+      "zmcl",
+      "onim",
+      "lmm",
+      "mechrevo-console",
+      "wgt",
+      "douyin",
+      "lightjunction",
+      "coolapk",
+      "binance-cli"
+    ],
+    "corresponding_application_execution_during_test": false,
+    "completion_test_groups": 23
+  },
+  "suite_check": {
+    "command": "make check",
+    "exit_code": 0,
+    "tests": 87,
+    "seconds": 27.604,
+    "skipped": 0
+  },
+  "documentation_site": {
+    "pages": 9,
+    "files": 17,
+    "local_links_checked": 492
+  },
+  "local_bundle_smoke": {
+    "exit_code": 0,
+    "seconds": 1.535,
+    "coverage": [
+      "install",
+      "repeat-install",
+      "doctor",
+      "component-commands",
+      "dotfiles-adoption",
+      "restore",
+      "uninstall"
+    ]
+  },
+  "formal_release": {
+    "run_id": 44703223337,
+    "release_id": 452440359,
+    "status": "completed",
+    "conclusion": "success",
+    "source_commit": "74e492c88a3ba8b6b59802a0fad3e74cf73712c7",
+    "url": "https://github.com/LIghtJUNction/oh-my-ztty/releases/tag/v0.2.5",
+    "published_at": "2026-11-20T08:34:49Z",
+    "archives": [
+      {
+        "arch": "x86_64",
+        "name": "oh-my-ztty-0.2.5-linux-x86_64.tar.gz",
+        "bytes": 5575647,
+        "sha256": "79d58efac183069e9d50701374fc76dc9938d96d69c9a58d35252a629129a388"
+      },
+      {
+        "arch": "aarch64",
+        "name": "oh-my-ztty-0.2.5-linux-aarch64.tar.gz",
+        "bytes": 5371947,
+        "sha256": "40cdf0fe1cb714d141fcab4328f98f8d73a789a485b112ed6a95cb36dcb6f3b5"
+      }
+    ]
+  },
+  "component_completion_priority_fix": {
+    "repository": "LIghtJUNction/zshard",
+    "version": "0.2.1",
+    "commit": "f7842f70e439c4abda2a46698f0ebe067d38b297"
+  },
+  "binance_cli": {
+    "version": "2.3.0",
+    "help_nodes": 916,
+    "groups": 39,
+    "leaf_commands": 877,
+    "account_data_read": false,
+    "api_called": false
+  },
+  "aur": {
+    "ok": true,
+    "remote_git_verified": true,
+    "remote_files_match": true,
+    "aur_rpc_current": true,
+    "working_tree_clean": true,
+    "installed_package": "oh-my-ztty-bin 0.2.5-1",
+    "manifest_files_per_arch": 119,
+    "completion_files_per_arch": 36,
+    "isolated_lifecycle_checks": 12,
+    "plain_zsh_cases": 15,
+    "plain_zsh_passed": 15,
+    "verified_global_origins": 12,
+    "runtime_applications_executed_during_Tab": false,
+    "pacman_integrity_exit_code": 0,
+    "arm_runtime_execution_tested": false,
+    "aur_commit": "f04c248a8a8c2d55c4031ed0a0df2e6c09f60f3e",
+    "url": "https://aur.archlinux.org/packages/oh-my-ztty-bin"
+  },
+  "user_install": {
+    "status": "installed_verified",
+    "previous_version": "0.2.3",
+    "installer_exit_code": 0,
+    "protected_unchanged": true,
+    "version_output": "oh-my-ztty 0.2.5",
+    "doctor_exit_code": 0,
+    "manifest_files_verified": 119,
+    "source_files_compared": 51
+  },
+  "user_completion": {
+    "schema": "oh-my-ztty.user-completion.v1",
+    "runtime_version": "0.2.5",
+    "method": "Installed runtime plus actual user configuration in a private ZLE PTY; Tab readback only; fixture executables trap unexpected calls.",
+    "checks": [
+      {
+        "input": "ssmcp --theme no",
+        "actual_words": [
+          "ssmcp",
+          "--theme",
+          "nord"
+        ],
+        "expected_words": [
+          "ssmcp",
+          "--theme",
+          "nord"
+        ],
+        "pass": true
+      },
+      {
+        "input": "ssmcp sessions cr",
+        "actual_words": [
+          "ssmcp",
+          "sessions",
+          "create"
+        ],
+        "expected_words": [
+          "ssmcp",
+          "sessions",
+          "create"
+        ],
+        "pass": true
+      },
+      {
+        "input": "ssmcp --context-root file",
+        "actual_words": [
+          "ssmcp",
+          "--context-root",
+          "file"
+        ],
+        "expected_words": [
+          "ssmcp",
+          "--context-root",
+          "file"
+        ],
+        "pass": true
+      },
+      {
+        "input": "codex mcp ad",
+        "actual_words": [
+          "codex",
+          "mcp",
+          "add"
+        ],
+        "expected_words": [
+          "codex",
+          "mcp",
+          "add"
+        ],
+        "pass": true
+      },
+      {
+        "input": "codex exec --sandbox work",
+        "actual_words": [
+          "codex",
+          "exec",
+          "--sandbox",
+          "workspace-write"
+        ],
+        "expected_words": [
+          "codex",
+          "exec",
+          "--sandbox",
+          "workspace-write"
+        ],
+        "pass": true
+      },
+      {
+        "input": "claude --permission-mode pl",
+        "actual_words": [
+          "claude",
+          "--permission-mode",
+          "plan"
+        ],
+        "expected_words": [
+          "claude",
+          "--permission-mode",
+          "plan"
+        ],
+        "pass": true
+      },
+      {
+        "input": "claude --output-format str",
+        "actual_words": [
+          "claude",
+          "--output-format",
+          "stream-json"
+        ],
+        "expected_words": [
+          "claude",
+          "--output-format",
+          "stream-json"
+        ],
+        "pass": true
+      },
+      {
+        "input": "gemini mcp ad",
+        "actual_words": [
+          "gemini",
+          "mcp",
+          "add"
+        ],
+        "expected_words": [
+          "gemini",
+          "mcp",
+          "add"
+        ],
+        "pass": true
+      },
+      {
+        "input": "gemini --output-format str",
+        "actual_words": [
+          "gemini",
+          "--output-format",
+          "stream-json"
+        ],
+        "expected_words": [
+          "gemini",
+          "--output-format",
+          "stream-json"
+        ],
+        "pass": true
+      },
+      {
+        "input": "rustup toolchain ins",
+        "actual_words": [
+          "rustup",
+          "toolchain",
+          "install"
+        ],
+        "expected_words": [
+          "rustup",
+          "toolchain",
+          "install"
+        ],
+        "pass": true
+      },
+      {
+        "input": "rustup toolchain install stable --profile min",
+        "actual_words": [
+          "rustup",
+          "toolchain",
+          "install",
+          "stable",
+          "--profile",
+          "minimal"
+        ],
+        "expected_words": [
+          "rustup",
+          "toolchain",
+          "install",
+          "stable",
+          "--profile",
+          "minimal"
+        ],
+        "pass": true
+      }
+    ],
+    "personal_completion_preserved": true,
+    "application_invocations": 0,
+    "personal_completion_selected": true,
+    "priority_indices": {
+      "personal": 3,
+      "suite": 4,
+      "framework": [
+        26
+      ]
+    },
+    "personal_precedes_suite_and_framework": true,
+    "priority_probe_passed": true,
+    "ok": true
+  },
+  "graphical_completion": {
+    "schema": "oh-my-ztty.completion-graphical.v1",
+    "runtime_version": "0.2.5",
+    "source": "installed release",
+    "method": "Real ztty x11 window on an owned Xvfb; private HOME and copied completion inputs; ssmcp executable replaced by an invocation trap; ZLE buffer readback after actual Tab.",
+    "input_files": {
+      "config/zsh/.zshrc": "37b7fe9049881003d38b59567e31fb4a605aea214bc6078d45208906cd492598",
+      "config/zsh/completion-paths.zsh": "ba72111900b5bb0e32c137edbac19e04ccfb631297c1341ffeeeab7ff768e29a",
+      "packaging/completions/_ssmcp": "24b6be6c2a8f1a8e44cd4019b6d18bbde4143850328cadce3cba9e3f76ca93e6",
+      "components/zshard/lib/interactive.zsh": "ff5ddc202a24028e0c24c640f43d154e007e98a393f2186b57cb4e53742acf3f"
+    },
+    "host_display_unchanged": true,
+    "cleanup_complete": true,
+    "buffer_assertion": {
+      "input": "ssmcp --theme no<Tab>",
+      "buffer": "ssmcp --theme nord ",
+      "completion_ready": "1"
+    },
+    "menu_input": "ssmcp --theme <Tab>",
+    "screenshot": "ssmcp-native-completion.png",
+    "screenshot_bytes": 15053,
+    "ssmcp_invocations": 0,
+    "ok": true
+  },
+  "startup": {
+    "schema": "oh-my-ztty.startup-isolated.v1",
+    "created_utc": "2026-11-20T08:46:22.042414+00:00",
+    "method": "Blocking waitpid process wall time, warm cache, isolated HOME, zsh interactive -c 'exit 0'; suite includes launcher and preset. No prompt rendering, Tab or network. Old/new/vanilla measured in one seeded interleaved run.",
+    "warmups_per_case": 3,
+    "samples_per_case": 21,
+    "random_seed": 20261120,
+    "loadavg_before": [
+      3.6396484375,
+      6.95361328125,
+      7.9560546875
+    ],
+    "results": {
+      "vanilla_zsh": {
+        "median_ms": 6.207571,
+        "p95_ms": 12.672868,
+        "min_ms": 4.907464,
+        "max_ms": 13.221468,
+        "raw_ms": [
+          5.207253,
+          5.638606,
+          5.808542,
+          6.059518,
+          5.17434,
+          6.207571,
+          5.660609,
+          4.907464,
+          6.201173,
+          11.375887,
+          12.672868,
+          5.429372,
+          10.244906,
+          13.221468,
+          10.683028,
+          11.956349,
+          12.603377,
+          6.156801,
+          11.563066,
+          12.592899,
+          11.131272
+        ]
+      },
+      "installed_suite_0.2.3": {
+        "median_ms": 10.366392,
+        "p95_ms": 14.187181,
+        "min_ms": 5.746526,
+        "max_ms": 14.359453,
+        "raw_ms": [
+          6.534535,
+          6.97903,
+          7.076067,
+          7.449025,
+          7.1907,
+          5.746526,
+          5.775784,
+          10.366392,
+          11.712709,
+          12.311438,
+          11.86774,
+          11.252471,
+          9.344746,
+          6.141884,
+          13.727521,
+          14.359453,
+          14.187181,
+          6.1642,
+          13.395463,
+          11.20364,
+          10.479182
+        ]
+      },
+      "installed_suite_0.2.5": {
+        "median_ms": 10.793355,
+        "p95_ms": 15.170309,
+        "min_ms": 4.898142,
+        "max_ms": 15.572661,
+        "raw_ms": [
+          6.707185,
+          6.248115,
+          7.067808,
+          5.302714,
+          7.190252,
+          5.905407,
+          5.68827,
+          4.898142,
+          11.469981,
+          12.842512,
+          12.402758,
+          11.511801,
+          12.294494,
+          5.278926,
+          14.509842,
+          15.170309,
+          13.959671,
+          11.08265,
+          15.572661,
+          10.793355,
+          6.786552
+        ]
+      }
+    },
+    "sample_order": [
+      {
+        "case": "installed_suite_0.2.3",
+        "ms": 6.534535
+      },
+      {
+        "case": "installed_suite_0.2.5",
+        "ms": 6.707185
+      },
+      {
+        "case": "vanilla_zsh",
+        "ms": 5.207253
+      },
+      {
+        "case": "installed_suite_0.2.3",
+        "ms": 6.97903
+      },
+      {
+        "case": "installed_suite_0.2.3",
+        "ms": 7.076067
+      },
+      {
+        "case": "installed_suite_0.2.5",
+        "ms": 6.248115
+      },
+      {
+        "case": "vanilla_zsh",
+        "ms": 5.638606
+      },
+      {
+        "case": "installed_suite_0.2.3",
+        "ms": 7.449025
+      },
+      {
+        "case": "installed_suite_0.2.5",
+        "ms": 7.067808
+      },
+      {
+        "case": "installed_suite_0.2.5",
+        "ms": 5.302714
+      },
+      {
+        "case": "vanilla_zsh",
+        "ms": 5.808542
+      },
+      {
+        "case": "vanilla_zsh",
+        "ms": 6.059518
+      },
+      {
+        "case": "installed_suite_0.2.3",
+        "ms": 7.1907
+      },
+      {
+        "case": "installed_suite_0.2.3",
+        "ms": 5.746526
+      },
+      {
+        "case": "vanilla_zsh",
+        "ms": 5.17434
+      },
+      {
+        "case": "installed_suite_0.2.5",
+        "ms": 7.190252
+      },
+      {
+        "case": "vanilla_zsh",
+        "ms": 6.207571
+      },
+      {
+        "case": "installed_suite_0.2.5",
+        "ms": 5.905407
+      },
+      {
+        "case": "installed_suite_0.2.3",
+        "ms": 5.775784
+      },
+      {
+        "case": "vanilla_zsh",
+        "ms": 5.660609
+      },
+      {
+        "case": "installed_suite_0.2.5",
+        "ms": 5.68827
+      },
+      {
+        "case": "vanilla_zsh",
+        "ms": 4.907464
+      },
+      {
+        "case": "installed_suite_0.2.5",
+        "ms": 4.898142
+      },
+      {
+        "case": "vanilla_zsh",
+        "ms": 6.201173
+      },
+      {
+        "case": "installed_suite_0.2.3",
+        "ms": 10.366392
+      },
+      {
+        "case": "installed_suite_0.2.5",
+        "ms": 11.469981
+      },
+      {
+        "case": "installed_suite_0.2.3",
+        "ms": 11.712709
+      },
+      {
+        "case": "vanilla_zsh",
+        "ms": 11.375887
+      },
+      {
+        "case": "vanilla_zsh",
+        "ms": 12.672868
+      },
+      {
+        "case": "installed_suite_0.2.5",
+        "ms": 12.842512
+      },
+      {
+        "case": "installed_suite_0.2.5",
+        "ms": 12.402758
+      },
+      {
+        "case": "installed_suite_0.2.5",
+        "ms": 11.511801
+      },
+      {
+        "case": "installed_suite_0.2.5",
+        "ms": 12.294494
+      },
+      {
+        "case": "installed_suite_0.2.3",
+        "ms": 12.311438
+      },
+      {
+        "case": "installed_suite_0.2.3",
+        "ms": 11.86774
+      },
+      {
+        "case": "installed_suite_0.2.3",
+        "ms": 11.252471
+      },
+      {
+        "case": "installed_suite_0.2.3",
+        "ms": 9.344746
+      },
+      {
+        "case": "vanilla_zsh",
+        "ms": 5.429372
+      },
+      {
+        "case": "installed_suite_0.2.3",
+        "ms": 6.141884
+      },
+      {
+        "case": "installed_suite_0.2.5",
+        "ms": 5.278926
+      },
+      {
+        "case": "vanilla_zsh",
+        "ms": 10.244906
+      },
+      {
+        "case": "installed_suite_0.2.5",
+        "ms": 14.509842
+      },
+      {
+        "case": "installed_suite_0.2.3",
+        "ms": 13.727521
+      },
+      {
+        "case": "installed_suite_0.2.3",
+        "ms": 14.359453
+      },
+      {
+        "case": "vanilla_zsh",
+        "ms": 13.221468
+      },
+      {
+        "case": "installed_suite_0.2.5",
+        "ms": 15.170309
+      },
+      {
+        "case": "installed_suite_0.2.5",
+        "ms": 13.959671
+      },
+      {
+        "case": "installed_suite_0.2.5",
+        "ms": 11.08265
+      },
+      {
+        "case": "installed_suite_0.2.3",
+        "ms": 14.187181
+      },
+      {
+        "case": "installed_suite_0.2.5",
+        "ms": 15.572661
+      },
+      {
+        "case": "vanilla_zsh",
+        "ms": 10.683028
+      },
+      {
+        "case": "vanilla_zsh",
+        "ms": 11.956349
+      },
+      {
+        "case": "vanilla_zsh",
+        "ms": 12.603377
+      },
+      {
+        "case": "installed_suite_0.2.5",
+        "ms": 10.793355
+      },
+      {
+        "case": "installed_suite_0.2.5",
+        "ms": 6.786552
+      },
+      {
+        "case": "vanilla_zsh",
+        "ms": 6.156801
+      },
+      {
+        "case": "installed_suite_0.2.3",
+        "ms": 6.1642
+      },
+      {
+        "case": "installed_suite_0.2.3",
+        "ms": 13.395463
+      },
+      {
+        "case": "vanilla_zsh",
+        "ms": 11.563066
+      },
+      {
+        "case": "vanilla_zsh",
+        "ms": 12.592899
+      },
+      {
+        "case": "vanilla_zsh",
+        "ms": 11.131272
+      },
+      {
+        "case": "installed_suite_0.2.3",
+        "ms": 11.20364
+      },
+      {
+        "case": "installed_suite_0.2.3",
+        "ms": 10.479182
+      }
+    ],
+    "limitations": "Single developer machine under current shared load; warm startup only, no interactive latency or general performance claim.",
+    "loadavg_after": [
+      3.6396484375,
+      6.95361328125,
+      7.9560546875
+    ],
+    "runtime_version": "0.2.5",
+    "finished_utc": "2026-11-20T08:46:22.700924+00:00",
+    "protocol_change_from_prior_baseline": "All three current cases explicitly run -i -c exit 0. Historical baseline used bare exit; compare the current interleaved old/new cases only, without inferring an improvement from the historical baseline."
+  }
+}
