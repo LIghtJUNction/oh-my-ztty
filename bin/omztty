@@ -103,6 +103,10 @@ case "$cmd" in
         printf 'No connection or background service was started.\n'
         exit "$failed" ;;
     update)
+        if [ -f "$root/PACKAGE_MANAGER" ]; then
+            printf 'This installation is managed by pacman.\nUpdate with: yay -Syu oh-my-ztty-bin\n' >&2
+            exit 2
+        fi
         for option in "$@"; do
             case "$option" in
                 --desktop|--no-desktop) ;;
@@ -121,6 +125,10 @@ case "$cmd" in
         [ -f "$base/.owner" ] || { printf 'Update requires an installed suite\n' >&2; exit 1; }
         XDG_DATA_HOME=$(dirname -- "$base") OMZTTY_BIN_DIR=$(cat "$base/.bin-dir") sh "$tmp/install.sh" "$@" ;;
     uninstall)
+        if [ -f "$root/PACKAGE_MANAGER" ]; then
+            printf 'This installation is managed by pacman.\nRemove with: sudo pacman -Rns oh-my-ztty-bin\n' >&2
+            exit 2
+        fi
         [ "$#" -eq 0 ] || { printf 'usage: omztty uninstall\n' >&2; exit 2; }
         base=$(CDPATH= cd -- "$root/../.." && pwd -P)
         exec sh "$root/uninstall.sh" --root "$base" ;;
