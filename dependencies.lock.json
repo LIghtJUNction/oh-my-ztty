@@ -1,12 +1,12 @@
 {
   "schema": 2,
-  "updated_at": "2026-11-20T19:18:48+00:00",
+  "updated_at": "2026-11-20T19:47:51+00:00",
   "components": {
     "ztty": {
       "repository": "https://github.com/LIghtJUNction/ztty.git",
       "branch": "main",
-      "commit": "be29c6763d3f63832f77c21746d7d62aa70e7d62",
-      "observed_at": "2026-11-20T19:18:38+00:00"
+      "commit": "c7c2a3e887a2f132f3e1e3d9e18cc0ebc16bae25",
+      "observed_at": "2026-11-20T19:47:50+00:00"
     },
     "ssmcp": {
       "repository": "https://github.com/LIghtJUNction/ssmcp.git",
