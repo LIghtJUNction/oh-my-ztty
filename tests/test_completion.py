@@ -166,6 +166,20 @@ class InteractiveCompletion(unittest.TestCase):
             "omztty ztty plugin ch": "omztty ztty plugin check",
         })
 
+    def test_preset_terminal_has_no_control_commands(self):
+        self.start()
+        self.cases({
+            "omztty terminal rel": "omztty terminal rel",
+            "omztty terminal att": "omztty terminal att",
+            "omztty terminal mc": "omztty terminal mc",
+            "omztty terminal reload --bin": "omztty terminal reload --bin",
+            "omztty terminal -e ztty rel": "omztty terminal -e ztty reload",
+            "omztty terminal -- ztty att": "omztty terminal -- ztty attach",
+            "ztty att": "ztty attach",
+            "omztty ztty att": "omztty ztty attach",
+            "omztty ztty mcp --trans": "omztty ztty mcp --transport",
+        })
+
     def test_paths_keep_spaces_and_unicode(self):
         self.start()
         plugin = "demo=" + str(self.project / "plugin")
@@ -293,7 +307,7 @@ class InteractiveCompletion(unittest.TestCase):
 
     def test_reload_executable_paths_are_absolute_and_never_executed(self):
         self.start()
-        for prefix in ("ztty", "omztty terminal", "omztty ztty"):
+        for prefix in ("ztty", "omztty ztty"):
             with self.subTest(prefix=prefix):
                 self.assertEqual(self.complete(prefix + " rel"), shlex.split(prefix + " reload"))
                 self.assertEqual(self.complete(prefix + " reload --bin"),

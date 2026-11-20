@@ -47,6 +47,9 @@ _omztty() {
     case $command in
         config) _omztty_config ;;
         terminal|ztty)
+            # Keep personal ztty completions in the normal dispatch path.
+            local omztty_terminal_preset=0
+            [[ $command == terminal ]] && omztty_terminal_preset=1
             words[1]=ztty
             service=ztty
             if (( $+_comps[ztty] )); then _normal

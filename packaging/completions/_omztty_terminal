@@ -18,13 +18,24 @@ while (( index < CURRENT )); do
             shift $index words
             (( CURRENT -= index ))
             if (( CURRENT == 1 )); then _command_names
-            else local service=$words[1]; _normal
+            else
+                # The delegated command has its own grammar, even if it is ztty.
+                local omztty_terminal_preset=0
+                local service=$words[1]
+                _normal
             fi
             return ;;
         *) break ;;
     esac
 done
-local action=$words[2]
+local action=
+local -a control_command_spec=()
+if [[ ${omztty_terminal_preset:-0} != 1 ]]; then
+    action=$words[2]
+    control_command_spec=(
+        '1:command:(attach detach close rename list action move control commands command-output shell-integration plugin save-layout restore-layout reload mcp)'
+    )
+fi
 case $action in
     attach|detach|close|rename|list|action|move|control|commands|command-output|shell-integration|plugin|save-layout|restore-layout|reload|mcp)
         if (( CURRENT > 2 )); then
@@ -79,7 +90,7 @@ _arguments -C \
     '(-h --help)'{-h,--help}'[Show help]' \
     '(-V --version)'{-V,--version}'[Show version]' \
     '-e[Execute a command]:command:_command_names' \
-    '1:command:(attach detach close rename list action move control commands command-output shell-integration plugin save-layout restore-layout reload mcp)'
+    "${control_command_spec[@]}"
 if [[ $state == text-plugin ]]; then
     if compset -P '*='; then _files -S ''
     else _message 'NAME=/absolute/path/to/library.so'
