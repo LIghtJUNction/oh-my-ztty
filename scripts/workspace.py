@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
-"""Inspect, validate and pin the suite's independent Git repositories."""
+"""Sync, inspect and validate the suite's independent Git repositories."""
 from __future__ import annotations
 import argparse
-import hashlib
 import json
 import os
 import re
 import subprocess
 import sys
 import tempfile
-import urllib.request
+from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -50,36 +49,6 @@ def status(as_json):
                     state += ", changed pin"
                 print(f'{row["component"]:8} {row["head"][:12]}  {state}')
 
-def new_asset_lock(name, ref):
-    lock_path = ROOT / "dependencies.lock.json"
-    lock = json.loads(lock_path.read_text())
-    previous = lock["components"][name]
-    release = json.loads(run("gh", "api", f"repos/{previous['repository']}/releases/tags/{ref}", capture=True))
-    if release["draft"] or release["prerelease"]:
-        raise RuntimeError("Upstream pin requires a published stable release")
-    by_name = {asset["name"]: asset for asset in release["assets"]}
-    updated = {"repository": previous["repository"], "tag": ref, "assets": {}}
-    for arch, old in previous["assets"].items():
-        filename = old["url"].rsplit("/", 1)[1]
-        asset = by_name.get(filename)
-        if asset is None:
-            raise RuntimeError(f"Release has no expected {arch} asset: {filename}")
-        url = asset["browser_download_url"]
-        expected_prefix = f"https://github.com/{previous['repository']}/releases/download/{ref}/"
-        if not url.startswith(expected_prefix):
-            raise RuntimeError("Unexpected release asset URL")
-        digest = asset.get("digest") or ""
-        if digest.startswith("sha256:") and re.fullmatch(r"[0-9a-f]{64}", digest[7:]):
-            sha = digest[7:]
-        else:
-            h = hashlib.sha256()
-            with urllib.request.urlopen(url, timeout=60) as stream:
-                for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-                    h.update(chunk)
-            sha = h.hexdigest()
-        updated["assets"][arch] = {"url": url, "sha256": sha}
-    lock["components"][name] = updated
-    return lock_path, json.dumps(lock, indent=2) + "\n"
 
 CONFIG_KEYS = r"^(submodule\..*|remote\..*\.url)$"
 
@@ -198,7 +167,7 @@ def restore_checkout(snapshot):
 
 def publish_lock(destination, text, original):
     if destination.read_bytes() != original:
-        raise RuntimeError("dependencies.lock.json changed during pin; it was preserved")
+        raise RuntimeError("dependencies.lock.json changed during sync; it was preserved")
     descriptor, filename = tempfile.mkstemp(
         prefix=".dependencies.lock.", suffix=".tmp", dir=destination.parent)
     temporary = Path(filename)
@@ -209,7 +178,7 @@ def publish_lock(destination, text, original):
             os.fsync(stream.fileno())
         temporary.chmod(destination.stat().st_mode & 0o777)
         if destination.read_bytes() != original:
-            raise RuntimeError("dependencies.lock.json changed during pin; it was preserved")
+            raise RuntimeError("dependencies.lock.json changed during sync; it was preserved")
         temporary.replace(destination)
     except (Exception, KeyboardInterrupt) as error:
         try:
@@ -220,93 +189,137 @@ def publish_lock(destination, text, original):
                 f"temporary file retained at {temporary}: {cleanup_error}") from error
         raise
 
-def pin(name, ref):
-    if not re.fullmatch(r"v[0-9]+\.[0-9]+\.[0-9]+|[0-9a-f]{40}", ref):
-        raise RuntimeError("Use a release tag vX.Y.Z or a full lowercase commit SHA")
-    path = directory(name)
-    snapshots = snapshot_sources(path)
+def source_url(name):
+    return f"https://github.com/LIghtJUNction/{name}.git"
+
+
+def latest_source(name, path):
+    """Resolve one live default branch and fetch that exact observation."""
+    repository = source_url(name)
+    advertised = run("git", "ls-remote", "--symref", repository, "HEAD",
+                     cwd=path, capture=True)
+    branch = head = None
+    for line in advertised.splitlines():
+        value, _, ref = line.partition("\t")
+        if ref != "HEAD":
+            continue
+        if value.startswith("ref: refs/heads/"):
+            branch = value.removeprefix("ref: refs/heads/")
+        elif re.fullmatch(r"[0-9a-f]{40}", value):
+            head = value
+    if not branch or not head:
+        raise RuntimeError(f"Cannot resolve the remote default branch for {name}")
+    observed_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    run("git", "fetch", "--no-tags", "--no-recurse-submodules", "--depth=1",
+        repository, head, cwd=path)
+    fetched = run("git", "rev-parse", "--verify", "FETCH_HEAD^{commit}",
+                  cwd=path, capture=True)
+    if fetched != head:
+        raise RuntimeError(f"Fetched {name} source differs from the observed default branch")
+    return {"repository": repository, "branch": branch, "commit": head,
+            "observed_at": observed_at}
+
+
+def select_source(snapshots, new_head):
+    path = snapshots[0]["path"]
     original_paths = {item["path"] for item in snapshots}
-    lock_change = None
-    lock_original = None
-    if name in ("ztty", "ssmcp"):
-        if not ref.startswith("v"):
-            raise RuntimeError("Bundled upstream binaries require a release tag")
-        lock_path = ROOT / "dependencies.lock.json"
-        if run("git", "status", "--porcelain", "--untracked-files=all", "--",
-               str(lock_path.relative_to(ROOT)), capture=True):
-            raise RuntimeError("Commit or stash dependencies.lock.json changes first")
-        lock_original = lock_path.read_bytes()
-        lock_change = new_asset_lock(name, ref)
-    run("git", "fetch", "--no-recurse-submodules", "--depth=1", "origin",
-        "refs/tags/" + ref if ref.startswith("v") else ref, cwd=path)
-    new_head = run("git", "rev-parse", "--verify", "FETCH_HEAD^{commit}",
-                   cwd=path, capture=True)
+    checkout(path, new_head)
+    for child in gitlinks(path):
+        if child not in original_paths and child.exists():
+            if not child.is_dir() or any(child.iterdir()):
+                raise RuntimeError(
+                    f"New submodule directory is not empty: "
+                    f"{child.relative_to(ROOT)}. Its contents were preserved.")
+    run("git", "submodule", "sync", "--recursive", cwd=path)
+    run("git", "submodule", "update", "--init", "--recursive", "--checkout", cwd=path)
+    source_status = run("git", "submodule", "status", "--recursive",
+                        cwd=path, capture=True)
+    if any(line[:1] in ("-", "+", "U") for line in source_status.splitlines()):
+        raise RuntimeError("Recursive submodule initialization left unresolved pins")
+    if run("git", "status", "--porcelain", "--untracked-files=all",
+           "--ignore-submodules=none", cwd=path, capture=True):
+        raise RuntimeError("The selected source tree is not clean after recursive update")
+
+
+def restore_sources(snapshots):
+    path = snapshots[0]["path"]
+    original_paths = {item["path"] for item in snapshots}
+    errors = []
     try:
-        checkout(path, new_head)
-        # A new gitlink must not take over an ignored, nonempty directory.
-        for child in gitlinks(path):
-            if child not in original_paths and child.exists():
-                if not child.is_dir() or any(child.iterdir()):
-                    raise RuntimeError(
-                        f"New submodule directory is not empty: "
-                        f"{child.relative_to(ROOT)}. Its contents were preserved.")
-        run("git", "submodule", "sync", "--recursive", cwd=path)
-        run("git", "submodule", "update", "--init", "--recursive", "--checkout",
-            cwd=path)
-        source_status = run("git", "submodule", "status", "--recursive",
-                            cwd=path, capture=True)
-        if any(line[:1] in ("-", "+", "U") for line in source_status.splitlines()):
-            raise RuntimeError("Recursive submodule initialization left unresolved pins")
-        if run("git", "status", "--porcelain", "--untracked-files=all",
-               "--ignore-submodules=none", cwd=path, capture=True):
-            raise RuntimeError("The selected source tree is not clean after recursive update")
-        if lock_change:
-            publish_lock(*lock_change, lock_original)
+        additions = submodule_directories(path) - original_paths
+    except Exception as error:
+        additions = set()
+        errors.append(f"Cannot inspect partial initialization: {error}")
+    try:
+        restore_checkout(snapshots[0])
+    except Exception as error:
+        errors.append(f"Component checkout: {error}")
+    # Never force, deinit, clean or delete newly cloned worktrees during recovery.
+    for arguments in (
+        ("git", "submodule", "sync", "--recursive"),
+        ("git", "submodule", "update", "--recursive", "--checkout", "--no-fetch"),
+    ):
+        try:
+            run(*arguments, cwd=path)
+        except Exception as error:
+            errors.append(f"Recursive restoration: {error}")
+    for snapshot in snapshots[1:]:
+        try:
+            restore_checkout(snapshot)
+        except Exception as error:
+            errors.append(f"{snapshot['path']}: {error}")
+    for snapshot in snapshots:
+        try:
+            restore_configuration(snapshot["path"], snapshot["config"])
+        except Exception as error:
+            errors.append(str(error))
+    retained = sorted(str(item.relative_to(ROOT)) for item in additions if item.exists())
+    return errors, retained
+
+
+def sync(component=None):
+    names = (component,) if component else COMPONENTS
+    lock_path = ROOT / "dependencies.lock.json"
+    if run("git", "status", "--porcelain", "--untracked-files=all", "--",
+           str(lock_path.relative_to(ROOT)), capture=True):
+        raise RuntimeError("Commit or stash dependencies.lock.json changes first")
+    original = lock_path.read_bytes()
+    lock = json.loads(original)
+    if component and lock.get("schema") != 2:
+        raise RuntimeError("Run workspace.py sync without a component to migrate all source records")
+    records = dict(lock.get("components", {})) if lock.get("schema") == 2 else {}
+    # Check every selected checkout before fetching or changing any source tree.
+    snapshots = {name: snapshot_sources(directory(name)) for name in names}
+    updates = {name: latest_source(name, snapshots[name][0]["path"]) for name in names}
+    applied = []
+    try:
+        for name in names:
+            applied.append(name)
+            select_source(snapshots[name], updates[name]["commit"])
+        records.update(updates)
+        updated = {"schema": 2,
+                   "updated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                   "components": records}
+        publish_lock(lock_path, json.dumps(updated, indent=2) + "\n", original)
     except (Exception, KeyboardInterrupt) as error:
-        recovery_errors = []
-        try:
-            additions = submodule_directories(path) - original_paths
-        except Exception as inspection_error:
-            additions = set()
-            recovery_errors.append(f"Cannot inspect partial initialization: {inspection_error}")
-        try:
-            restore_checkout(snapshots[0])
-        except Exception as recovery_error:
-            recovery_errors.append(f"Component checkout: {recovery_error}")
-        # Use native Git restoration; no force, deinit or clean, and no removal
-        # of newly cloned worktrees.
-        for arguments in (
-            ("git", "submodule", "sync", "--recursive"),
-            ("git", "submodule", "update", "--recursive", "--checkout", "--no-fetch"),
-        ):
-            try:
-                run(*arguments, cwd=path)
-            except Exception as recovery_error:
-                recovery_errors.append(f"Recursive restoration: {recovery_error}")
-        for snapshot in snapshots[1:]:
-            try:
-                restore_checkout(snapshot)
-            except Exception as recovery_error:
-                recovery_errors.append(f"{snapshot['path']}: {recovery_error}")
-        for snapshot in snapshots:
-            try:
-                restore_configuration(snapshot["path"], snapshot["config"])
-            except Exception as recovery_error:
-                recovery_errors.append(str(recovery_error))
-        retained = sorted(str(item.relative_to(ROOT))
-                          for item in additions if item.exists())
-        message = f"Pin {name} failed ({type(error).__name__}: {error}). "
+        recovery_errors, retained = [], []
+        for name in reversed(applied):
+            errors, additions = restore_sources(snapshots[name])
+            recovery_errors.extend(errors)
+            retained.extend(additions)
+        message = f"Sync {', '.join(names)} failed ({type(error).__name__}: {error}). "
         if recovery_errors:
             message += "Rollback incomplete: " + "; ".join(recovery_errors) + ". "
         else:
             message += "Previous source commits and checkout branches restored. "
-        if lock_change:
-            message += "The dependency lock was not replaced. "
+        message += "The dependency lock was not replaced. "
         if retained:
             message += "Additional submodule directories retained for inspection: " + ", ".join(retained) + ". "
         raise RuntimeError(message.rstrip()) from error
-    print(f"Pinned {name} to {new_head}, including recursive submodules. "
-          "Run workspace.py check, then commit the gitlink and lock changes.")
+    for name in names:
+        record = updates[name]
+        print(f"Synced {name} from {record['branch']} to {record['commit']}")
+    print("Run workspace.py check, then commit the gitlinks and source lock together.")
 
 
 def check(component):
@@ -325,14 +338,13 @@ def main():
     show.add_argument("--json", action="store_true")
     validate = commands.add_parser("check", help="run local checks for new components and the suite")
     validate.add_argument("--component", choices=("suite", "zshard", "zdot", "zrc", "zfetch"))
-    update = commands.add_parser("pin", help="fetch and select one explicit component release")
-    update.add_argument("component", choices=COMPONENTS)
-    update.add_argument("ref")
+    update = commands.add_parser("sync", help="fetch current default-branch source for one or all components")
+    update.add_argument("component", nargs="?", choices=COMPONENTS)
     args = parser.parse_args()
     try:
         if args.command == "status": status(args.json)
         elif args.command == "check": check(args.component)
-        else: pin(args.component, args.ref)
+        else: sync(args.component)
     except (RuntimeError, OSError, ValueError, subprocess.CalledProcessError) as error:
         print("workspace: " + str(error), file=sys.stderr)
         return 1

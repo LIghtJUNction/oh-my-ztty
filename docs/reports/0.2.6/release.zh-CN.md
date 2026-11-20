@@ -57,9 +57,9 @@
 
 这些单窗口样本不能证明全进程峰值低于 10 MiB，也没有提供相对 0.2.5 的受控性能增益结论。图形报告中的进程清理均成功，临时 HOME 已移除。
 
-![x86_64 正式验收窗口](linux-x86_64-terminal.png)
+[x86_64 正式验收窗口（截图归档）](https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.6/oh-my-ztty-generated-evidence-20261121.tar.gz)
 
-![ARM64 正式验收窗口](linux-aarch64-terminal.png)
+[ARM64 正式验收窗口（截图归档）](https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.6/oh-my-ztty-generated-evidence-20261121.tar.gz)
 
 ## 公开制品
 

@@ -33,22 +33,20 @@ Use your AUR helper to upgrade the system package. Configuration adoption remain
 
 | Component | Job |
 | --- | --- |
-| [ztty 0.5.2](https://github.com/LIghtJUNction/ztty/tree/v0.5.2) | Native terminal |
+| [ztty](https://github.com/LIghtJUNction/ztty) | Native terminal |
 | [zshard](https://github.com/LIghtJUNction/zshard) | Original zsh framework: completion, suggestions, highlighting and lazy plugins |
-| [zrc 0.1.2](https://github.com/LIghtJUNction/zrc/tree/v0.1.2) | Native Neovim and terminal-tool configuration with one warm Ink palette |
+| [zrc](https://github.com/LIghtJUNction/zrc) | Native Neovim and terminal-tool configuration with one warm Ink palette |
 | [zdot](https://github.com/LIghtJUNction/zdot) | `no_std` dotfiles manager with plans, reversible links and explicit Git sync |
-| [zfetch 0.1.1](https://github.com/LIghtJUNction/zfetch/tree/v0.1.1) | On-demand native system overview, zero crate dependencies |
-| [ssmcp 0.10.20](https://github.com/LIghtJUNction/ssmcp/tree/v0.10.20) | On-demand MCP workspace connection for AI |
+| [zfetch](https://github.com/LIghtJUNction/zfetch) | On-demand native system overview, zero crate dependencies |
+| [ssmcp](https://github.com/LIghtJUNction/ssmcp) | On-demand MCP workspace connection for AI |
 
-These are the component versions selected for oh-my-ztty 0.2.6. The suite records their source revisions as Git submodules. Your Linux distribution supplies zsh. See the [completion reference](docs/completions.md) for command and version coverage.
+Development follows each component's latest default branch. Git submodules and `dependencies.lock.json` record the exact sources selected for a build. The [0.2.6 release record](docs/reports/0.2.6/release.zh-CN.md) describes the already published combination. Your Linux distribution supplies zsh. See the [completion reference](docs/completions.md) for command and version coverage.
 
 ## Ink preset
 
 A warm graphite, linen and copper palette, generous spacing and a two-line prompt with the path, cached Git branch and command status. The prompt uses zsh builtins; installed fonts fall back through Fontconfig. [Customize the preset](docs/installation.md#ink-appearance).
 
-![The native Ink editor running in ztty](docs/reports/workspace-0.2.1/nvim-home.jpg)
-
-Actual deployed configuration photographed on an isolated display. The documented workstation's real desktop launch chain was verified separately with a new suite broker, program execution and broker reuse; its default entry is now oh-my-ztty. See the [report, recovery history and acceptance scope](docs/reports/workspace-0.2.1.md).
+The [workstation report](docs/reports/workspace-0.2.1.md) records the deployed Ink configuration, desktop launch chain, broker reuse, recovery steps and acceptance scope.
 
 ## Make it your default workspace
 
@@ -76,14 +74,26 @@ omztty uninstall       # Restore configs and remove a per-user installation
 
 AI-generated commands are reviewed in the shell input line before execution. The suite does not start an AI model or resident agent at shell startup.
 
+Current source builds also expose startup inspection through zfetch:
+
+```sh
+omztty info --boot         # Inspect startup services and configuration paths
+omztty info --boot --json  # Read the same startup chain as JSON
+```
+
 ## Develop together
 
 ```sh
 git clone --recurse-submodules https://github.com/LIghtJUNction/oh-my-ztty.git
 cd oh-my-ztty
 python3 scripts/workspace.py status
+python3 scripts/workspace.py sync
+python3 scripts/workspace.py check
+python3 scripts/build_bundle.py
 ```
 
-[Development and release guide](CONTRIBUTING.md) covers local checks, component updates and one-command version bumps. [Architecture](docs/architecture.md) describes the runtime boundaries and extension interfaces.
+`sync` fetches all six default branches and records their commits and observation times in the schema 2 source lock. After the first full synchronization, `sync zshard` updates one component. The bundle compiles all four native programs from those sources with Cargo's `--locked` option and respects the configured shared target directory.
+
+[Development and release guide](CONTRIBUTING.md) covers local checks, source updates and explicit version publication. [Architecture](docs/architecture.md) describes the runtime boundaries and extension interfaces.
 
 MIT license. Performance claims and their measurement conditions belong together; see [the benchmark record](docs/performance.md).

@@ -53,7 +53,7 @@ The [nine-page Markdown documentation site](https://lightjunction.github.io/oh-m
 
 At release source `0ad667661e26316851e3a90406c146ce98aa9663`, `.cache/docs-venv/bin/python scripts/build_site.py` produced **9 pages, 17 files, 223,867 bytes**, with **453 local links checked**. Generated pages show suite 0.1.2 and zshard 0.1.3 and use the current 0.1.2 offline archive. Historical measurements and evidence retain their original source versions.
 
-Visual and interaction evidence is in the [website redesign report](website-2026-11-20.md) and [screenshot](website-2026-11-20.jpg). That screenshot was captured during the preceding 0.1.1 website checkpoint and records the layout and palette. The narrow layout was checked using desktop browser zoom; the clipboard round-trip was inconclusive in that browser and is not claimed as a complete clipboard verification.
+Visual and interaction evidence is in the [website redesign report](website-2026-11-20.md) and [screenshot (screenshot archive)](https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.6/oh-my-ztty-generated-evidence-20261121.tar.gz). That screenshot was captured during the preceding 0.1.1 website checkpoint and records the layout and palette. The narrow layout was checked using desktop browser zoom; the clipboard round-trip was inconclusive in that browser and is not claimed as a complete clipboard verification.
 
 ## Audit reproduction
 

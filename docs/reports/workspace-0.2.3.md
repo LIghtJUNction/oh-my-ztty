@@ -65,7 +65,7 @@ yay -S oh-my-ztty-bin
 
 本地最终验收对发行树执行了 **70 项套件测试**、两种架构的完整打包与清单检查，并实际运行 x86_64 安装器、shell 和图形终端。图形检查覆盖窗口可见、键盘命令执行、首次补全后 shell 可继续使用，以及组件版本。测试使用独立显示服务，完成后没有残留子进程，宿主显示状态不变。[验收记录](workspace-0.2.3/acceptance.json) · [清理记录](workspace-0.2.3/closure.json)
 
-![0.2.3 本地图形终端验收截图](workspace-0.2.3/terminal.png)
+[0.2.3 本地图形终端验收截图（截图归档）](https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.6/oh-my-ztty-generated-evidence-20261121.tar.gz)
 
 正式发布工作流在原生 x86_64 和原生 ARM runner 上分别执行套件检查、实际捆绑程序 smoke test、图形窗口/键盘/补全/清理检查，然后发布资产。两种架构和 publish 共三个 job 全部成功。[正式工作流](https://github.com/LIghtJUNction/oh-my-ztty/actions/runs/44684467902) · [工作流记录](workspace-0.2.3/workflows.json)
 
@@ -145,9 +145,9 @@ AUR 的 `oh-my-ztty-bin 0.2.3-1` 已推送，公开 RPC 返回正确版本，匿
 
 本轮沿用已有模板和样式，保持留白与克制视觉。静态构建生成 9 页、17 个文件，验证 490 条站内链接，版本更新脚本与文档的契约检查保留。文案经独立事实核对后合入 [PR #5](https://github.com/LIghtJUNction/oh-my-ztty/pull/5)，GitHub Pages build 与 deploy 均成功。[部署工作流](https://github.com/LIghtJUNction/oh-my-ztty/actions/runs/44685625981)
 
-![已上线的官网首页](workspace-0.2.3/website.jpg)
+[已上线的官网首页（截图归档）](https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.6/oh-my-ztty-generated-evidence-20261121.tar.gz)
 
-通过实际在线 Chromium 页面确认了新标题和正文。桌面视口为 1363×936，文档宽 1348；桌面 400% 缩放下的 CSS 视口为 340×234，文档宽 337、标题宽 295，没有页面级横向溢出。后者是窄视口近似检查，不代表真机手机测试。检查后已恢复 100% 缩放。[在线检查记录](workspace-0.2.3/website.json) · [窄视口截图](workspace-0.2.3/website-narrow.jpg)
+通过实际在线 Chromium 页面确认了新标题和正文。桌面视口为 1363×936，文档宽 1348；桌面 400% 缩放下的 CSS 视口为 340×234，文档宽 337、标题宽 295，没有页面级横向溢出。后者是窄视口近似检查，不代表真机手机测试。检查后已恢复 100% 缩放。[在线检查记录](workspace-0.2.3/website.json) · [窄视口截图（截图归档）](https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.6/oh-my-ztty-generated-evidence-20261121.tar.gz)
 
 ## 9. 证据索引与边界
 

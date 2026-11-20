@@ -74,7 +74,7 @@ AUR 的 ARM 包完成了构建、清单与 ELF 架构检查；本轮本机包生
 
 真实用户配置下的 **11/11 个 Tab 用例**通过；个人补全目录位于套件及框架定义之前，实际选中了个人覆盖函数。
 
-![已安装版本中的 ssmcp 原生补全](ssmcp-native-completion.png)
+[已安装版本中的 ssmcp 原生补全（截图归档）](https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.6/oh-my-ztty-generated-evidence-20261121.tar.gz)
 
 截图在隔离图形显示环境中使用已安装的 ztty 与新运行时生成，并核对真实命令缓冲区。它不影响当前桌面的输入或已有终端会话。
 

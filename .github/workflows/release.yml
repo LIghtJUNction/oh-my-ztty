@@ -38,15 +38,15 @@ jobs:
       - name: Install build and shell prerequisites
         run: |
           sudo apt-get update
-          sudo apt-get install -y zsh xvfb xdotool imagemagick fonts-dejavu-core \
-            libx11-6 libxft2 libxrender1 libfontconfig1 \
-            libwayland-client0 libwayland-egl1 libwayland-cursor0 libxkbcommon0 \
-            libfreetype6 libharfbuzz0b libegl1 libgles2 libgcc-s1
+          sudo apt-get install -y build-essential pkg-config zsh xvfb xdotool imagemagick fonts-dejavu-core \
+            libx11-dev libxft-dev libxrender-dev libfontconfig1-dev \
+            libwayland-dev libxkbcommon-dev libfreetype-dev libharfbuzz-dev \
+            libegl1-mesa-dev libgles2-mesa-dev libgcc-s1
           rustup toolchain install 1.100.0 --profile minimal
           rustup default 1.100.0
       - name: Check installer lifecycle
         run: make check
-      - name: Build complete locked bundle
+      - name: Build complete source-locked bundle
         run: python3 scripts/build_bundle.py --arch "${{ matrix.arch }}"
       - name: Smoke actual bundled programs in isolated HOME
         run: python3 scripts/smoke_bundle.py dist/oh-my-ztty-*-linux-${{ matrix.arch }}.tar.gz

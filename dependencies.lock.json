@@ -1,33 +1,42 @@
 {
-  "schema": 1,
+  "schema": 2,
+  "updated_at": "2026-11-20T17:33:18+00:00",
   "components": {
     "ztty": {
-      "repository": "LIghtJUNction/ztty",
-      "tag": "v0.5.2",
-      "assets": {
-        "x86_64": {
-          "url": "https://github.com/LIghtJUNction/ztty/releases/download/v0.5.2/ztty-linux-x86_64.tar.gz",
-          "sha256": "a69a4df53b3856d57c3a6f5e9a2109cd7727e5a7f02be902f133a137b186546f"
-        },
-        "aarch64": {
-          "url": "https://github.com/LIghtJUNction/ztty/releases/download/v0.5.2/ztty-linux-aarch64.tar.gz",
-          "sha256": "24d1d7cc638291bf5746f5dbe4deb2d9aef9727bead31339d6048d0e1da2c700"
-        }
-      }
+      "repository": "https://github.com/LIghtJUNction/ztty.git",
+      "branch": "main",
+      "commit": "d8845547b4da8fbc1fb6437c2765cf11981e598c",
+      "observed_at": "2026-11-20T17:32:15+00:00"
     },
     "ssmcp": {
-      "repository": "LIghtJUNction/ssmcp",
-      "tag": "v0.10.20",
-      "assets": {
-        "x86_64": {
-          "url": "https://github.com/LIghtJUNction/ssmcp/releases/download/v0.10.20/ssmcp-x86_64-unknown-linux-gnu.tar.gz",
-          "sha256": "33ab32051b99fa36c11935dd8438d0987c073bcb64317bec11a227d29eacb2cc"
-        },
-        "aarch64": {
-          "url": "https://github.com/LIghtJUNction/ssmcp/releases/download/v0.10.20/ssmcp-aarch64-unknown-linux-gnu.tar.gz",
-          "sha256": "3b6784c5df3e8193cdc9c7b7919c601fdce398eda40db5ed500d262704267eab"
-        }
-      }
+      "repository": "https://github.com/LIghtJUNction/ssmcp.git",
+      "branch": "main",
+      "commit": "7ddaeab07be67f25f8277aa37486474710cb1fa3",
+      "observed_at": "2026-11-20T17:32:17+00:00"
+    },
+    "zshard": {
+      "repository": "https://github.com/LIghtJUNction/zshard.git",
+      "branch": "main",
+      "commit": "f7842f70e439c4abda2a46698f0ebe067d38b297",
+      "observed_at": "2026-11-20T17:32:19+00:00"
+    },
+    "zdot": {
+      "repository": "https://github.com/LIghtJUNction/zdot.git",
+      "branch": "main",
+      "commit": "d8084d4ae55a24113f56335e8b584b5f13d91925",
+      "observed_at": "2026-11-20T17:32:21+00:00"
+    },
+    "zrc": {
+      "repository": "https://github.com/LIghtJUNction/zrc.git",
+      "branch": "main",
+      "commit": "6311bf3377643fff0cff5a45a70b2256e22cc51f",
+      "observed_at": "2026-11-20T17:32:22+00:00"
+    },
+    "zfetch": {
+      "repository": "https://github.com/LIghtJUNction/zfetch.git",
+      "branch": "main",
+      "commit": "5006d7a9e2a2d3f292f677df94395e27a794b9c7",
+      "observed_at": "2026-11-20T17:32:24+00:00"
     }
   }
 }

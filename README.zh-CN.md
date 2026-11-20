@@ -35,22 +35,20 @@ omztty doctor
 
 | 项目 | 作用 |
 | --- | --- |
-| [ztty 0.5.2](https://github.com/LIghtJUNction/ztty/tree/v0.5.2) | 原生终端 |
+| [ztty](https://github.com/LIghtJUNction/ztty) | 原生终端 |
 | [zshard](https://github.com/LIghtJUNction/zshard) | zsh 框架，提供补全、历史建议、命令高亮和延迟加载插件 |
-| [zrc 0.1.2](https://github.com/LIghtJUNction/zrc/tree/v0.1.2) | Neovim 与常用终端工具的原生配置，共用暖色 Ink 外观 |
+| [zrc](https://github.com/LIghtJUNction/zrc) | Neovim 与常用终端工具的原生配置，共用暖色 Ink 外观 |
 | [zdot](https://github.com/LIghtJUNction/zdot) | `no_std` 配置管理工具，预览、部署链接、备份和恢复，并显式执行 Git 同步 |
-| [zfetch 0.1.1](https://github.com/LIghtJUNction/zfetch/tree/v0.1.1) | 零 crate 依赖的原生 `no_std` 系统概况工具，按需运行 |
-| [ssmcp 0.10.20](https://github.com/LIghtJUNction/ssmcp/tree/v0.10.20) | 按需把工作区接入 AI 的 MCP 工具 |
+| [zfetch](https://github.com/LIghtJUNction/zfetch) | 零 crate 依赖的原生 `no_std` 系统概况工具，按需运行 |
+| [ssmcp](https://github.com/LIghtJUNction/ssmcp) | 按需把工作区接入 AI 的 MCP 工具 |
 
-以上是 oh-my-ztty 0.2.6 选用的组件版本，源码提交由 Git 子模块固定。zsh、Neovim 等系统应用需单独安装。进入 shell 后，可按需查看系统概况或启动 AI 连接。zfetch 的 Arch Linux 包名为 `zfetch-project-z` 与 `zfetch-project-z-bin`，发布状态见其仓库说明。
+开发时同步各组件默认分支的最新源码，Git 子模块与 `dependencies.lock.json` 共同记录本次构建选用的提交。[0.2.6 发布记录](docs/reports/0.2.6/release.zh-CN.md)保留该已发布版本的组件组合与验收结果。zsh、Neovim 等系统应用需单独安装。进入 shell 后，可按需查看系统概况或启动 AI 连接。zfetch 的 Arch Linux 包名为 `zfetch-project-z` 与 `zfetch-project-z-bin`，发布状态见其仓库说明。
 
 ## Ink 默认外观
 
 暖石墨背景、亚麻白文字、铜色重点、28 px 内边距与两行提示符，把路径、Git 分支和输入区分开。Neovim 与终端工具沿用同一套配色。提示符使用 zsh 内置能力；字体通过 Fontconfig 回退，不强制安装图标字体。[自定义预设](docs/installation.md#ink-appearance)。
 
-![使用 Ink 配色的真实 Neovim 默认页面](docs/reports/workspace-0.2.1/nvim-home.jpg)
-
-这是隔离显示中运行已部署配置的实际截图。记录机器的真实桌面启动链已另行通过新 broker、程序执行和复用验收，默认入口现为 oh-my-ztty；详见[报告、恢复过程与验收范围](docs/reports/workspace-0.2.1.md)。
+[实机报告](docs/reports/workspace-0.2.1.md)记录了 Ink 配置、桌面启动链、broker 复用、恢复步骤与验收范围。
 
 ## 设为默认工作环境
 
@@ -86,12 +84,24 @@ omztty uninstall       # 先恢复配置，再卸载用户级安装
 
 AI 建议的命令先进入输入行，由人确认执行。个人配置、补全与历史位于发行版目录之外，更新或卸载时保留。
 
+当前源码构建还可通过 zfetch 查看启动链中的服务与配置路径：
+
+```sh
+omztty info --boot         # 查看启动服务和配置文件位置
+omztty info --boot --json  # 以 JSON 输出同一启动链
+```
+
 ## 一起迭代
 
 ```sh
 git clone --recurse-submodules https://github.com/LIghtJUNction/oh-my-ztty.git
 cd oh-my-ztty
 python3 scripts/workspace.py status
+python3 scripts/workspace.py sync
+python3 scripts/workspace.py check
+python3 scripts/build_bundle.py
 ```
 
-开发、测试和发布见 [CONTRIBUTING.md](CONTRIBUTING.md)。性能数字与测量范围见[性能记录](docs/performance.md)。项目采用 MIT 许可证。
+`sync` 默认获取六个组件的最新默认分支，并在 schema 2 源码锁中记录提交与观测时间。旧锁首次升级需要完整同步；此后可用 `sync zshard` 单独更新一个组件。打包时通过 Cargo `--locked` 从记录的源码编译四个原生程序，沿用已有的共享构建目录配置。
+
+开发、测试和显式发布步骤见 [CONTRIBUTING.md](CONTRIBUTING.md)。性能数字与测量范围见[性能记录](docs/performance.md)。项目采用 MIT 许可证。

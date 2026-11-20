@@ -5,3 +5,12 @@
 __pycache__/
 *.pyc
 /_site/
+/docs/reports/**/*.png
+/docs/reports/**/*.jpg
+/docs/reports/**/*.jpeg
+/docs/reports/**/*.webp
+/docs/reports/**/*.gif
+/docs/reports/**/*.zip
+/docs/reports/**/*.tar.gz
+/docs/reports/**/*.mp4
+/docs/reports/**/*.webm

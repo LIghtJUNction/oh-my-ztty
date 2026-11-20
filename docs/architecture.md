@@ -1,6 +1,6 @@
 # Architecture
 
-oh-my-ztty assembles six independent projects into one versioned Linux environment. Git submodules record the source revisions; the release bundle contains the executables and shell files needed at runtime.
+oh-my-ztty assembles six independent projects into one versioned Linux environment. Development synchronizes their latest default branches. Git submodules and the schema 2 source lock record the selected revisions; the release bundle contains the executables and shell files needed at runtime.
 
 ## Runtime
 
@@ -20,7 +20,7 @@ The shell startup path does not download plugins, run zfetch, call an AI provide
 
 The new zdot library and executable use Rust `no_std`, with Project Z's `zclap` parser configured without its default `std` feature. Its Linux backend uses direct system calls. Development scripts and tests run outside that production dependency graph.
 
-zshard is written in zsh. The pinned ztty core and executable also use Rust `no_std`; its graphical front end retains its X11 and system-library dependencies. The included ssmcp release has its existing Rust standard-library and networking dependencies. These are separate processes; ssmcp's runtime is started on demand.
+zshard is written in zsh. The ztty core and executable also use Rust `no_std`; its graphical front end uses system X11 and Wayland libraries. ssmcp uses the Rust standard library and networking dependencies. These are separate processes; ssmcp's runtime starts on demand.
 
 zrc supplies Lua for Neovim 0.11+ and each application's native configuration format. Its configuration is read inside those applications, with no separate configuration daemon. zfetch is a native Rust `no_std` utility with no crate dependencies; its system overview is an explicit command, not a shell-startup banner.
 
@@ -36,7 +36,9 @@ The profile and personal additions live under `${XDG_CONFIG_HOME:-$HOME/.config}
 
 Uninstallation restores the adopted `omztty config` profile before removing the runtime. Failed restoration or inconsistent deployment records preserve the installation for recovery. Independent profiles deployed through `omztty dot` keep their separate lifecycle. See [configuration and recovery](configuration.md).
 
-The installer checks the downloaded archive before activating it. The build tool verifies the locked upstream asset digests. Gitlinks and dependency asset locks must agree before a release.
+The installer checks the downloaded archive before activating it. The build tool verifies that all six component checkouts are clean and match `dependencies.lock.json`, then compiles ztty, ssmcp, zdot and zfetch using Cargo's `--locked --release` options. ztty enables its Wayland feature; ssmcp's JavaScript helper comes from the same source checkout as its executable. Each native executable's ELF architecture is checked before packaging.
+
+The source lock records each canonical GitHub URL, default branch, observed commit and observation time. A build consumes that recorded snapshot, while `workspace.py sync` fetches current default-branch heads when selecting the next snapshot. Cargo retains its existing target-directory configuration, including shared build outputs. `BUILD.json` records the source commits, branch names and synchronization time included in the archive.
 
 ## Extension points
 
@@ -44,7 +46,7 @@ The installer checks the downloaded archive before activating it. The build tool
 
 **AI tools** use small, explicit context records and an on-demand MCP connection. A proposed command can be put into the editing buffer for review. It is not executed as a side effect of receiving a suggestion. API keys, environment values and the full command history are not a default context payload.
 
-**Terminal and native extensions** remain in the upstream ztty and ssmcp projects, which use Project Z's plugin interfaces. The suite pins those implementations and keeps their own documentation authoritative.
+**Terminal and native extensions** remain in the upstream ztty and ssmcp projects, which use Project Z's plugin interfaces. The suite records their source commits and keeps their own documentation authoritative.
 
 **Application profiles** come from zrc. They share the Ink palette while keeping application-native files editable. Neovim uses native packages and explicit local extensions; the profile does not install applications or language servers.
 
@@ -52,6 +54,6 @@ The installer checks the downloaded archive before activating it. The build tool
 
 ## Versioning
 
-The suite and the new components have independent semantic versions. A suite release is a tested combination, recorded by its Git commit and six gitlinks. Updating a shell plugin or a component is explicit; normal shell startup uses the installed versions.
+The suite and its components have independent semantic versions. A suite release is a tested combination, recorded by its Git commit, six gitlinks and source lock. Source synchronization and release publication are separate operations. Normal shell startup uses the installed versions.
 
 Routine checks run locally. Manual validation workflows support another environment when needed. Tag workflows produce release artifacts, and the Pages workflow publishes the static website. Release installation and the installed configuration commands do not require Rust, Python, a build system or a JavaScript application runtime.

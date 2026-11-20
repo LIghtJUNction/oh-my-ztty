@@ -1,6 +1,6 @@
 # Development
 
-Use this workspace to change a component, validate its integration and publish a new suite version. Each component has its own repository; the suite records the exact revisions assembled into a release.
+Use this workspace to change a component, validate its integration and prepare a suite release. Development follows each component's latest default branch. The suite records the observed revisions and builds that exact source combination.
 
 ## Clone the workspace
 
@@ -26,7 +26,7 @@ Status reads local repository state and makes no network request.
 python3 scripts/workspace.py check
 ```
 
-This checks zshard, zdot, zrc, zfetch and the suite's installer and integration tests. It does not rebuild every upstream ztty or ssmcp dependency; their published executables are checked during bundle verification.
+This runs the zshard, zdot, zrc and zfetch checks, then the suite's installer and integration tests. Use `--component suite` for the suite checks alone. Full ztty and ssmcp test suites remain in their own repositories; the bundle build compiles their programs and subsequent smoke tests exercise the integration.
 
 Run the relevant checks locally after a change. Manual validation workflows are available. Routine code pushes and pull requests do not start a duplicate daily test matrix.
 
@@ -41,32 +41,49 @@ git -C components/zshard switch -c improve-completion
 make -C components/zshard check
 ```
 
-Commit and publish component changes before advancing the parent gitlink. Keep unrelated upstream work outside the suite change.
+Commit component changes and merge them into the repository's default branch before synchronizing the suite. Review the parent gitlink together with its source-lock record.
 
-## Pin a published component
+## Synchronize default branches
 
-The pin command accepts a component and a published version. For example:
+Synchronize the current default-branch heads of all six components:
 
 ```sh
-python3 scripts/workspace.py pin zshard v0.2.0
+python3 scripts/workspace.py sync
 python3 scripts/workspace.py check
 ```
 
-Pin fetches the requested revision, checks out the component, synchronizes submodule URLs, and initializes and updates its nested submodules recursively. This also handles a dependency that moves from an inline source directory to a submodule. Review and commit the changed parent gitlink after validation.
+Sync resolves the live default branch of each canonical GitHub repository, fetches its observed head, checks out that source and updates nested submodules recursively. `dependencies.lock.json` schema 2 records the repository URL, branch, exact commit and observation time; its top-level timestamp records the completed synchronization. Commit the changed gitlinks and source lock together after validation.
 
-Pinning ztty or ssmcp also obtains release asset digests for `dependencies.lock.json`. It requires a stable release tag, GitHub CLI access and the expected assets for both architectures. The lock is replaced only after the recursive source update succeeds. First-party zshard and zdot pins also accept a full lowercase commit SHA.
+The first migration from the old release-asset lock requires a full `sync`. Once schema 2 is present, an optional component limits the update:
+
+```sh
+python3 scripts/workspace.py sync zshard
+```
+
+Every synchronization observes the current remote head again. The saved commit identifies the input selected for a build. Component publication and suite publication remain separate, explicit steps.
 
 ### Local state and recovery
 
-Pin requires clean source checkouts, including initialized nested repositories, and a clean dependency lock when selecting upstream binaries. It refuses a nonempty uninitialized submodule directory and preserves its contents.
+Sync requires clean selected source checkouts, including initialized nested repositories, and a committed dependency lock. It refuses a nonempty uninitialized submodule directory and preserves its contents.
 
 Ignored paths in an initialized nested repository are also refused. These paths may be ordinary build caches; the restriction exists because Git's recursive checkout can overwrite ignored files. The error names the repository and paths to move aside. An ignored cache at the component's top level can remain if it does not collide with the new revision.
 
-If an update fails, pin attempts to restore the previous component and nested commits, their checkout branches, and the saved submodule URL configuration. It leaves the dependency lock unchanged; a concurrent lock edit is preserved. Newly initialized directories can remain and are listed for inspection. Pin does not delete their contents to make recovery appear clean.
+The source lock is replaced after all selected checkouts succeed. If an update fails, sync attempts to restore the changed component and nested commits, their checkout branches, and saved submodule URL configuration. It leaves the lock unchanged and preserves concurrent lock edits. Newly initialized directories can remain and are listed for inspection.
 
-A failed recovery is reported alongside the original failure. For example, a source edit made while pin is running can prevent Git from restoring an old checkout. Inspect the reported paths before retrying.
+A failed recovery is reported alongside the original failure. For example, a source edit made while sync is running can prevent Git from restoring an old checkout. Inspect the reported paths before retrying.
 
-The component's release and the suite's selected pin are separate decisions.
+## Build the source-locked bundle
+
+```sh
+python3 scripts/build_bundle.py
+python3 scripts/smoke_bundle.py "dist/oh-my-ztty-$(cat VERSION)-linux-$(uname -m).tar.gz"
+```
+
+The build requires all six checkouts to be clean and match schema 2's recorded commits. It compiles ztty, ssmcp, zdot and zfetch with Cargo's `--locked --release` options. The ztty build enables Wayland, and ssmcp's JavaScript helper is copied from its matching source checkout. `BUILD.json` records the component commits, branch names and source-lock synchronization time.
+
+Cargo discovers executable paths through its build output and respects the user's configured target directory, including shared output caches. Native builds use normal release outputs. A different `--arch` selects a cross target and requires its Rust standard library, linker and system development libraries. The resulting executable architecture is checked before packaging.
+
+See [the release workflow](https://github.com/LIghtJUNction/oh-my-ztty/blob/main/.github/workflows/release.yml) for the native development libraries. Builds consume the source lock without refreshing component branches; use `workspace.py sync` to select newer sources. Source and lock consistency are checked again before the archive is written.
 
 ## Bump and release
 
@@ -84,11 +101,11 @@ From a clean, validated main branch, the release form checks, commits, tags and 
 python3 scripts/bump.py patch --release
 ```
 
-Publish component versions, pin them in the suite, validate the assembled bundle, then bump oh-my-ztty. The suite's release-tag workflow builds and validates Linux x86_64 and ARM64 on native runners.
+Synchronize component sources, validate the assembled bundle, then bump oh-my-ztty when preparing publication. The suite's release-tag workflow builds and validates Linux x86_64 and ARM64 on native runners. Historical releases retain their original source and evidence; the [0.2.6 report](https://github.com/LIghtJUNction/oh-my-ztty/blob/main/docs/reports/0.2.6/release.zh-CN.md) describes that shipped version.
 
 ## Release evidence
 
-A release record should identify source pins, upstream binary digests, local check results and a full installation lifecycle.
+A release record should identify the source lock, six gitlinks, archive checksums, local check results and a full installation lifecycle. Store text measurements and artifact links in Git; keep generated screenshots and release archives in the artifact destination.
 
 Install twice in an isolated home, exercise the actual shell and bundled programs, then uninstall. Include pre-existing files so preservation checks test real data. Keep startup, first completion, live memory and active AI sessions as distinct measurement scopes.
 

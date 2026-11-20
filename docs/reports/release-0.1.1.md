@@ -30,7 +30,7 @@ zsh 由 Linux 发行版提供。套件版本记录一组经过验证的组件版
 
 字体通过 Fontconfig 在已安装字体间回退，提示符不依赖私用区图标。当前隔离环境实际选择了 JetBrainsMono Nerd Font；用户的字体安装情况和 Fontconfig 规则会影响结果。提示符回调只使用 zsh 内置命令，不创建外部进程。
 
-[真实运行截图](linux-x86_64-terminal.png) · [Ink 配置](https://github.com/LIghtJUNction/oh-my-ztty/blob/v0.1.1/config/zsh/ink.zsh)
+[真实运行截图（截图归档）](https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.6/oh-my-ztty-generated-evidence-20261121.tar.gz) · [Ink 配置](https://github.com/LIghtJUNction/oh-my-ztty/blob/v0.1.1/config/zsh/ink.zsh)
 
 ### Shell 与插件接口
 

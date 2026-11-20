@@ -39,19 +39,19 @@ Ink 使用暖石墨背景、亚麻白文字、铜色重点和较大的留白。�
 
 `omztty info` 显式运行 zfetch；正常打开 shell 不自动打印系统概况。
 
-![隔离显示中的实际 oh-my-ztty 0.2.1 终端与 zfetch 0.1.0](workspace-0.2.1/terminal-zfetch.jpg)
+[隔离显示中的实际 oh-my-ztty 0.2.1 终端与 zfetch 0.1.0（截图归档）](https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.6/oh-my-ztty-generated-evidence-20261121.tar.gz)
 
 ### Neovim 默认页面
 
 原生默认页面提供文件查找、最近文件、新缓冲区和快捷键入口。
 
-![隔离显示中的实际 Neovim Ink 默认页面](workspace-0.2.1/nvim-home.jpg)
+[隔离显示中的实际 Neovim Ink 默认页面（截图归档）](https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.6/oh-my-ztty-generated-evidence-20261121.tar.gz)
 
 ### Neovim 编辑公开项目代码
 
 截图打开的是本仓库的公开提示符代码，展示实际行号、语法颜色、模式与文件状态。
 
-![隔离显示中的实际 Neovim 编辑公开 Ink 提示符代码](workspace-0.2.1/nvim-code.jpg)
+[隔离显示中的实际 Neovim 编辑公开 Ink 提示符代码（截图归档）](https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.6/oh-my-ztty-generated-evidence-20261121.tar.gz)
 
 zrc 本轮交付 10 个配置模块：Neovim、Kitty、Foot、Ghostty、tmux、fzf、bat、ripgrep、Git 显示设置和 shell 设置。套件再组合自身的 zsh、ztty 入口。配置模块的存在与应用已安装、已运行是不同的验收项：本机实际验收覆盖 shell 和 Neovim 等记录中的路径；**tmux 未安装，未做运行验收**，不能把 10 个模块写成 10 个应用均已实测。Neovim 配置需要 0.11 或更新版本；本轮以原生配置替换旧 LazyVim 配置，功能集合有所变化。
 

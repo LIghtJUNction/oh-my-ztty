@@ -1,4 +1,4 @@
-"""Exercise workspace pins with real repositories and fixture-only file remotes."""
+"""Exercise default-branch synchronization with real repositories and fixture-only file remotes."""
 from __future__ import annotations
 import json
 import os
@@ -17,7 +17,7 @@ class WorkspaceFixture:
     def __init__(self, component="ztty"):
         cache = SCRIPT.parent.parent / ".cache" / "workspace-tests"
         cache.mkdir(parents=True, exist_ok=True)
-        self.temp = tempfile.TemporaryDirectory(prefix="pin fixture ", dir=cache)
+        self.temp = tempfile.TemporaryDirectory(prefix="sync fixture ", dir=cache)
         self.base = Path(self.temp.name)
         self.component = component
         self.env = {key: value for key, value in os.environ.items()
@@ -62,13 +62,10 @@ class WorkspaceFixture:
         shutil.copy2(SCRIPT, self.root / "scripts/workspace.py")
         (self.root / ".gitignore").write_text(".cache/\n")
         self.lock_path = self.root / "dependencies.lock.json"
-        lock = {"components": {"ztty": {
-            "repository": "fixture/ztty", "tag": "v1.0.0",
-            "assets": {arch: {
-                "url": f"https://github.com/fixture/ztty/releases/download/v1.0.0/bundle-{arch}.tar.gz",
-                "sha256": "1" * 64,
-            } for arch in ("x86_64", "aarch64")},
-        }}}
+        lock = {"schema": 2, "updated_at": "2026-11-21T00:00:00+00:00",
+                "components": {component: {
+                    "repository": f"https://github.com/LIghtJUNction/{component}.git",
+                    "branch": "main", "commit": self.old_head}}}
         self.lock_path.write_text(json.dumps(lock, indent=2) + "\n")
         self.commit(self.root, "Suite files")
         self.git(self.root, "submodule", "add", str(self.upstream), "components/" + component)
@@ -81,7 +78,9 @@ class WorkspaceFixture:
         self.git(self.leaf, "checkout", "-b", "kept-leaf")
         self.original_lock = self.lock_path.read_bytes()
         self.original_branch = self.git(self.path, "symbolic-ref", "--short", "HEAD")
-        self._install_gh_fixture()
+        self.env["GIT_CONFIG_COUNT"] = "4"
+        self.env["GIT_CONFIG_KEY_3"] = f"url.{self.upstream}.insteadOf"
+        self.env["GIT_CONFIG_VALUE_3"] = f"https://github.com/LIghtJUNction/{component}.git"
 
     def close(self):
         self.temp.cleanup()
@@ -106,21 +105,6 @@ class WorkspaceFixture:
         self.git(path, "add", "--all")
         self.git(path, "commit", "--quiet", "-m", message)
         return self.git(path, "rev-parse", "HEAD")
-
-    def _install_gh_fixture(self):
-        bin_dir = self.base / "fixture bin"
-        bin_dir.mkdir()
-        program = bin_dir / "gh"
-        program.write_text(
-            "#!" + sys.executable + "\n"
-            "import json,sys\n"
-            "tag=sys.argv[-1].rsplit('/',1)[-1]\n"
-            "assets=[{'name':'bundle-'+a+'.tar.gz',"
-            "'browser_download_url':'https://github.com/fixture/ztty/releases/download/'+tag+'/bundle-'+a+'.tar.gz',"
-            "'digest':'sha256:'+'2'*64} for a in ('x86_64','aarch64')]\n"
-            "print(json.dumps({'draft':False,'prerelease':False,'assets':assets}))\n")
-        program.chmod(0o755)
-        self.env["PATH"] = str(bin_dir) + os.pathsep + self.env["PATH"]
 
     def new_release(self, broken=False, extracted=False, cache_collision=False):
         (self.leaf_remote / "value").write_text("new leaf\n")
@@ -165,9 +149,34 @@ class WorkspaceFixture:
         location.write_text("#!/bin/sh\n" + content)
         location.chmod(0o755)
 
-    def pin(self, ref="v1.1.0"):
-        return self.command([sys.executable, "scripts/workspace.py", "pin",
-                             self.component, ref], self.root, check=False)
+    def sync(self):
+        return self.command([sys.executable, "scripts/workspace.py", "sync",
+                             self.component], self.root, check=False)
+
+    def add_suite_components(self):
+        components = {self.component: {"upstream": self.upstream,
+                                      "path": self.path,
+                                      "old_head": self.old_head,
+                                      "branch": self.original_branch}}
+        for name in ("ssmcp", "zshard", "zdot", "zrc", "zfetch"):
+            upstream = self.repo(name + " remote")
+            (upstream / "value").write_text("old " + name + "\n")
+            old_head = self.commit(upstream, "Old " + name)
+            self.git(self.root, "submodule", "add", str(upstream), "components/" + name)
+            path = self.root / "components" / name
+            components[name] = {"upstream": upstream, "path": path,
+                                "old_head": old_head,
+                                "branch": self.git(path, "symbolic-ref", "--short", "HEAD")}
+            index = int(self.env["GIT_CONFIG_COUNT"])
+            self.env["GIT_CONFIG_COUNT"] = str(index + 1)
+            self.env[f"GIT_CONFIG_KEY_{index}"] = f"url.{upstream}.insteadOf"
+            self.env[f"GIT_CONFIG_VALUE_{index}"] = f"https://github.com/LIghtJUNction/{name}.git"
+        self.commit(self.root, "Add remaining suite components")
+        return components
+
+    def sync_all(self):
+        return self.command([sys.executable, "scripts/workspace.py", "sync"],
+                            self.root, check=False)
 
     def assert_old(self, test, expected_lock=None):
         test.assertEqual(self.git(self.path, "rev-parse", "HEAD"), self.old_head)
@@ -181,7 +190,7 @@ class WorkspaceFixture:
                          self.original_lock if expected_lock is None else expected_lock)
 
 
-class WorkspacePinTests(unittest.TestCase):
+class WorkspaceSyncTests(unittest.TestCase):
     def fixture(self, component="ztty"):
         fixture = WorkspaceFixture(component)
         self.addCleanup(fixture.close)
@@ -194,7 +203,7 @@ class WorkspacePinTests(unittest.TestCase):
         (f.path / "cache/keep").write_text("top-level build cache\n")
         temporary_name = f.root / "dependencies.lock.json.new"
         temporary_name.write_text("unrelated file\n")
-        result = f.pin()
+        result = f.sync()
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertEqual(f.git(f.path, "rev-parse", "HEAD"), f.new_head)
         self.assertEqual(f.git(f.nested, "rev-parse", "HEAD"), f.nested_new)
@@ -204,14 +213,14 @@ class WorkspacePinTests(unittest.TestCase):
         self.assertEqual(f.git(fresh / "deeper/leaf", "rev-parse", "HEAD"), f.leaf_new)
         self.assertEqual((f.path / "cache/keep").read_text(), "top-level build cache\n")
         self.assertEqual(temporary_name.read_text(), "unrelated file\n")
-        self.assertEqual(json.loads(f.lock_path.read_text())["components"]["ztty"]["tag"], "v1.1.0")
+        self.assertEqual(json.loads(f.lock_path.read_text())["components"]["ztty"]["commit"], f.new_head)
         self.assertEqual(f.git(f.path, "status", "--porcelain", "--ignore-submodules=none"), "")
 
 
     def test_extracts_inline_directory_into_recursive_submodule(self):
         f = self.fixture()
         f.new_release(extracted=True)
-        result = f.pin()
+        result = f.sync()
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         extracted = f.path / "vendor/extracted"
         self.assertEqual(f.git(extracted, "rev-parse", "HEAD"), f.new_module_head)
@@ -224,7 +233,7 @@ class WorkspacePinTests(unittest.TestCase):
         f.new_release(cache_collision=True)
         (f.path / "cache").mkdir()
         (f.path / "cache/keep").write_text("local build cache\n")
-        result = f.pin()
+        result = f.sync()
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("would be overwritten by checkout", result.stderr)
         self.assertEqual((f.path / "cache/keep").read_text(), "local build cache\n")
@@ -239,7 +248,7 @@ class WorkspacePinTests(unittest.TestCase):
         exclude.write_text(exclude.read_text() + "\ndeps/new/\n")
         (f.path / "deps/new").mkdir()
         (f.path / "deps/new/keep").write_text("pre-existing ignored contents\n")
-        result = f.pin()
+        result = f.sync()
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("New submodule directory is not empty", result.stderr)
         self.assertIn("Additional submodule directories retained for inspection", result.stderr)
@@ -258,7 +267,7 @@ class WorkspacePinTests(unittest.TestCase):
         f.git(f.path, "clone", str(f.leaf_remote), str(target))
         f.git(target, "checkout", "-b", "local-work")
         local_head = f.git(target, "rev-parse", "HEAD")
-        result = f.pin()
+        result = f.sync()
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("New submodule directory is not empty", result.stderr)
         self.assertEqual(f.git(target, "rev-parse", "HEAD"), local_head)
@@ -266,13 +275,13 @@ class WorkspacePinTests(unittest.TestCase):
         self.assertEqual((target / "value").read_text(), "new leaf\n")
         f.assert_old(self)
 
-    def test_full_commit_pin_for_first_party_component(self):
+    def test_default_branch_sync_for_shell_component(self):
         f = self.fixture("zshard")
         f.new_release()
-        result = f.pin(f.new_head)
+        result = f.sync()
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertTrue((f.path / "deps/new/deeper/leaf/.git").exists())
-        self.assertEqual(f.lock_path.read_bytes(), f.original_lock)
+        self.assertEqual(json.loads(f.lock_path.read_text())["components"]["zshard"]["commit"], f.new_head)
 
     def test_nested_source_changes_are_not_hidden_by_ignore_configuration(self):
         f = self.fixture()
@@ -280,7 +289,7 @@ class WorkspacePinTests(unittest.TestCase):
         f.git(f.path, "config", "submodule.deps/existing.ignore", "all")
         f.git(f.nested, "config", "submodule.deps/leaf.ignore", "all")
         (f.leaf / "value").write_text("local source edit\n")
-        result = f.pin()
+        result = f.sync()
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("source changes", result.stderr)
         self.assertEqual((f.leaf / "value").read_text(), "local source edit\n")
@@ -291,7 +300,7 @@ class WorkspacePinTests(unittest.TestCase):
         f.new_release()
         (f.nested / "cache").mkdir()
         (f.nested / "cache/keep").write_text("nested build cache\n")
-        result = f.pin()
+        result = f.sync()
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("ignored paths (possibly build caches)", result.stderr)
         self.assertIn("cache/", result.stderr)
@@ -303,7 +312,7 @@ class WorkspacePinTests(unittest.TestCase):
         f.new_release()
         f.git(f.path, "submodule", "deinit", "--", "deps/existing")
         (f.nested / "keep").write_text("pre-existing data\n")
-        result = f.pin()
+        result = f.sync()
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("Uninitialized submodule directory is not empty", result.stderr)
         self.assertEqual((f.nested / "keep").read_text(), "pre-existing data\n")
@@ -315,7 +324,7 @@ class WorkspacePinTests(unittest.TestCase):
         f.new_release()
         edited = f.original_lock + b"\n"
         f.lock_path.write_bytes(edited)
-        result = f.pin()
+        result = f.sync()
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("dependencies.lock.json changes first", result.stderr)
         f.assert_old(self, edited)
@@ -326,9 +335,9 @@ class WorkspacePinTests(unittest.TestCase):
         configured_url = str(f.base / "custom mirror retained")
         f.git(f.path, "config", "submodule.deps/existing.url", configured_url)
         f.git(f.nested, "config", "remote.origin.url", configured_url)
-        result = f.pin()
+        result = f.sync()
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn("Pin ztty failed", result.stderr)
+        self.assertIn("Sync ztty failed", result.stderr)
         self.assertIn("Previous source commits and checkout branches restored", result.stderr)
         self.assertIn("Additional submodule directories retained for inspection", result.stderr)
         self.assertTrue((f.path / "deps/new/.git").exists())
@@ -336,16 +345,16 @@ class WorkspacePinTests(unittest.TestCase):
         self.assertEqual(f.git(f.nested, "config", "remote.origin.url"), configured_url)
         f.assert_old(self)
 
-    def test_lock_changed_during_pin_is_preserved_and_sources_are_restored(self):
+    def test_lock_changed_during_sync_is_preserved_and_sources_are_restored(self):
         f = self.fixture()
         f.new_release()
         edited = b"concurrent lock edit\n"
         f.hook(f'if [ "$2" = {shlex.quote(f.new_head)} ]; then\n'
                f"  printf 'concurrent lock edit\\n' > {shlex.quote(str(f.lock_path))}\n"
                "fi\n")
-        result = f.pin()
+        result = f.sync()
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn("changed during pin; it was preserved", result.stderr)
+        self.assertIn("changed during sync; it was preserved", result.stderr)
         f.assert_old(self, edited)
 
     def test_rollback_failure_reports_both_errors_and_keeps_conflicting_edit(self):
@@ -354,12 +363,130 @@ class WorkspacePinTests(unittest.TestCase):
         f.hook(f'if [ "$2" = {shlex.quote(f.new_head)} ]; then\n'
                "  printf 'concurrent source edit\\n' > value\n"
                "fi\n")
-        result = f.pin()
+        result = f.sync()
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("selected source tree is not clean", result.stderr)
         self.assertIn("Rollback incomplete", result.stderr)
         self.assertEqual((f.path / "value").read_text(), "concurrent source edit\n")
         self.assertEqual(f.lock_path.read_bytes(), f.original_lock)
+
+    def test_remote_default_branch_overrides_stale_origin_head(self):
+        f = self.fixture()
+        f.new_release()
+        f.git(f.upstream, "branch", "-m", "trunk")
+        result = f.sync()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        record = json.loads(f.lock_path.read_text())["components"]["ztty"]
+        self.assertEqual(record["branch"], "trunk")
+        self.assertEqual(record["commit"], f.new_head)
+        self.assertIn("observed_at", record)
+        self.assertNotIn("assets", record)
+        self.assertNotIn("tag", record)
+
+    def test_next_sync_refreshes_the_default_branch_instead_of_reusing_lock(self):
+        f = self.fixture()
+        f.new_release()
+        result = f.sync()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        f.commit(f.root, "Record source sync")
+        (f.upstream / "value").write_text("latest source without a release tag\n")
+        newest = f.commit(f.upstream, "Move default branch")
+        result = f.sync()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(f.git(f.path, "rev-parse", "HEAD"), newest)
+        self.assertEqual(json.loads(f.lock_path.read_text())["components"]["ztty"]["commit"], newest)
+
+    def test_partial_migration_does_not_invent_unobserved_component_sources(self):
+        f = self.fixture()
+        legacy = {"schema": 1, "components": {"ztty": {"tag": "v1.0.0"}}}
+        f.lock_path.write_text(json.dumps(legacy) + "\n")
+        f.commit(f.root, "Legacy release lock")
+        previous = f.lock_path.read_bytes()
+        result = f.sync()
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("without a component", result.stderr)
+        self.assertEqual(f.lock_path.read_bytes(), previous)
+        self.assertEqual(f.git(f.path, "rev-parse", "HEAD"), f.old_head)
+
+    def test_all_components_are_checked_before_the_first_checkout(self):
+        f = self.fixture()
+        components = f.add_suite_components()
+        f.new_release()
+        marker = f.base / "first checkout"
+        f.hook(f"printf '%s\\n' \"$2\" >> {shlex.quote(str(marker))}\n")
+        last = components["zfetch"]
+        (last["path"] / "value").write_text("uncommitted zfetch work\n")
+        result = f.sync_all()
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("source changes in components/zfetch", result.stderr)
+        self.assertFalse(marker.exists(), "A component was checked out before preflight finished")
+        self.assertEqual((last["path"] / "value").read_text(), "uncommitted zfetch work\n")
+        f.assert_old(self)
+        for component in components.values():
+            self.assertEqual(f.git(component["path"], "rev-parse", "HEAD"), component["old_head"])
+            self.assertEqual(f.git(component["path"], "symbolic-ref", "--short", "HEAD"),
+                             component["branch"])
+
+    def test_second_component_recursive_failure_restores_the_whole_sync(self):
+        f = self.fixture()
+        components = f.add_suite_components()
+        f.new_release()
+        marker = f.base / "first checkout"
+        f.hook(f"printf '%s\\n' \"$2\" >> {shlex.quote(str(marker))}\n")
+        second = components["ssmcp"]
+        remote = second["upstream"]
+        (remote / "value").write_text("new ssmcp\n")
+        f.git(remote, "config", "-f", ".gitmodules", "submodule.broken.path", "deps/broken")
+        f.git(remote, "config", "-f", ".gitmodules", "submodule.broken.url",
+              str(f.base / "missing second component remote"))
+        f.git(remote, "update-index", "--add", "--cacheinfo",
+              "160000," + f.leaf_new + ",deps/broken")
+        f.git(remote, "add", ".gitmodules", "value")
+        f.git(remote, "commit", "--quiet", "-m", "Add unavailable recursive dependency")
+        result = f.sync_all()
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("missing second component remote", result.stderr)
+        self.assertIn("Previous source commits and checkout branches restored", result.stderr)
+        visited = marker.read_text().splitlines()
+        self.assertIn(f.new_head, visited)
+        self.assertEqual(visited[-1], f.old_head)
+        f.assert_old(self)
+        for component in components.values():
+            self.assertEqual(f.git(component["path"], "rev-parse", "HEAD"), component["old_head"])
+            self.assertEqual(f.git(component["path"], "symbolic-ref", "--short", "HEAD"),
+                             component["branch"])
+        self.assertEqual((second["path"] / "value").read_text(), "old ssmcp\n")
+        self.assertFalse((second["path"] / ".gitmodules").exists())
+
+    def test_full_sync_migrates_legacy_assets_to_all_six_source_records(self):
+        f = self.fixture()
+        components = f.add_suite_components()
+        legacy = {"schema": 1, "components": {
+            name: {"tag": "v1.0.0", "assets": {"x86_64": {"url": "legacy asset"}}}
+            for name in ("ztty", "ssmcp")}}
+        f.lock_path.write_text(json.dumps(legacy) + "\n")
+        f.commit(f.root, "Use legacy release asset lock")
+        f.new_release()
+        expected = {"ztty": f.new_head}
+        for name, component in components.items():
+            if name != "ztty":
+                (component["upstream"] / "value").write_text("latest " + name + "\n")
+                expected[name] = f.commit(component["upstream"], "Advance " + name)
+        result = f.sync_all()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        lock = json.loads(f.lock_path.read_text())
+        self.assertEqual(lock["schema"], 2)
+        self.assertIn("updated_at", lock)
+        self.assertEqual(set(lock["components"]), set(components))
+        for name, component in components.items():
+            record = lock["components"][name]
+            self.assertEqual(record["repository"], f"https://github.com/LIghtJUNction/{name}.git")
+            self.assertEqual(record["branch"], "main")
+            self.assertEqual(record["commit"], expected[name])
+            self.assertEqual(f.git(component["path"], "rev-parse", "HEAD"), expected[name])
+            self.assertIn("observed_at", record)
+            self.assertNotIn("tag", record)
+            self.assertNotIn("assets", record)
 
 
 if __name__ == "__main__":

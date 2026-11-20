@@ -24,7 +24,7 @@ SSMCP 仍为 0.10.10，其他五个组件源码未变。zdot、zfetch 复用正�
 
 ARM64 本次仅核验组装、ELF 和清单，没有运行验收。`--text-plugin` 仅做套件 argv 转发检查；本次未扩跑插件执行或 Wayland GUI。上游宿主证据保留原源码身份。图形原件中的单次启动样本仅作诊断，不用于性能比较。
 
-![私有 Xvfb 中使用正式 ztty 0.5.0 的实际套件候选](ztty-0.5.0-consumer-20261120/linux-x86_64-terminal.png)
+[私有 Xvfb 中使用正式 ztty 0.5.0 的实际套件候选（截图归档）](https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.6/oh-my-ztty-generated-evidence-20261121.tar.gz)
 
 ## 私有包与清理
 

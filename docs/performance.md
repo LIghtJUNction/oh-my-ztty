@@ -65,7 +65,7 @@ A separate 40-sample interleaved test measured the complete `omztty shell -i -c 
 
 The window first became observable after **114.8 ms** in one launch. That is a diagnostic reading with a 20 ms polling interval, not a statistically measured rendering latency.
 
-The [cache-reuse record](reports/linux-x86_64-completion-cache.json) contains the installed dump's before/after hash and timestamp. Both remained unchanged after the real first Tab. The [terminal screenshot](reports/linux-x86_64-terminal.png) records the tested preset.
+The [cache-reuse record](reports/linux-x86_64-completion-cache.json) contains the installed dump's before/after hash and timestamp. Both remained unchanged after the real first Tab. The [terminal screenshot (screenshot archive)](https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.6/oh-my-ztty-generated-evidence-20261121.tar.gz) records the tested preset.
 
 ### Virtual-display diagnostic
 

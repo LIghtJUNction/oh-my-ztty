@@ -1,21 +1,23 @@
 #!/usr/bin/env python3
-"""Build a complete, deterministic Linux release from pinned inputs."""
+"""Build a Linux release from synchronized default-branch sources."""
 from __future__ import annotations
 import argparse
 import gzip
 import hashlib
 import json
-import os
 from pathlib import Path
 import platform
+import re
 import shutil
 import subprocess
+import sys
 import tarfile
 import tempfile
-import urllib.request
 
 ROOT = Path(__file__).resolve().parents[1]
 ARCHES = {"x86_64": 62, "aarch64": 183}
+COMPONENTS = ("ztty", "ssmcp", "zshard", "zdot", "zrc", "zfetch")
+BINARIES = ("ztty", "ssmcp", "zdot", "zfetch")
 
 def run(argv, cwd=ROOT, **kwargs):
     return subprocess.check_output(argv, cwd=cwd, text=True, **kwargs).strip()
@@ -30,33 +32,70 @@ def copy(source, destination):
     destination.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(source, destination)
 
-def download(spec):
-    path = ROOT / ".cache" / spec["url"].rsplit("/", 1)[-1]
-    path.parent.mkdir(exist_ok=True)
-    if path.exists() and digest(path) == spec["sha256"]:
-        return path
-    temporary = path.with_suffix(path.suffix + ".part")
-    request = urllib.request.Request(spec["url"], headers={"User-Agent": "oh-my-ztty-release/1"})
-    with urllib.request.urlopen(request, timeout=90) as response, temporary.open("wb") as out:
-        shutil.copyfileobj(response, out)
-    if digest(temporary) != spec["sha256"]:
-        temporary.unlink()
-        raise RuntimeError(f"upstream checksum mismatch: {path.name}")
-    temporary.replace(path)
-    return path
+def verify_sources(lock):
+    if not isinstance(lock, dict) or lock.get("schema") != 2:
+        raise RuntimeError("Run workspace.py sync to create the default-branch source lock")
+    components = lock.get("components")
+    if not isinstance(components, dict) or set(components) != set(COMPONENTS):
+        raise RuntimeError("The source lock must contain all six suite components")
+    if not isinstance(lock.get("updated_at"), str) or not lock["updated_at"]:
+        raise RuntimeError("The source lock has no synchronization time")
+    sources = {}
+    for name in COMPONENTS:
+        spec = components[name]
+        repository = f"https://github.com/LIghtJUNction/{name}.git"
+        if (not isinstance(spec, dict) or spec.get("repository") != repository
+                or not isinstance(spec.get("branch"), str) or not spec["branch"]
+                or not isinstance(spec.get("commit"), str)
+                or not re.fullmatch(r"[0-9a-f]{40}", spec.get("commit", ""))):
+            raise RuntimeError(f"Invalid default-branch source lock for {name}")
+        source = ROOT / "components" / name
+        head = run(["git", "rev-parse", "HEAD"], cwd=source)
+        if head != spec["commit"]:
+            raise RuntimeError(f"{name} source HEAD does not match dependencies.lock.json; run workspace.py sync")
+        dirty = run(["git", "status", "--porcelain", "--untracked-files=all",
+                     "--ignore-submodules=none"], cwd=source)
+        if dirty:
+            raise RuntimeError(f"{name} source tree has uncommitted changes")
+        sources[name] = head
+    return sources
 
-def extract_member(archive, basename, destination, required=True):
-    with tarfile.open(archive, "r:gz") as stream:
-        candidates = [entry for entry in stream.getmembers() if entry.isfile() and entry.name.rsplit("/", 1)[-1] == basename]
-        if not candidates and not required:
-            return
-        if len(candidates) != 1:
-            raise RuntimeError(f"expected exactly one {basename} in {archive.name}")
-        destination.parent.mkdir(parents=True, exist_ok=True)
-        destination.write_bytes(stream.extractfile(candidates[0]).read())
+def build_component(name, arch):
+    source = ROOT / "components" / name
+    manifest = source / "Cargo.toml"
+    command = ["cargo", "build", "--locked", "--release", "--bin", name,
+               "--manifest-path", str(manifest),
+               "--message-format=json-render-diagnostics"]
+    if platform.machine() != arch:
+        command.extend(["--target", f"{arch}-unknown-linux-gnu"])
+    if name == "ztty":
+        command.extend(["--features", "wayland"])
+    # Cargo owns output placement, including the user's shared target directory.
+    result = subprocess.run(command, cwd=source, check=True, text=True,
+                            stdout=subprocess.PIPE)
+    executables = set()
+    for line in result.stdout.splitlines():
+        try:
+            message = json.loads(line)
+        except json.JSONDecodeError as error:
+            raise RuntimeError(f"Cargo returned invalid build metadata for {name}") from error
+        target = message.get("target", {})
+        if (message.get("reason") == "compiler-artifact"
+                and target.get("name") == name and "bin" in target.get("kind", [])
+                and message.get("executable")
+                and Path(message.get("manifest_path", "")).resolve() == manifest.resolve()):
+            executables.add(Path(message["executable"]))
+    if len(executables) != 1:
+        raise RuntimeError(f"Cargo did not report exactly one {name} executable")
+    executable = executables.pop()
+    if not executable.is_absolute():
+        executable = source / executable
+    check_elf(executable, arch)
+    return executable
 
 def check_elf(path, arch):
-    header = path.read_bytes()[:20]
+    with path.open("rb") as stream:
+        header = stream.read(20)
     if len(header) != 20 or header[:6] != b"\x7fELF\x02\x01" or int.from_bytes(header[18:20], "little") != ARCHES[arch]:
         raise RuntimeError(f"wrong executable architecture: {path}")
 
@@ -67,45 +106,16 @@ def tracked_component(name, destination):
         if entry and not entry.startswith((".github/", "tests/", "scripts/")):
             copy(source / entry, destination / entry)
 
-def main():
+def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--arch", choices=ARCHES, default=platform.machine())
-    parser.add_argument("--zdot", type=Path, help="existing binary matching the target architecture")
-    parser.add_argument("--zfetch", type=Path, help="existing zfetch binary matching the target architecture")
     parser.add_argument("--output", type=Path, default=ROOT / "dist")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     version = (ROOT / "VERSION").read_text().strip()
-    lock = json.loads((ROOT / "dependencies.lock.json").read_text())
-    sources = {}
-    for name in ["ztty", "ssmcp", "zshard", "zdot", "zrc", "zfetch"]:
-        source = ROOT / "components" / name
-        sha = run(["git", "rev-parse", "HEAD"], cwd=source)
-        sources[name] = sha
-        if name in lock["components"]:
-            expected = run(["git", "rev-parse", lock["components"][name]["tag"] + "^{commit}"], cwd=source)
-            if sha != expected:
-                raise RuntimeError(f"{name} gitlink does not match the locked release tag")
-    if args.zdot is None:
-        if platform.machine() != args.arch:
-            raise RuntimeError("cross packaging requires --zdot with a cross-built binary")
-        target = f"{args.arch}-unknown-linux-gnu"
-        target_dir = ROOT / "target" / "zdot"
-        subprocess.run(["cargo", "build", "--locked", "--release", "--target", target,
-                        "--manifest-path", str(ROOT / "components/zdot/Cargo.toml")],
-                       check=True, cwd=ROOT / "components/zdot", env={**os.environ, "CARGO_TARGET_DIR": str(target_dir)})
-        args.zdot = target_dir / target / "release/zdot"
-    if args.zfetch is None:
-        if platform.machine() != args.arch:
-            raise RuntimeError("cross packaging requires --zfetch with a cross-built binary")
-        target = f"{args.arch}-unknown-linux-gnu"
-        target_dir = ROOT / "target" / "zfetch"
-        subprocess.run(["cargo", "build", "--locked", "--release", "--target", target,
-                        "--manifest-path", str(ROOT / "components/zfetch/Cargo.toml")],
-                       check=True, cwd=ROOT / "components/zfetch",
-                       env={**os.environ, "CARGO_TARGET_DIR": str(target_dir)})
-        args.zfetch = target_dir / target / "release/zfetch"
-    check_elf(args.zfetch, args.arch)
-    check_elf(args.zdot, args.arch)
+    lock_path = ROOT / "dependencies.lock.json"
+    original_lock = lock_path.read_bytes()
+    lock = json.loads(original_lock)
+    sources = verify_sources(lock)
     args.output.mkdir(parents=True, exist_ok=True)
     (ROOT / ".cache").mkdir(exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="bundle-", dir=ROOT / ".cache") as temp:
@@ -119,26 +129,28 @@ def main():
                     copy(source, stage / source.relative_to(ROOT))
         tracked_component("zshard", stage / "components/zshard")
         tracked_component("zrc", stage / "components/zrc")
-        copy(args.zdot, stage / "bin/zdot")
-        copy(args.zfetch, stage / "bin/zfetch")
-        for name, spec in lock["components"].items():
-            archive = download(spec["assets"][args.arch])
-            extract_member(archive, name, stage / "bin" / name)
-            extract_member(archive, "LICENSE", stage / "licenses" / f"{name}.txt")
-            if name == "ssmcp":
-                extract_member(archive, "code-mode.js", stage / "bin/code-mode.js", required=False)
-        for name in ["ztty", "ssmcp", "zdot", "zfetch"]:
+        for name in BINARIES:
+            # Copy each artifact immediately: another build may reuse Cargo's
+            # shared output path while the remaining components compile.
+            copy(build_component(name, args.arch), stage / "bin" / name)
             binary = stage / "bin" / name
             binary.chmod(0o755)
             check_elf(binary, args.arch)
+        copy(ROOT / "components/ssmcp/src/code_mode.js", stage / "bin/code-mode.js")
         for name in ["omztty", "omztty-config", "zshard"]:
             (stage / "bin" / name).chmod(0o755)
         (stage / "install.sh").chmod(0o755)
         (stage / "uninstall.sh").chmod(0o755)
-        for name in ["zshard", "zdot", "zrc", "zfetch"]:
+        for name in COMPONENTS:
             copy(ROOT / "components" / name / "LICENSE", stage / "licenses" / f"{name}.txt")
+        if lock_path.read_bytes() != original_lock:
+            raise RuntimeError("dependencies.lock.json changed during the build")
+        verify_sources(lock)
         (stage / "PLATFORM").write_text(f"linux-{args.arch}\n")
-        metadata = {"schema": 1, "suite_version": version, "platform": f"linux-{args.arch}", "source_commits": sources}
+        metadata = {"schema": 2, "suite_version": version, "platform": f"linux-{args.arch}",
+                    "source_commits": sources, "sources_updated_at": lock["updated_at"],
+                    "source_branches": {name: lock["components"][name]["branch"]
+                                        for name in COMPONENTS}}
         (stage / "BUILD.json").write_text(json.dumps(metadata, indent=2, sort_keys=True) + "\n")
         manifest = []
         for path in sorted(stage.rglob("*")):
@@ -163,4 +175,8 @@ def main():
         print(json.dumps({"archive": str(archive), "sha256": checksum, "bytes": archive.stat().st_size, "sources": sources}, indent=2))
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except (RuntimeError, OSError, ValueError, subprocess.CalledProcessError) as error:
+        print("bundle: " + str(error), file=sys.stderr)
+        raise SystemExit(1)

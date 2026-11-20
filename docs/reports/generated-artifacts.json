@@ -1,0 +1,78 @@
+{
+  "schema": 1,
+  "archive_url": "https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.6/oh-my-ztty-generated-evidence-20261121.tar.gz",
+  "archive_sha256": "9f038fee512e3db4c5907667a15118ced32b5b9f0d7dd2a97c44b65947d2bf7c",
+  "archive_bytes": 438861,
+  "files": {
+    "docs/reports/0.2.5/ssmcp-native-completion.png": {
+      "git_blob": "0db2a241c70d91c28564f20f42b608715dccb7d5",
+      "bytes": 15053,
+      "sha256": "fdd02785a2f2eb4a4fb522c08fa3539f273949701a8e2b2f4927ec7335fbc307"
+    },
+    "docs/reports/0.2.6/linux-aarch64-terminal.png": {
+      "git_blob": "28e4986f22261055a183c75e63002af75c2a162d",
+      "bytes": 25903,
+      "sha256": "ec1acf3253f0befded0b6631cd1cd1d3ed756385d0283861d5245a7a7f56da0d"
+    },
+    "docs/reports/0.2.6/linux-x86_64-terminal.png": {
+      "git_blob": "28e4986f22261055a183c75e63002af75c2a162d",
+      "bytes": 25903,
+      "sha256": "ec1acf3253f0befded0b6631cd1cd1d3ed756385d0283861d5245a7a7f56da0d"
+    },
+    "docs/reports/linux-x86_64-terminal.png": {
+      "git_blob": "0b8e2d8f9f1f0c75636d9315a1d3235998988d1a",
+      "bytes": 24628,
+      "sha256": "7cd150c5a965b3715230931d3478220ff0956b98c36ba4a308ba0c27b4b36386"
+    },
+    "docs/reports/website-2026-11-20.jpg": {
+      "git_blob": "2d26f5cbaccde26e9155edc2273bd090fffa6eda",
+      "bytes": 73856,
+      "sha256": "7d4de3acb619327b219c5e6e3ca612f5232d954df88d7c627596d479fba82e2e"
+    },
+    "docs/reports/workspace-0.2.0/nvim-home.jpg": {
+      "git_blob": "10652d8b1ea359f32b8b8ef315d6d2644febfbf6",
+      "bytes": 20804,
+      "sha256": "d2dce318bdda00b34ea2be8a3b0f6b4815d5a73de2663da0472c4ae7bc2d8db4"
+    },
+    "docs/reports/workspace-0.2.0/nvim-shortcuts.jpg": {
+      "git_blob": "fa65caee01b3987b1f167ad581d21cc2c8468ae0",
+      "bytes": 36912,
+      "sha256": "a749205595299e6d3fc9a7127f44f8ad9ec719447b477544a6635caac7e779e2"
+    },
+    "docs/reports/workspace-0.2.1/nvim-code.jpg": {
+      "git_blob": "bf63f2da052fb5c218d67aee2857f082a29b24f2",
+      "bytes": 104936,
+      "sha256": "49ff76b62cdcfcf7f4a46b42c23809a6a238380680c21a5f99bc21700b15957d"
+    },
+    "docs/reports/workspace-0.2.1/nvim-home.jpg": {
+      "git_blob": "50dd0858c0924c12175c0bbd61245aff9dde08e6",
+      "bytes": 21104,
+      "sha256": "798ac83827e3843bddf7923bd45b8c132acce16afccd04afbbf364708053e433"
+    },
+    "docs/reports/workspace-0.2.1/terminal-zfetch.jpg": {
+      "git_blob": "ebfd78f61b454d40e6a7b7130ec2d75cf2e561b4",
+      "bytes": 39601,
+      "sha256": "1c23de73833e1c5d25427698daaa27714f2568597b8eaa468561a0748b0a160d"
+    },
+    "docs/reports/workspace-0.2.3/terminal.png": {
+      "git_blob": "96ef76c751a0f0dd70a457423408aaf018a24302",
+      "bytes": 24123,
+      "sha256": "79a00ba49ba001d0df3dccdddcc81ddf170c5e5541b3fe496733222729bd8db7"
+    },
+    "docs/reports/workspace-0.2.3/website-narrow.jpg": {
+      "git_blob": "14fc586c75615e07101d3c6031774a485b3a86aa",
+      "bytes": 10389,
+      "sha256": "66018e06e6c2bfb9d719ce3912d131c9da51ffb890bfd7c7b71539f03174149f"
+    },
+    "docs/reports/workspace-0.2.3/website.jpg": {
+      "git_blob": "7afb8847abd21c8a768980332ab5dbdc9fcf9de8",
+      "bytes": 93836,
+      "sha256": "025fec8ce31b6f817642d7fc18027bd69799f5e4abdd95a47875859150eb9250"
+    },
+    "docs/reports/ztty-0.5.0-consumer-20261120/linux-x86_64-terminal.png": {
+      "git_blob": "0db75e3b897dbc5f567cb777522013714d7096b2",
+      "bytes": 23904,
+      "sha256": "8be778056fef776edbb353dbc7da97724f3ef104db69b12f720302adb6e00bf0"
+    }
+  }
+}

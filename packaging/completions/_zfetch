@@ -5,6 +5,7 @@ local format_option='*--format'
 [[ $PREFIX$SUFFIX == --format=* ]] && format_option+='='
 
 _arguments \
+    '--boot[show boot-to-desktop evidence, configuration and service units]' \
     '*--json[emit structured system information]' \
     "${format_option}[select text or JSON output]:format:(text json)" \
     '--no-color[disable ANSI color]' \
