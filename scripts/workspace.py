@@ -310,12 +310,13 @@ def pin(name, ref):
 
 
 def check(component):
-    if component:
+    if component == "zrc":
+        run(sys.executable, "scripts/check.py", cwd=directory(component))
+    elif component:
         run("make", "check", cwd=ROOT if component == "suite" else directory(component))
-        return
-    for name in ("zshard", "zdot", "zrc", "zfetch"):
-        run("make", "check", cwd=directory(name))
-    run("make", "check")
+    else:
+        for name in ("zshard", "zdot", "zrc", "zfetch", "suite"):
+            check(name)
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
