@@ -4,7 +4,7 @@ oh-my-ztty gives Linux developers a configured zsh shell and a terminal to run i
 
 Use the shell in your current terminal or open the included ztty window. An optional application profile adds matching Neovim and terminal-tool settings, which you can edit as ordinary configuration files.
 
-The current suite release is **0.2.5**, available for Linux x86_64 and ARM64.
+The current suite release is **0.2.6** once its Linux x86_64 and ARM64 bundles are published. The quick start uses the latest published installer.
 
 ## Quick start
 
@@ -47,14 +47,14 @@ The profile lives under `~/.config/oh-my-ztty/profile` by default. Edit its file
 
 | Component | Its part in the setup |
 | --- | --- |
-| [ztty](https://github.com/LIghtJUNction/ztty) | Opens terminal windows and runs shell sessions |
+| [ztty 0.5.2](https://github.com/LIghtJUNction/ztty/tree/v0.5.2) | Opens terminal windows and runs shell sessions |
 | [zshard](https://github.com/LIghtJUNction/zshard) | Adds the prompt, completion, suggestions, highlighting and plugins to system zsh |
-| [zrc](https://github.com/LIghtJUNction/zrc) | Supplies native configuration files for the editor and terminal tools |
+| [zrc 0.1.2](https://github.com/LIghtJUNction/zrc/tree/v0.1.2) | Supplies native configuration files for the editor and terminal tools |
 | [zdot](https://github.com/LIghtJUNction/zdot) | Links configuration files into place, saves originals and restores them |
-| [zfetch](https://github.com/LIghtJUNction/zfetch) | Shows system information when you run `omztty info` |
-| [ssmcp](https://github.com/LIghtJUNction/ssmcp) | Connects an AI client to a workspace on request |
+| [zfetch 0.1.1](https://github.com/LIghtJUNction/zfetch/tree/v0.1.1) | Shows system information when you run `omztty info` |
+| [ssmcp 0.10.20](https://github.com/LIghtJUNction/ssmcp/tree/v0.10.20) | Connects an AI client to a workspace on request |
 
-Each suite release selects a specific combination of these components. The [release page](https://github.com/LIghtJUNction/oh-my-ztty/releases/latest) provides the bundles and checksums; the [component checkouts](https://github.com/LIghtJUNction/oh-my-ztty/tree/main/components) record the source revisions.
+These components are pinned for the 0.2.6 source version. The [release page](https://github.com/LIghtJUNction/oh-my-ztty/releases/latest) provides published bundles and checksums. See [configuration](configuration.md#completion) for completion behavior.
 
 ## Next steps
 

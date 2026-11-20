@@ -3,29 +3,29 @@
   "components": {
     "ztty": {
       "repository": "LIghtJUNction/ztty",
-      "tag": "v0.5.0",
+      "tag": "v0.5.2",
       "assets": {
         "x86_64": {
-          "url": "https://github.com/LIghtJUNction/ztty/releases/download/v0.5.0/ztty-linux-x86_64.tar.gz",
-          "sha256": "4b79ded489c37325ac049e4962e75c7ff773c2c5d073d8fbad154bb47dfed6b2"
+          "url": "https://github.com/LIghtJUNction/ztty/releases/download/v0.5.2/ztty-linux-x86_64.tar.gz",
+          "sha256": "a69a4df53b3856d57c3a6f5e9a2109cd7727e5a7f02be902f133a137b186546f"
         },
         "aarch64": {
-          "url": "https://github.com/LIghtJUNction/ztty/releases/download/v0.5.0/ztty-linux-aarch64.tar.gz",
-          "sha256": "f86ddc20d6359c8301e7198adf80359c067ea02c28228139e2a39705a5ddd09d"
+          "url": "https://github.com/LIghtJUNction/ztty/releases/download/v0.5.2/ztty-linux-aarch64.tar.gz",
+          "sha256": "24d1d7cc638291bf5746f5dbe4deb2d9aef9727bead31339d6048d0e1da2c700"
         }
       }
     },
     "ssmcp": {
       "repository": "LIghtJUNction/ssmcp",
-      "tag": "v0.10.10",
+      "tag": "v0.10.20",
       "assets": {
         "x86_64": {
-          "url": "https://github.com/LIghtJUNction/ssmcp/releases/download/v0.10.10/ssmcp-x86_64-unknown-linux-gnu.tar.gz",
-          "sha256": "42c22dabfe41d4fc2fecbabaaf222c9d35bb9b77b4550c4daccada4290530920"
+          "url": "https://github.com/LIghtJUNction/ssmcp/releases/download/v0.10.20/ssmcp-x86_64-unknown-linux-gnu.tar.gz",
+          "sha256": "33ab32051b99fa36c11935dd8438d0987c073bcb64317bec11a227d29eacb2cc"
         },
         "aarch64": {
-          "url": "https://github.com/LIghtJUNction/ssmcp/releases/download/v0.10.10/ssmcp-aarch64-unknown-linux-gnu.tar.gz",
-          "sha256": "4065ded7d71f5d7cb1ee33f32c5f306402f3825825aa68fa549bf9c998c080ce"
+          "url": "https://github.com/LIghtJUNction/ssmcp/releases/download/v0.10.20/ssmcp-aarch64-unknown-linux-gnu.tar.gz",
+          "sha256": "3b6784c5df3e8193cdc9c7b7919c601fdce398eda40db5ed500d262704267eab"
         }
       }
     }

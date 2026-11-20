@@ -128,14 +128,15 @@ Highlighting recognizes the first command token. It is not a full shell grammar 
 
 ## Completion
 
-Press Tab after a command, an option or a partial value. The suite includes native zsh completion for its tools, with the same behavior through the `omztty` wrappers.
+Press Tab after a command, an option or a partial value. The suite provides native zsh completion for its tools and their `omztty` entrypoints.
 
 | Command | Completion |
 | --- | --- |
-| `ssmcp` | Account, session, browser setup, UI, service and recovery commands; options, themes, log formats and path arguments |
-| `ztty` | Session actions, terminal settings and command completion after `-e` or `--` |
+| `ssmcp` | Client 0.10.20 commands and options, including `local`, `--account-compat` and `007 upgrade` |
+| `ztty`, `omztty ztty` | ztty 0.5.2 launch options and control commands, including `reload --binary` |
+| `omztty terminal` | Preset launch options, paths, and command completion after `-e` or `--` |
 | `zdot` | Deployment commands, synchronization actions and repository paths |
-| `zfetch` | Output format and color options |
+| `zfetch` | 0.1.1 output format and color options. The last format flag selects the output |
 | `zshard` | Plugin actions, locally installed plugin names, hooks and completion directories |
 | `zai` | AI actions and ssmcp arguments after `connect` |
 | `omztty` | Suite commands and their nested component arguments |

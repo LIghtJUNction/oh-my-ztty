@@ -37,7 +37,7 @@ omztty ai connect
 
 This starts the bundled ssmcp in the current directory. Inside the preset shell, `zai connect` provides the same handoff and forwards supplied arguments to ssmcp.
 
-Follow [ssmcp's connection instructions](https://github.com/LIghtJUNction/ssmcp/tree/v0.10.10) to connect your AI client. This command starts the workspace connection; model selection and account setup stay with that client.
+Use the [ssmcp 0.10.20 connection instructions](https://github.com/LIghtJUNction/ssmcp/tree/v0.10.20) when connecting an AI client. Model selection and account setup stay with that client.
 
 ## Use a provider
 

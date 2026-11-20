@@ -15,7 +15,7 @@ The bundle includes the terminal, shell framework and configuration tools. You n
 | Graphics libraries | X11, Xrender, Xft, Fontconfig, Wayland, xkbcommon, FreeType, HarfBuzz, EGL and GLES |
 | Binary ABI | glibc 2.34 or newer and libgcc for ztty and ssmcp |
 
-The ztty 0.5.0 binary needs all of the listed graphics libraries, including when you select the X11 backend. Release builds are validated on Ubuntu 24.04 for both architectures. Other distributions need compatible libraries; the glibc version alone does not establish compatibility.
+The ztty 0.5.2 binary needs the listed graphics libraries even when you select the X11 backend. The release workflow targets Ubuntu 24.04 for both architectures. Other distributions also need compatible libraries.
 
 Install Neovim, other applications and language servers separately when you want to use their profiles.
 
@@ -137,10 +137,10 @@ Personal shell configuration belongs outside the release directory. See [configu
 
 ## Offline installation
 
-Download an archive and its matching `.sha256` file from the [same release](https://github.com/LIghtJUNction/oh-my-ztty/releases/tag/v0.2.5), then run:
+Download an archive and its matching `.sha256` file from the same published release. The following example uses the x86_64 archive for [v0.2.6](https://github.com/LIghtJUNction/oh-my-ztty/releases/tag/v0.2.6) once that release is published.
 
 ```sh
-sh install.sh --from ./oh-my-ztty-0.2.5-linux-x86_64.tar.gz
+sh install.sh --from ./oh-my-ztty-0.2.6-linux-x86_64.tar.gz
 ```
 
 Use the aarch64 archive on ARM64. If you have already obtained the digest from the release record, the installer's `--sha256` option can supply it instead of a sidecar file.

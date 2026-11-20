@@ -1,6 +1,10 @@
 # Installation
 
-The release bundle includes ztty, zshard, zrc, zdot, zfetch and ssmcp. Installation and configuration commands from a release do not require Rust or Python. Install system zsh 5.9 or newer first. The suite window is validated on X11/XWayland. The bundled ztty 0.5.0 links X11, Xrender, Xft, Fontconfig, Wayland, xkbcommon, FreeType, HarfBuzz, EGL and GLES runtime libraries; these libraries are required even when selecting the X11 backend. Both published architectures require glibc 2.34 or newer and libgcc for ztty and ssmcp; zdot is static. Formal release validation targets Ubuntu 24.04; the ABI floor alone does not certify every distribution.
+The release bundle includes ztty, zshard, zrc, zdot, zfetch and ssmcp. Installation and configuration commands from a release do not require Rust or Python. Install system zsh 5.9 or newer first.
+
+The suite window runs on X11 or XWayland. The pinned ztty 0.5.2 executable links X11, Xrender, Xft, Fontconfig, Wayland, xkbcommon, FreeType, HarfBuzz, EGL and GLES. These runtime libraries are required even when you select the X11 backend.
+
+ztty 0.5.2 and ssmcp 0.10.20 require glibc 2.34 or newer and libgcc on both architectures. zdot is static. The release workflow targets Ubuntu 24.04 for validation.
 
 Using the editor profile requires Neovim 0.11 or newer, installed separately. The configuration commands do not install applications or language servers.
 
@@ -120,10 +124,10 @@ Configure an installed AI provider's executable and arguments as the `ZSHARD_AI_
 
 ## Offline installation
 
-Download the archive and its matching `.sha256` file from the [same release](https://github.com/LIghtJUNction/oh-my-ztty/releases/tag/v0.2.5), then run:
+Download the archive and its matching `.sha256` file from the same published release. The following example uses the x86_64 archive for [v0.2.6](https://github.com/LIghtJUNction/oh-my-ztty/releases/tag/v0.2.6) once that release is published.
 
 ```sh
-sh install.sh --from ./oh-my-ztty-0.2.5-linux-x86_64.tar.gz
+sh install.sh --from ./oh-my-ztty-0.2.6-linux-x86_64.tar.gz
 ```
 
 Use the aarch64 archive on ARM64. An explicit `--sha256 HEX` can replace the sidecar file when the digest has already been obtained from the release record.

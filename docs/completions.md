@@ -10,11 +10,21 @@ The shell searches the personal completion directory, suite definitions and exis
 
 ## Native coverage and version targets
 
-Suite component versions follow `dependencies.lock.json`. The ssmcp client definition follows the pinned 0.10.10 release, including its supported invite/join commands. It does not advertise later-only options. The separate ssmcpd definition targets the standalone daemon listed below.
+The suite pins ztty and the ssmcp client in `dependencies.lock.json` and builds zfetch from its pinned source. The ssmcpd row describes completion for the separately installed daemon.
+
+`omztty terminal` completes launch options and paths because it starts ztty with the suite's preset. Both `-e` and `--` delegate completion to the command being launched. Use `ztty` or `omztty ztty` for control commands such as `attach`, `mcp`, and `reload`. The `reload --binary` argument completes absolute executable paths.
+
+The ssmcp 0.10.20 client completion offers `local`, `--account-compat`, and `007 upgrade`.
+
+zfetch 0.1.1 accepts `--json` and `--format` in either order. The last format flag selects the output, so Tab offers either flag after an earlier one.
 
 | Commands | Verified grammar |
 | --- | --- |
-| omztty, ztty, zdot, zfetch, zshard, zai, ssmcp | This suite's component lock and public entrypoints |
+| omztty, zdot, zshard, zai | Public entrypoints in the suite |
+| ztty and omztty ztty | ztty 0.5.2 |
+| omztty terminal | ztty 0.5.2 launch options |
+| zfetch | 0.1.1 |
+| ssmcp | Client 0.10.20 |
 | codex | codex-cli 0.170.0 |
 | claude | Claude Code 2.1.329 |
 | gemini | Gemini CLI 0.46.0 |

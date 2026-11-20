@@ -33,14 +33,14 @@ Use your AUR helper to upgrade the system package. Configuration adoption remain
 
 | Component | Job |
 | --- | --- |
-| [ztty](https://github.com/LIghtJUNction/ztty) | Native terminal |
+| [ztty 0.5.2](https://github.com/LIghtJUNction/ztty/tree/v0.5.2) | Native terminal |
 | [zshard](https://github.com/LIghtJUNction/zshard) | Original zsh framework: completion, suggestions, highlighting and lazy plugins |
-| [zrc](https://github.com/LIghtJUNction/zrc) | Native Neovim and terminal-tool configuration with one warm Ink palette |
+| [zrc 0.1.2](https://github.com/LIghtJUNction/zrc/tree/v0.1.2) | Native Neovim and terminal-tool configuration with one warm Ink palette |
 | [zdot](https://github.com/LIghtJUNction/zdot) | `no_std` dotfiles manager with plans, reversible links and explicit Git sync |
-| [zfetch](https://github.com/LIghtJUNction/zfetch) | On-demand native system overview, zero crate dependencies |
-| [ssmcp](https://github.com/LIghtJUNction/ssmcp) | On-demand MCP workspace connection for AI |
+| [zfetch 0.1.1](https://github.com/LIghtJUNction/zfetch/tree/v0.1.1) | On-demand native system overview, zero crate dependencies |
+| [ssmcp 0.10.20](https://github.com/LIghtJUNction/ssmcp/tree/v0.10.20) | On-demand MCP workspace connection for AI |
 
-Each is a separate open-source repository, pinned here as a Git submodule. zsh is supplied by your Linux distribution.
+These are the component versions selected for oh-my-ztty 0.2.6. The suite records their source revisions as Git submodules. Your Linux distribution supplies zsh. See the [completion reference](docs/completions.md) for command and version coverage.
 
 ## Ink preset
 

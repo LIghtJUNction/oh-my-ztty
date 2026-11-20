@@ -35,14 +35,14 @@ omztty doctor
 
 | 项目 | 作用 |
 | --- | --- |
-| [ztty](https://github.com/LIghtJUNction/ztty) | 原生终端 |
+| [ztty 0.5.2](https://github.com/LIghtJUNction/ztty/tree/v0.5.2) | 原生终端 |
 | [zshard](https://github.com/LIghtJUNction/zshard) | zsh 框架，提供补全、历史建议、命令高亮和延迟加载插件 |
-| [zrc](https://github.com/LIghtJUNction/zrc) | Neovim 与常用终端工具的原生配置，共用暖色 Ink 外观 |
+| [zrc 0.1.2](https://github.com/LIghtJUNction/zrc/tree/v0.1.2) | Neovim 与常用终端工具的原生配置，共用暖色 Ink 外观 |
 | [zdot](https://github.com/LIghtJUNction/zdot) | `no_std` 配置管理工具，预览、部署链接、备份和恢复，并显式执行 Git 同步 |
-| [zfetch](https://github.com/LIghtJUNction/zfetch) | 零 crate 依赖的原生 `no_std` 系统概况工具，按需运行 |
-| [ssmcp](https://github.com/LIghtJUNction/ssmcp) | 按需把工作区接入 AI 的 MCP 工具 |
+| [zfetch 0.1.1](https://github.com/LIghtJUNction/zfetch/tree/v0.1.1) | 零 crate 依赖的原生 `no_std` 系统概况工具，按需运行 |
+| [ssmcp 0.10.20](https://github.com/LIghtJUNction/ssmcp/tree/v0.10.20) | 按需把工作区接入 AI 的 MCP 工具 |
 
-本仓库用 Git 子模块固定各组件版本。zsh、Neovim 等系统应用单独安装；普通 shell 启动不会运行系统概况工具或启动 AI 连接。zfetch 的 Arch Linux 包名为 `zfetch-project-z` 与 `zfetch-project-z-bin`，发布状态见其仓库说明。
+以上是 oh-my-ztty 0.2.6 选用的组件版本，源码提交由 Git 子模块固定。zsh、Neovim 等系统应用需单独安装。进入 shell 后，可按需查看系统概况或启动 AI 连接。zfetch 的 Arch Linux 包名为 `zfetch-project-z` 与 `zfetch-project-z-bin`，发布状态见其仓库说明。
 
 ## Ink 默认外观
 
