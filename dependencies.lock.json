@@ -3,15 +3,15 @@
   "components": {
     "ztty": {
       "repository": "LIghtJUNction/ztty",
-      "tag": "v0.4.1",
+      "tag": "v0.5.0",
       "assets": {
         "x86_64": {
-          "url": "https://github.com/LIghtJUNction/ztty/releases/download/v0.4.1/ztty-linux-x86_64.tar.gz",
-          "sha256": "8a65f736f13c1c7a415997a38853f1eb876a3a9edea5fa7c7880178a2b9a289c"
+          "url": "https://github.com/LIghtJUNction/ztty/releases/download/v0.5.0/ztty-linux-x86_64.tar.gz",
+          "sha256": "4b79ded489c37325ac049e4962e75c7ff773c2c5d073d8fbad154bb47dfed6b2"
         },
         "aarch64": {
-          "url": "https://github.com/LIghtJUNction/ztty/releases/download/v0.4.1/ztty-linux-aarch64.tar.gz",
-          "sha256": "c40eed517d36703f76e76bf907ef1e49d02ec67d9ed0cc7fd044d254f942974f"
+          "url": "https://github.com/LIghtJUNction/ztty/releases/download/v0.5.0/ztty-linux-aarch64.tar.gz",
+          "sha256": "f86ddc20d6359c8301e7198adf80359c067ea02c28228139e2a39705a5ddd09d"
         }
       }
     },
