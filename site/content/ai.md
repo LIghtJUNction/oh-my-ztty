@@ -1,6 +1,6 @@
 # AI integration
 
-The suite provides explicit context, a provider interface and an on-demand ssmcp connection. It does not select a model or configure an account during shell startup.
+Use the AI commands to inspect local shell context, connect a client to your workspace or place a proposed command in the editing buffer. Start by inspecting the context below, then choose an ssmcp connection or a provider CLI for requests.
 
 ## Inspect context
 
@@ -27,7 +27,7 @@ The result is one `zshard.context.v1` JSON object:
 | `history_included` | `false` |
 | `environment_included` | `false` |
 
-It does not read file contents or emit the previous command. A fresh standalone process starts with `last_exit` set to 0. The directory path itself can be private; it is shared with a provider only when you explicitly invoke one.
+It does not read file contents or emit the previous command. A fresh standalone process starts with `last_exit` set to 0. The directory path is included when you send a request to a provider.
 
 ## Connect a workspace
 
@@ -37,7 +37,7 @@ omztty ai connect
 
 This starts the bundled ssmcp in the current directory. Inside the preset shell, `zai connect` provides the same handoff and forwards supplied arguments to ssmcp.
 
-Set up and authenticate the connection using [ssmcp's own instructions](https://github.com/LIghtJUNction/ssmcp/tree/v0.10.10). The suite does not create a model account or start a model as part of this command.
+Follow [ssmcp's connection instructions](https://github.com/LIghtJUNction/ssmcp/tree/v0.10.10) to connect your AI client. This command starts the workspace connection; model selection and account setup stay with that client.
 
 ## Use a provider
 
@@ -74,4 +74,4 @@ The command is put into the editing buffer. Review, edit or cancel it; pressing 
 
 Opening a shell performs no provider request or MCP connection. The included ssmcp has its existing Rust standard-library and networking dependencies and runs when requested. A live AI session has a different memory footprint from the idle terminal measurements.
 
-The [AI contract](https://github.com/LIghtJUNction/zshard/blob/v0.1.2/docs/plugins.md#ai-contracts) defines argument handling and context fields. The [release verification](https://github.com/LIghtJUNction/oh-my-ztty/blob/main/docs/reports/public-release-0.1.1.json) covers local context; it does not claim a completed call to an external paid model.
+The [AI contract](https://github.com/LIghtJUNction/zshard/blob/v0.2.0/docs/plugins.md#ai-contracts) defines argument handling and context fields. The `cat` example above checks the local request format; a real provider requires its own setup.

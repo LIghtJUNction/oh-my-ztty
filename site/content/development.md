@@ -1,6 +1,6 @@
 # Development
 
-The suite pins independent repositories so each component can evolve while a released combination remains reproducible.
+Use this workspace to change a component, validate its integration and publish a new suite version. Each component has its own repository; the suite records the exact revisions assembled into a release.
 
 ## Clone the workspace
 
@@ -26,7 +26,7 @@ Status reads local repository state and makes no network request.
 python3 scripts/workspace.py check
 ```
 
-This checks zshard, zdot and the installer. It does not rebuild every upstream ztty or ssmcp dependency; their published executables are checked during bundle verification.
+This checks zshard, zdot, zrc, zfetch and the suite's installer and integration tests. It does not rebuild every upstream ztty or ssmcp dependency; their published executables are checked during bundle verification.
 
 Run the relevant checks locally after a change. Manual validation workflows are available. Routine code pushes and pull requests do not start a duplicate daily test matrix.
 
@@ -45,10 +45,10 @@ Commit and publish component changes before advancing the parent gitlink. Keep u
 
 ## Pin a published component
 
-The pin command accepts a component and a published version. For the framework version in suite 0.1.2:
+The pin command accepts a component and a published version. For example:
 
 ```sh
-python3 scripts/workspace.py pin zshard v0.1.3
+python3 scripts/workspace.py pin zshard v0.2.0
 python3 scripts/workspace.py check
 ```
 
@@ -70,7 +70,7 @@ The component's release and the suite's selected pin are separate decisions.
 
 ## Bump and release
 
-Each new project exposes the same version interface:
+Prepare the suite's next version with:
 
 ```sh
 python3 scripts/bump.py patch

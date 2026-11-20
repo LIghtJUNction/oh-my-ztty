@@ -7,13 +7,13 @@
           "slug": "",
           "title": "Overview",
           "source": "index.md",
-          "description": "A versioned Linux terminal environment built on Project Z."
+          "description": "A configured zsh shell, an included terminal and editable application profiles for Linux."
         },
         {
           "slug": "installation",
           "title": "Installation",
           "source": "installation.md",
-          "description": "Install, update and remove the suite with a verified per-user installer."
+          "description": "Install a per-user release or the Arch Linux package, then open your first shell."
         }
       ]
     },
@@ -24,25 +24,25 @@
           "slug": "configuration",
           "title": "Configuration",
           "source": "configuration.md",
-          "description": "Adopt one reversible profile for the native editor, shell and everyday terminal tools."
+          "description": "Set up the shell and editor, keep personal changes and refresh unchanged defaults."
         },
         {
           "slug": "plugins",
           "title": "Plugins",
           "source": "plugins.md",
-          "description": "Load local plugins and keep remote plugins pinned to reviewed commits."
+          "description": "Load shell plugins, add completions and keep remote plugins at chosen commits."
         },
         {
           "slug": "ai",
           "title": "AI integration",
           "source": "ai.md",
-          "description": "Export explicit context, connect through ssmcp and review proposed commands."
+          "description": "Inspect local context, connect an AI client and edit proposed commands before running them."
         },
         {
           "slug": "dotfiles",
           "title": "Dotfiles",
           "source": "dotfiles.md",
-          "description": "Preview and manage dotfile links, backups and explicit Git synchronization."
+          "description": "Link files from your own repository, save originals and synchronize with Git."
         }
       ]
     },
@@ -53,19 +53,19 @@
           "slug": "performance",
           "title": "Performance",
           "source": "performance.md",
-          "description": "Measured startup, first completion and memory, with methods and raw evidence."
+          "description": "Historical startup, completion and memory measurements, with methods and source records."
         },
         {
           "slug": "architecture",
           "title": "Architecture",
           "source": "architecture.md",
-          "description": "Understand process boundaries, no_std code, source pins and installation state."
+          "description": "See which tool does each job and where runtime, configuration and state are kept."
         },
         {
           "slug": "development",
           "title": "Development",
           "source": "development.md",
-          "description": "Work across submodules, validate a combination and publish a version bump."
+          "description": "Change a component, validate the assembled suite and publish a new version."
         }
       ]
     }

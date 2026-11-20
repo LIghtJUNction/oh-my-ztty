@@ -1,6 +1,6 @@
 # Plugins
 
-zshard loads ordinary zsh files through explicit interfaces. Plugins run with your shell's privileges, so choose and review the code you load.
+Add shell commands, completions and prompt behavior by loading ordinary zsh files. Start with the included example, then add the plugins you want to `local.zsh` so they load in future sessions.
 
 ## Load a local plugin
 
@@ -42,7 +42,7 @@ zshard use hello
 
 Add `zshard use hello` to `local.zsh` if you want it in each shell.
 
-The checkout and its lock file record the pin. Installation does not source the downloaded file. `verify` explicitly checks Git HEAD and uncommitted changes; ordinary shell loading is separate from that integrity check.
+The checkout and its lock file record the pin. Installation does not source the downloaded file. Loading it runs that code inside your shell. `verify` explicitly checks Git HEAD and uncommitted changes; ordinary shell loading is separate from that integrity check.
 
 Git file transports and repository hooks are disabled during plugin installation. The entry must resolve inside the checkout.
 
@@ -77,4 +77,4 @@ Register a directory of standard zsh `_command` completion files with `zshard co
 
 Register a prompt callback with `zshard theme FUNCTION`. It receives the last exit status and elapsed whole seconds and assigns `PROMPT` and `RPROMPT`. Keep external commands out of the callback to retain the default prompt's process behavior.
 
-See the [complete extension reference](https://github.com/LIghtJUNction/zshard/blob/v0.1.3/docs/plugins.md) and the [working hello plugin](https://github.com/LIghtJUNction/zshard/blob/v0.1.3/examples/hello.plugin.zsh).
+See the [complete extension reference](https://github.com/LIghtJUNction/zshard/blob/v0.2.0/docs/plugins.md) and the [working hello plugin](https://github.com/LIghtJUNction/zshard/blob/v0.2.0/examples/hello.plugin.zsh).
