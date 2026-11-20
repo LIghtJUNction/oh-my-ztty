@@ -35,7 +35,9 @@ omztty config refresh
 
 `refresh` compares the editable profile with the defaults from its recorded suite version, then updates files that you have left unchanged. Customized files, removed files, source symlinks, extra personal files and the existing deployment manifest stay in place. It prints each updated or preserved path. Restart the affected application to load its refreshed configuration.
 
-Keep the previously recorded release installed until refresh completes: its verified files are the comparison baseline. A missing or modified baseline stops refresh before any profile changes. Repeating refresh at the same suite version does nothing. Refresh handles changes to existing defaults; a changed default file layout or mapping requires a deliberate profile review and is rejected without edits.
+The profile keeps a verified snapshot of shipped defaults in `.baseline/`, separate from your editable files. Refresh replaces that snapshot with the new shipped defaults after updating the profile; it never copies your personal changes into the snapshot. This keeps refresh usable when a system package replaces the runtime in place or an obsolete suite release is removed.
+
+Profiles created before snapshots were introduced use the recorded installed release once, then save a snapshot on successful refresh. Keep that old release until the first refresh completes. A missing, modified or mismatched baseline stops refresh before any profile changes. Repeating refresh at the same suite version does nothing. Refresh handles changes to existing defaults; a changed default file layout or mapping requires a deliberate profile review and is rejected without edits.
 
 ## Neovim
 
