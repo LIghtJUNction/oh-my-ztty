@@ -67,6 +67,33 @@ class BundleTests(unittest.TestCase):
         (self.root / "dependencies.lock.json").write_text(json.dumps(lock) + "\n")
         return lock
 
+    def nested_source_fixture(self):
+        lock = self.source_fixture()
+        leaf_remote = self.base / "leaf remote"
+        leaf_remote.mkdir()
+        self.git(leaf_remote, "init", "-b", "main")
+        (leaf_remote / "value").write_text("original leaf\n")
+        self.git(leaf_remote, "add", ".")
+        self.git(leaf_remote, "commit", "-m", "Leaf source")
+
+        nested_remote = self.base / "nested remote"
+        nested_remote.mkdir()
+        self.git(nested_remote, "init", "-b", "main")
+        self.git(nested_remote, "-c", "protocol.file.allow=always", "submodule",
+                 "add", str(leaf_remote), "deps/leaf source")
+        self.git(nested_remote, "commit", "-m", "Nested source")
+
+        source = self.root / "components/ztty"
+        self.git(source, "-c", "protocol.file.allow=always", "submodule",
+                 "add", str(nested_remote), "deps/nested source")
+        self.git(source, "commit", "-m", "Recursive source dependency")
+        self.git(source, "-c", "protocol.file.allow=always", "submodule",
+                 "update", "--init", "--recursive")
+        lock["components"]["ztty"]["commit"] = self.git(source, "rev-parse", "HEAD")
+        (self.root / "dependencies.lock.json").write_text(json.dumps(lock) + "\n")
+        nested = source / "deps/nested source"
+        return lock, source, nested, nested / "deps/leaf source"
+
     def suite_fixture(self):
         lock = self.source_fixture()
         for name in ["install.sh", "uninstall.sh", "LICENSE", "bin/omztty",
@@ -106,6 +133,41 @@ class BundleTests(unittest.TestCase):
         (source / "VERSION").write_text("1.0.0\n")
         (source / "untracked.rs").write_text("uncommitted\n")
         with self.assertRaisesRegex(RuntimeError, "ztty source tree.*uncommitted"):
+            BUNDLE.verify_sources(lock)
+
+    def test_verifies_clean_recursive_sources_with_spaces_in_paths(self):
+        lock, _, _, _ = self.nested_source_fixture()
+        self.assertEqual(BUNDLE.verify_sources(lock),
+                         {name: spec["commit"] for name, spec in lock["components"].items()})
+
+    def test_rejects_leaf_edits_hidden_by_nested_ignore_configuration(self):
+        lock, source, nested, leaf = self.nested_source_fixture()
+        self.git(nested, "config", "submodule.deps/leaf source.ignore", "all")
+        (leaf / "value").write_text("uncommitted leaf source\n")
+        self.assertEqual(self.git(source, "status", "--porcelain",
+                                  "--untracked-files=all", "--ignore-submodules=none"), "")
+        with self.assertRaisesRegex(RuntimeError, "ztty source tree has uncommitted changes"):
+            BUNDLE.verify_sources(lock)
+
+    def test_rejects_uninitialized_nested_source(self):
+        lock, source, _, _ = self.nested_source_fixture()
+        self.git(source, "submodule", "deinit", "--", "deps/nested source")
+        with self.assertRaisesRegex(RuntimeError, "ztty source tree has unresolved submodule commits"):
+            BUNDLE.verify_sources(lock)
+
+    def test_rejects_uninitialized_leaf_source(self):
+        lock, _, nested, _ = self.nested_source_fixture()
+        self.git(nested, "submodule", "deinit", "--", "deps/leaf source")
+        with self.assertRaisesRegex(RuntimeError, "ztty source tree has unresolved submodule commits"):
+            BUNDLE.verify_sources(lock)
+
+    def test_rejects_leaf_commit_outside_the_recursive_pin(self):
+        lock, _, nested, leaf = self.nested_source_fixture()
+        self.git(nested, "config", "submodule.deps/leaf source.ignore", "all")
+        (leaf / "value").write_text("different committed leaf source\n")
+        self.git(leaf, "add", "value")
+        self.git(leaf, "commit", "-m", "Move leaf beyond recorded pin")
+        with self.assertRaisesRegex(RuntimeError, "ztty source tree has unresolved submodule commits"):
             BUNDLE.verify_sources(lock)
 
     def test_rejects_noncanonical_repository_and_invalid_commit(self):

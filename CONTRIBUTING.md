@@ -61,7 +61,7 @@ python3 scripts/build_bundle.py
 python3 scripts/smoke_bundle.py "dist/oh-my-ztty-$(cat VERSION)-linux-$(uname -m).tar.gz"
 ```
 
-The build verifies all six source checkouts against the lock, then compiles ztty, ssmcp, zdot and zfetch with `cargo build --locked --release`. ztty enables its Wayland feature; ssmcp's JavaScript helper and all component licenses come from the same source checkouts. The build records source commits, default branches and the lock's synchronization time in `BUILD.json`.
+The build verifies all six source checkouts and every nested submodule against their recorded commits. It rejects uninitialized submodules and uncommitted files even when nested Git ignore settings hide them from the parent repository. It then compiles ztty, ssmcp, zdot and zfetch with `cargo build --locked --release`. ztty enables its Wayland feature; ssmcp's JavaScript helper and all component licenses come from the same source checkouts. The build records source commits, default branches and the lock's synchronization time in `BUILD.json`.
 
 Cargo uses the existing user configuration and `CARGO_TARGET_DIR`, including a shared target directory when configured. Native builds reuse Cargo's normal release outputs. `--arch aarch64` or `--arch x86_64` selects the bundle architecture; a different host architecture requires the corresponding Rust target, linker and system libraries. Each executable's ELF architecture is checked before packaging.
 
@@ -87,7 +87,7 @@ Tag workflows publish versioned artifacts. Synchronize component sources, valida
 
 ## Release record
 
-A release needs its exact source lock, six gitlinks, successful local tests, archive checksums and an installation lifecycle check. Exercise install twice, start the preset shell, run the native tools and uninstall in a temporary home. Keep pre-existing commands and unrelated files in that test.
+A release needs its exact source lock, six gitlinks, successful local tests, archive checksums and an installation lifecycle check. Exercise install twice, start the preset shell, run the native tools and both boot-report entrypoints, and uninstall in a temporary home. The graphical check also executes the boot report in the preset shell and captures its terminal output. Keep pre-existing commands and unrelated files in that test.
 
 Record benchmarks with source revisions, OS and CPU, warm-up policy, samples and units. Report shell startup separately from first completion and terminal memory. Keep text measurements and artifact links in `docs/reports/`; store generated screenshots and release archives outside Git.
 

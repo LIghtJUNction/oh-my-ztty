@@ -46,6 +46,16 @@ def main():
         run(cli, "ztty", "--version")
         info = json.loads(run(cli, "info", "--json"))
         assert info["schema"] == "zfetch.system.v1"
+        boot_stages = ["firmware", "bootloader", "kernel", "initramfs", "system_manager",
+                       "system_target", "login", "user_session", "desktop"]
+        for command in [("info", "--boot", "--json"),
+                        ("zfetch", "--boot", "--format=json")]:
+            boot = json.loads(run(cli, *command))
+            assert boot["schema"] == "zfetch.boot.v1"
+            assert boot["ordering"] == "structural"
+            assert [stage["stage"] for stage in boot["stages"]] == boot_stages
+            assert all(stage["status"] in {"observed", "configured", "unavailable"}
+                       for stage in boot["stages"])
         # Exercise adoption with the actual no_std binary, including conflict recovery.
         original = "print -r -- ORIGINAL_SHELL_CONFIG\\n"
         (home / ".zshrc").write_text(original)
@@ -89,7 +99,7 @@ def main():
         assert not current.parent.exists()
         assert not (home / ".zshrc").is_symlink()
         assert (home / ".zshrc").read_text() == original
-        print("PASS: actual bundle install, repeat, doctor, zsh, local AI context, component commands, zdot adoption/restore and uninstall.")
+        print("PASS: actual bundle install, repeat, doctor, zsh, local AI context, component commands, boot-chain entrypoints, zdot adoption/restore and uninstall.")
 
 if __name__ == "__main__":
     main()

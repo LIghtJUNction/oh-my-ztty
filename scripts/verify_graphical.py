@@ -135,6 +135,7 @@ def main():
             'ztty --version > "$HOME/component-versions"\n'
             'zdot --version >> "$HOME/component-versions"\n'
             'ssmcp --version >> "$HOME/component-versions"\n'
+            'zfetch --version >> "$HOME/component-versions"\n'
             'print -r -- ready > "$HOME/gui-ready"\n'
         )
         xvfb = subprocess.Popen(["Xvfb", "-displayfd", "1", "-screen", "0", "1600x1000x24", "-nolisten", "tcp"],
@@ -204,6 +205,19 @@ def main():
             run(["import", "-window", window_id, screenshot], env)
             report["screenshot"] = screenshot.name
             report["graphical_checks"] = ["visible window", "keyboard command executed in preset zsh", "first completion returned to a usable shell", "actual component versions verified"]
+            run(["xdotool", "key", "--window", window_id, "ctrl+l"], env)
+            run(["xdotool", "type", "--window", window_id, "--delay", "0",
+                 'omztty info --boot && print -r -- ready > "$HOME/boot-ready"'], env)
+            run(["xdotool", "key", "--window", window_id, "Return"], env)
+            wait_until(lambda: (home / "boot-ready").exists())
+            boot = json.loads(run([cli, "info", "--boot", "--json"], env).stdout)
+            if boot.get("schema") != "zfetch.boot.v1" or len(boot.get("stages", [])) != 9:
+                raise RuntimeError("installed zfetch did not return the complete boot structure")
+            boot_screenshot = args.output / f"linux-{os.uname().machine}-boot.png"
+            run(["import", "-window", window_id, boot_screenshot], env)
+            report["boot"] = {"schema": boot["schema"], "stages": len(boot["stages"]),
+                              "screenshot": boot_screenshot.name}
+            report["graphical_checks"].append("boot-chain command executed in the preset zsh")
             run([cli, "ztty", "close", "oh-my-ztty-verify"], env)
             launcher.wait(timeout=5)
         finally:

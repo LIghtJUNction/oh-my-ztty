@@ -53,10 +53,24 @@ def verify_sources(lock):
         head = run(["git", "rev-parse", "HEAD"], cwd=source)
         if head != spec["commit"]:
             raise RuntimeError(f"{name} source HEAD does not match dependencies.lock.json; run workspace.py sync")
-        dirty = run(["git", "status", "--porcelain", "--untracked-files=all",
-                     "--ignore-submodules=none"], cwd=source)
-        if dirty:
-            raise RuntimeError(f"{name} source tree has uncommitted changes")
+        submodules = run(["git", "submodule", "status", "--recursive"], cwd=source)
+        if any(line.startswith(("-", "+", "U")) for line in submodules.splitlines()):
+            raise RuntimeError(f"{name} source tree has unresolved submodule commits; "
+                               "run git submodule update --init --recursive")
+        repositories = [source]
+        while repositories:
+            repository_path = repositories.pop()
+            dirty = run(["git", "status", "--porcelain", "--untracked-files=all",
+                         "--ignore-submodules=none"], cwd=repository_path)
+            if dirty:
+                location = repository_path.relative_to(ROOT)
+                raise RuntimeError(f"{name} source tree has uncommitted changes in {location}")
+            # Nested ignore settings can hide leaf changes from the component.
+            # Inspect each repository directly, using NUL-delimited Git paths.
+            entries = run(["git", "ls-files", "--stage", "-z"], cwd=repository_path)
+            repositories.extend(repository_path / entry.split("\t", 1)[1]
+                                for entry in entries.split("\0")
+                                if entry.startswith("160000 "))
         sources[name] = head
     return sources
 
