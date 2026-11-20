@@ -1,6 +1,6 @@
 {
   "schema": 2,
-  "updated_at": "2026-11-20T17:33:18+00:00",
+  "updated_at": "2026-11-20T17:52:49+00:00",
   "components": {
     "ztty": {
       "repository": "https://github.com/LIghtJUNction/ztty.git",
@@ -35,8 +35,8 @@
     "zfetch": {
       "repository": "https://github.com/LIghtJUNction/zfetch.git",
       "branch": "main",
-      "commit": "5006d7a9e2a2d3f292f677df94395e27a794b9c7",
-      "observed_at": "2026-11-20T17:32:24+00:00"
+      "commit": "f0614f3b76eca222f4b3880f8dd1707d1308f098",
+      "observed_at": "2026-11-20T17:52:48+00:00"
     }
   }
 }
