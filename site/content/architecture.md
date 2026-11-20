@@ -1,6 +1,6 @@
 # Architecture
 
-oh-my-ztty assembles six independent Project Z tools into a versioned Linux environment. The source repository records exact component commits; the release archive contains the executables, shell files and integration assets.
+The suite packages six independently maintained tools around system zsh. This page explains which process does each job, where configuration lives and how a release records the versions it uses.
 
 ## Process boundaries
 
@@ -20,9 +20,9 @@ Shell startup does not download plugins, run zfetch, call a provider or connect 
 
 ## Native code
 
-The new zdot library and Linux executable use Rust `no_std`. Their Project Z zclap dependency is configured without its default standard-library feature. The executable uses direct system calls with no allocator, libc or dynamic ELF interpreter.
+The zdot library and Linux executable use Rust `no_std`. Their Project Z zclap dependency is configured without its default standard-library feature. The executable uses direct system calls with no allocator, libc or dynamic ELF interpreter.
 
-zshard is written in zsh and adds no compiled helper. The pinned ztty core and executable also use Rust `no_std`; the graphical front end still depends on X11 and system libraries.
+zshard is written in zsh and adds no compiled helper. The pinned ztty core and executable also use Rust `no_std`; the graphical front end still depends on the [listed graphics libraries](installation.md#requirements).
 
 The bundled ssmcp retains its existing Rust standard-library and networking dependencies. These boundaries describe separate programs. They do not make the whole bundle free of all standard libraries or system libraries.
 
@@ -32,23 +32,25 @@ Development scripts and build tools are outside the installed native dependency 
 
 ## Source and artifact pins
 
-The [Git submodules](https://github.com/LIghtJUNction/oh-my-ztty/blob/main/.gitmodules) record the source revisions for ztty, zshard, zrc, zdot, zfetch and ssmcp.
+The [component gitlinks](https://github.com/LIghtJUNction/oh-my-ztty/tree/main/components) record exact source commits for ztty, zshard, zrc, zdot, zfetch and ssmcp. The `.gitmodules` file records their repository locations.
 
-For ztty and ssmcp, `dependencies.lock.json` also records the published binary digests. Source gitlinks and upstream artifact locks must agree before building the bundle.
+For ztty and ssmcp, [dependencies.lock.json](https://github.com/LIghtJUNction/oh-my-ztty/blob/main/dependencies.lock.json) also records the published binary digests. Source gitlinks and upstream artifact locks must agree before building the bundle.
 
-A release includes a build record and `MANIFEST.sha256`. The installer checks both the downloaded archive and its contents before activation. The [earlier 0.1.1 verification](https://github.com/LIghtJUNction/oh-my-ztty/blob/main/docs/reports/public-release-0.1.1.json) records that release’s assets and binary dependencies; it predates the unified application profile.
+A release includes a build record and `MANIFEST.sha256`. The installer checks both the downloaded archive and its contents before activation. Versioned archives and their checksums are listed on the [release page](https://github.com/LIghtJUNction/oh-my-ztty/releases).
 
 ## Installation state
 
-Releases live below the user's XDG data directory. A `current` link selects the active version. Launchers address bundled executables explicitly, even when another tool with the same name exists elsewhere.
+The per-user installer keeps releases below the user's XDG data directory and selects one with a `current` link. The AUR package owns `/usr/lib/oh-my-ztty` and exposes `/usr/bin/omztty`; its runtime is updated and removed through the package manager.
+
+In both layouts, the launcher addresses bundled executables explicitly, even when another tool with the same name exists elsewhere.
 
 The launcher supplies a separate `ZDOTDIR` for trying the shell, a suite history path and a cache path tied to the release directory. Adopting `omztty config` creates an editable profile and deploys it through zdot; the managed default `.zshrc` reads the same suite entry point.
 
 Personal `options.zsh`, `local.zsh` and completion files live under `${XDG_CONFIG_HOME:-$HOME/.config}/oh-my-ztty`. Personal completions use its `completions/` directory, outside the runtime. HOME adoption requires an absolute `XDG_CONFIG_HOME` within HOME. Its journal and backups live under `${XDG_STATE_HOME:-$HOME/.local/state}/zdot/oh-my-ztty`.
 
-Uninstallation restores this adopted profile first. A restoration failure or inconsistent deployment record preserves the runtime for recovery. Independent `omztty dot` deployments remain separate. See [configuration](configuration.md).
+For a per-user installation, uninstallation restores the adopted profile first. A restoration failure or inconsistent deployment record preserves the runtime for recovery. For the AUR package, restore the profile with `omztty config remove` before removing the package. Independent `omztty dot` deployments remain separate. See [configuration](configuration.md).
 
-Before activation, the installer prepares the audited completion cache. Native zsh auditing and input validation remain part of reuse; it is not a bypass of completion security checks.
+Before activation, the per-user installer prepares the audited completion cache. Native zsh auditing and input validation remain part of reuse; it is not a bypass of completion security checks.
 
 ## Extension boundaries
 

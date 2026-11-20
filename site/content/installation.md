@@ -1,6 +1,8 @@
 # Installation
 
-The release bundle includes ztty, zshard, zrc, zdot, zfetch and ssmcp. Installation and configuration commands from a release do not require Rust or Python.
+Choose a per-user release installation or the Arch Linux package. Both provide the same suite commands; use the matching update and removal instructions below.
+
+The bundle includes the terminal, shell framework and configuration tools. You need system zsh and the libraries listed below. Installing a release and managing its configuration require neither Rust nor Python.
 
 ## Requirements
 
@@ -8,14 +10,14 @@ The release bundle includes ztty, zshard, zrc, zdot, zfetch and ssmcp. Installat
 | --- | --- |
 | Operating system | Linux x86_64 or ARM64 |
 | Shell | System zsh 5.9 or newer |
-| Editor profile | Neovim 0.11 or newer, installed separately |
-| Graphical session | X11 or XWayland |
+| Optional editor profile | Neovim 0.11 or newer, installed separately |
+| Graphical terminal session | X11 or XWayland |
 | Graphics libraries | X11, Xrender, Xft, Fontconfig, Wayland, xkbcommon, FreeType, HarfBuzz, EGL and GLES |
 | Binary ABI | glibc 2.34 or newer and libgcc for ztty and ssmcp |
 
-The ztty 0.5.0 binary needs all of the listed graphics libraries even when selecting the X11 backend. The formal native validation platform is Ubuntu 24.04 on both architectures. The glibc symbol floor alone does not establish compatibility with every distribution. zdot is a static executable without a glibc dependency.
+The ztty 0.5.0 binary needs all of the listed graphics libraries, including when you select the X11 backend. Release builds are validated on Ubuntu 24.04 for both architectures. Other distributions need compatible libraries; the glibc version alone does not establish compatibility.
 
-Application and language-server installation is separate from configuration deployment.
+Install Neovim, other applications and language servers separately when you want to use their profiles.
 
 On Ubuntu 24.04, install the basic dependencies with:
 
@@ -32,6 +34,7 @@ Install the [oh-my-ztty-bin package](https://aur.archlinux.org/packages/oh-my-zt
 ```sh
 yay -S oh-my-ztty-bin
 omztty doctor
+omztty shell
 ```
 
 With Git and Arch's `base-devel` tools installed, the package can also be built directly:
@@ -42,7 +45,15 @@ cd oh-my-ztty-bin
 makepkg -si
 ```
 
-The package uses prebuilt release binaries; runtime and configuration commands need no Rust or Python. Upgrades go through your AUR helper, and the system package manager owns installed files. Configuration adoption is explicit. After upgrading an adopted profile, run `omztty config refresh` to update defaults you have not changed.
+The package installs prebuilt release binaries under `/usr/lib/oh-my-ztty` and provides `/usr/bin/omztty`. Update it through your AUR helper:
+
+```sh
+yay -Syu oh-my-ztty-bin
+```
+
+If you adopted the application profile, run `omztty config refresh` after upgrading. This updates defaults you have not changed. Use the package manager to remove the runtime; `omztty update` and `omztty uninstall` are for per-user installations.
+
+If an older per-user installation is also on your PATH, use `/usr/bin/omztty` to select the package explicitly.
 
 Restore adopted configurations before removing the package:
 
@@ -53,9 +64,7 @@ sudo pacman -R oh-my-ztty-bin
 
 ## Install a release
 
-The following installer manages a per-user installation.
-
-Download the installer so you can inspect it before execution:
+Use the installer to keep the suite under your own account. Download it as a file, then run it:
 
 ```sh
 curl -fLO https://github.com/LIghtJUNction/oh-my-ztty/releases/latest/download/install.sh
@@ -75,14 +84,23 @@ An unrelated existing `omztty` executable stops installation. Existing tools wit
 
 ## Start the environment
 
+Open a configured zsh session in your current terminal:
+
 ```sh
 omztty shell
+```
+
+Type `exit` to return to your previous shell. To open the same setup in a new ztty window:
+
+```sh
 omztty terminal
 ```
 
-The first command starts the preset inside your current terminal. The second opens ztty with the same configuration. These commands try the environment in a separate shell session. Adopt the home profile below to make its configuration the default; account login-shell records remain unchanged.
+Both commands use the suite's configuration for that session. Adopt the application profile below to link its settings into your home directory. Your account's login shell is unchanged.
 
 ## Adopt the default workspace
+
+The optional profile adds the suite's zsh, terminal and editor defaults to your home configuration. Create it, inspect the planned changes, then apply it:
 
 ```sh
 omztty config init
@@ -91,9 +109,9 @@ omztty config apply --backup
 omztty config status
 ```
 
-The profile unifies zsh, ztty, Neovim and everyday terminal-tool configurations. Read the plan before applying it. `--backup` preserves conflicting originals, and `omztty config remove` restores them. Git display colors use the explicit include in [configuration](configuration.md).
+`--backup` saves existing files before replacing them with managed links. `omztty config remove` restores those originals. The [configuration guide](configuration.md) explains each profile, personal settings and the optional Git display include.
 
-Open a new terminal after adoption. Editable files live under `${XDG_CONFIG_HOME:-$HOME/.config}/oh-my-ztty/profile`. The journal and backups live under `${XDG_STATE_HOME:-$HOME/.local/state}/zdot/oh-my-ztty`. HOME adoption requires an absolute `XDG_CONFIG_HOME` within HOME; roots outside HOME are rejected.
+Open a new zsh session after adoption. Editable files live under `${XDG_CONFIG_HOME:-$HOME/.config}/oh-my-ztty/profile`. The journal and backups live under `${XDG_STATE_HOME:-$HOME/.local/state}/zdot/oh-my-ztty`. HOME adoption requires an absolute `XDG_CONFIG_HOME` within HOME; roots outside HOME are rejected.
 
 Suite upgrades preserve the editable profile. Run `omztty config refresh` after upgrading to update files that still match their shipped defaults. Custom edits, added files and deliberately removed files are preserved.
 
@@ -102,8 +120,6 @@ Personal completion files belong in `${XDG_CONFIG_HOME:-$HOME/.config}/oh-my-ztt
 ## System overview
 
 Run `omztty info` to display system information through the bundled zfetch utility. `omztty zfetch` invokes the same tool directly. The shell does not run it automatically.
-
-The standalone Arch Linux package names are `zfetch-project-z` and `zfetch-project-z-bin`. See the [zfetch repository](https://github.com/LIghtJUNction/zfetch) for publication status and installation details.
 
 ## Install options
 
@@ -146,7 +162,7 @@ omztty update --no-desktop
 omztty update --desktop
 ```
 
-For installations created by v0.1.1 or older, the first successful installation with this installer infers the choice from the existing desktop-entry record: present means enabled, absent means disabled. Either explicit option overrides it. The preference is saved after installation succeeds; failed preparation leaves the previous choice intact.
+Updates retain the desktop-entry choice saved by your last successful installation. Either option above changes that choice after the update succeeds.
 
 Each version has its own directory. A `current` link selects the active version, and completion caches are separated by release.
 
@@ -163,5 +179,3 @@ omztty uninstall
 Uninstallation restores the adopted `omztty config` home profile before removing the runtime. Failed restoration or inconsistent deployment records preserve the installation for recovery. After restoration, suite-owned installation files and links are removed; personal profiles, additions, completion files and history are retained.
 
 Independent repositories deployed through `omztty dot` have a separate lifecycle. Use [zdot remove](dotfiles.md#remove-a-deployment) first if you also want to restore those deployments.
-
-The [earlier 0.1.1 installation audit](https://github.com/LIghtJUNction/oh-my-ztty/blob/main/docs/reports/public-release-0.1.1.json) records that release’s installer and managed-link lifecycle; it predates the unified home profile described here.

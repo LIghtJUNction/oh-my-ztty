@@ -1,6 +1,8 @@
-# A unified workspace
+# Configuration
 
-The Ink profile puts the shell, Neovim and everyday terminal tools under one zdot deployment. zrc provides the native application configuration; zdot previews changes, creates links and restores original files.
+Keep your shell, editor and terminal-tool settings in one editable profile. `omztty config` copies the included defaults into your configuration directory and links them into place, with backups for existing files.
+
+The included Ink profile comes from zrc. zdot handles the file links and restoration; you edit the application files directly.
 
 ## Adopt the defaults
 
@@ -11,7 +13,7 @@ omztty config apply --backup
 omztty config status
 ```
 
-Open a new terminal after adoption. The account shell should already be zsh; adoption does not change account records. Existing application configurations are saved when `--backup` is supplied.
+Open a new zsh session after adoption. Your account's login shell is unchanged. `--backup` saves existing application configurations so you can restore them with `omztty config remove`.
 
 The profile covers zsh, ztty, Neovim, Kitty, Foot, Ghostty, tmux, fzf, bat, ripgrep and Git display settings. Application installation is separate.
 
@@ -34,15 +36,15 @@ Update the suite with `omztty update` for a per-user installation, or `yay -Syu 
 omztty config refresh
 ```
 
-`refresh` compares the editable profile with the defaults from its recorded suite version, then updates files that you have left unchanged. Customized files, removed files, source symlinks, extra personal files and the existing deployment manifest stay in place. It prints each updated or preserved path. Restart the affected application to load its refreshed configuration.
+`refresh` updates a file only when it still matches the default from the profile's recorded suite version. It lists the paths it updates or preserves. Your edits, removed files, source symlinks, extra personal files and deployment mappings stay in place. Restart the affected application to load the new configuration.
 
-The profile keeps a verified snapshot of shipped defaults in `.baseline/`, separate from your editable files. Refresh replaces that snapshot with the new shipped defaults after updating the profile; it never copies your personal changes into the snapshot. This keeps refresh usable when a system package replaces the runtime in place or an obsolete suite release is removed.
+The profile keeps a verified copy of shipped defaults in `.baseline/`. That snapshot contains no personal edits and is replaced after a successful refresh. It lets refresh work after a system package replaces the runtime or an old release directory is removed.
 
-Profiles created before snapshots were introduced use the recorded installed release once, then save a snapshot on successful refresh. Keep that old release until the first refresh completes. A missing, modified or mismatched baseline stops refresh before any profile changes. Repeating refresh at the same suite version does nothing. Refresh handles changes to existing defaults; a changed default file layout or mapping requires a deliberate profile review and is rejected without edits.
+Older profiles without a snapshot need their recorded installed release for the first refresh. Keep that release until refresh succeeds. A missing, modified or mismatched baseline stops the command before it changes the profile. Running it again at the same version does nothing. A change to the default file layout or mappings requires a profile review and is rejected without edits.
 
 ## Neovim
 
-Neovim 0.11 or newer is required for this profile. Run `nvim` for the Ink welcome page, or open a file normally. The editor has a native status line, diagnostics, a project picker and a searchable shortcut panel. It needs no plugin bootstrap, download or patched icon font.
+Install Neovim 0.11 or newer separately, then run `nvim` for the Ink welcome page or open a file normally. The editor has a native status line, diagnostics, a project picker and a searchable shortcut panel. It needs no plugin bootstrap, download or patched icon font.
 
 | Key | Action |
 | --- | --- |
@@ -92,8 +94,6 @@ omztty config remove
 
 For a per-user installation, `omztty uninstall` restores this adopted home profile first. A restoration failure preserves the installed runtime for recovery. For the AUR package, run `omztty config remove` before `sudo pacman -R oh-my-ztty-bin`; package removal leaves home files in place. Other deployments made through `omztty dot` remain independently managed.
 
-Legacy framework removal is a deliberate maintenance step after the replacement works. Packages required by other installed software stay under the package manager's dependency rules.
-
 ## Configuration files
 
 Create files below `${XDG_CONFIG_HOME:-$HOME/.config}/oh-my-ztty`:
@@ -126,6 +126,14 @@ ZSHARD_HISTORY_SCAN=200
 
 Highlighting recognizes the first command token. It is not a full shell grammar checker. At the end of the input buffer, Right or Ctrl-F accepts a history suggestion; otherwise the keys move forward normally.
 
+## Completion
+
+Press Tab to complete `omztty` subcommands, options and paths. Completion follows nested commands such as `omztty config sync`, offers terminal backend choices, and switches to command completion after `omztty terminal -e` or `--`.
+
+Put personal `_command` completion files in `${XDG_CONFIG_HOME:-$HOME/.config}/oh-my-ztty/completions/`, then open a new suite shell. This directory stays outside the runtime and survives updates. A registered component completion takes precedence over the suite's fallback.
+
+The per-user installer prepares a completion cache. With the default lazy setting, the shell initializes completion on the first Tab and checks any existing cache against its current inputs. See [startup options](#startup-options) to select eager loading or disable completion.
+
 ## Aliases and plugins
 
 Put aliases and plugin loading in `local.zsh`:
@@ -149,7 +157,7 @@ OMZTTY_THEME=framework
 
 A custom `zshard theme` registration in `local.zsh` runs after Ink and replaces its callback. The callback receives the previous exit status and elapsed whole seconds, then assigns `PROMPT` and `RPROMPT`.
 
-For a custom theme with terminal integration, follow the zero-width OSC boundary handling in the [actual Ink implementation](https://github.com/LIghtJUNction/oh-my-ztty/blob/v0.2.0/config/zsh/ink.zsh). `ZSHARD_PROMPT=off` leaves prompt variables alone.
+For a custom theme with terminal integration, follow the zero-width OSC boundary handling in the [actual Ink implementation](https://github.com/LIghtJUNction/oh-my-ztty/blob/main/config/zsh/ink.zsh). `ZSHARD_PROMPT=off` leaves prompt variables alone.
 
 ## State and cache
 

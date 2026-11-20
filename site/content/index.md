@@ -1,12 +1,14 @@
-# Overview
+# A working terminal setup for Linux
 
-oh-my-ztty assembles a terminal, a zsh framework, a native application configuration framework, a dotfile manager, a native system overview and an MCP client into one versioned Linux environment. System zsh runs your commands; the suite supplies the configuration and the tools around it.
+oh-my-ztty gives Linux developers a configured zsh shell and a terminal to run it in. Open a session to get a directory and Git-branch prompt, Tab completion, history suggestions and command highlighting.
+
+Use the shell in your current terminal or open the included ztty window. An optional application profile adds matching Neovim and terminal-tool settings, which you can edit as ordinary configuration files.
 
 The current suite release is **0.2.3**, available for Linux x86_64 and ARM64.
 
 ## Quick start
 
-Install system zsh 5.9 or newer and the terminal's [system dependencies](installation.md#requirements). Download and inspect the installer, then run it:
+Install zsh 5.9 or newer and the [required system libraries](installation.md#requirements), then download and run the per-user installer:
 
 ```sh
 curl -fLO https://github.com/LIghtJUNction/oh-my-ztty/releases/latest/download/install.sh
@@ -14,35 +16,50 @@ sh install.sh
 ~/.local/bin/omztty shell
 ```
 
-This opens the preset shell in your current terminal. Use `~/.local/bin/omztty terminal` to open it in ztty.
+This opens the configured shell in your current terminal. Type `exit` to return to your previous session. Run `~/.local/bin/omztty terminal` to open a new ztty window.
 
-Installation is per user. The suite keeps its runtime in a separate directory. Use `omztty config init`, inspect `omztty config plan`, then run `omztty config apply --backup` to adopt the native application profile. Account login-shell records remain unchanged.
+The installer keeps the runtime in your account's data directory. Your login shell stays as it is; adopting application configuration is a separate step. The [installation guide](installation.md) covers dependencies, offline installation and the [Arch Linux package](installation.md#arch-linux-aur).
 
-## What's included
+## What you can use
 
-| Component | Pinned version | Responsibility |
-| --- | --- | --- |
-| [ztty](https://github.com/LIghtJUNction/ztty) | 0.4.1 | Terminal window, rendering and PTY |
-| [zshard](https://github.com/LIghtJUNction/zshard) | 0.2.0 | Prompt, completion, suggestions, highlighting and plugins |
-| [zrc](https://github.com/LIghtJUNction/zrc) | 0.1.0 | Native editor and terminal-tool profiles |
-| [zdot](https://github.com/LIghtJUNction/zdot) | 0.2.0 | Dotfile plans, managed links, backups and Git sync |
-| [zfetch](https://github.com/LIghtJUNction/zfetch) | 0.1.0 | Native system overview on request |
-| [ssmcp](https://github.com/LIghtJUNction/ssmcp) | 0.10.10 | An explicit MCP connection to your workspace |
+| For daily work | Included support |
+| --- | --- |
+| Work in the shell | A prompt with your directory and Git branch, command completion, history suggestions and first-command highlighting |
+| Edit code | An optional Neovim profile with file search, a shortcut panel, diagnostics and support for installed language servers |
+| Keep a consistent setup | Editable profiles for zsh, ztty, Neovim and everyday terminal tools, with backups when you adopt them |
+| Work with an AI client | Commands to inspect local context, connect the current workspace and put proposed commands into the editing buffer |
 
-Each component has its own repository and release. Git submodules record the exact source revisions used by the suite.
+Neovim and other applications are installed separately. The suite supplies their configuration. AI connections and provider requests start when you invoke them.
+
+## Adopt the application profile
+
+To use the included application settings, create a profile and inspect its plan before applying it:
+
+```sh
+omztty config init
+omztty config plan
+omztty config apply --backup
+```
+
+The profile lives under `~/.config/oh-my-ztty/profile` by default. Edit its files to suit your workflow. After a suite update, `omztty config refresh` updates defaults you have left unchanged and preserves your edits. See [configuration](configuration.md) for the Neovim keys, shell options and how to restore your previous files.
 
 ## How it fits together
 
-The prompt and editing features run inside zsh. Completion initializes when needed, using a cache prepared during installation and checked against the current completion inputs.
+| Component | Its part in the setup |
+| --- | --- |
+| [ztty](https://github.com/LIghtJUNction/ztty) | Opens terminal windows and runs shell sessions |
+| [zshard](https://github.com/LIghtJUNction/zshard) | Adds the prompt, completion, suggestions, highlighting and plugins to system zsh |
+| [zrc](https://github.com/LIghtJUNction/zrc) | Supplies native configuration files for the editor and terminal tools |
+| [zdot](https://github.com/LIghtJUNction/zdot) | Links configuration files into place, saves originals and restores them |
+| [zfetch](https://github.com/LIghtJUNction/zfetch) | Shows system information when you run `omztty info` |
+| [ssmcp](https://github.com/LIghtJUNction/ssmcp) | Connects an AI client to a workspace on request |
 
-Dotfile management and AI connections are explicit commands. Opening a shell does not start a model or connect to a remote service. A ztty window uses ztty's resident broker; detached terminal sessions may outlive the window.
+Each suite release selects a specific combination of these components. The [release page](https://github.com/LIghtJUNction/oh-my-ztty/releases/latest) provides the bundles and checksums; the [component checkouts](https://github.com/LIghtJUNction/oh-my-ztty/tree/main/components) record the source revisions.
 
 ## Next steps
 
-- [Install and check the environment](installation.md).
-- [Keep personal options and aliases](configuration.md).
-- [Load a plugin](plugins.md) or [manage dotfiles](dotfiles.md).
-- [Set up AI integration](ai.md).
-- [Read the measurements](performance.md) and their scope.
-
-The [0.1.1 release report](https://github.com/LIghtJUNction/oh-my-ztty/blob/main/docs/reports/release-0.1.1.md) records source pins, public download checks and both native architecture validations.
+- [Configure the shell and editor](configuration.md).
+- [Load a shell plugin](plugins.md).
+- [Manage your own dotfile repository](dotfiles.md).
+- [Connect an AI client or provider](ai.md).
+- [Read the architecture](architecture.md) or [inspect the measured performance](performance.md).

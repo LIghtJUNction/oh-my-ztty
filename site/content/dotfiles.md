@@ -1,6 +1,8 @@
 # Dotfiles
 
-zdot links selected files from a repository into a target directory. Plan the changes first, apply them explicitly, and remove the deployment when you want to restore the originals.
+Use `omztty dot` to manage a dotfile repository of your own. It links selected files into your home directory, backs up existing files when requested and restores those originals when you remove the deployment.
+
+For the suite's included shell and application settings, start with [configuration](configuration.md). This guide covers a separate repository that you control.
 
 ## Create a layout
 
@@ -21,19 +23,15 @@ Each profile line has a source path, a tab, then a destination path. The source 
 
 ## Preview and apply
 
+For the `.zshrc` example, preview the replacement and apply it with a backup of the existing file:
+
 ```sh
-omztty dot plan --root "$HOME/dotfiles" --target "$HOME" --json
-omztty dot apply --root "$HOME/dotfiles" --target "$HOME"
+omztty dot plan --root "$HOME/dotfiles" --target "$HOME" --backup --json
+omztty dot apply --root "$HOME/dotfiles" --target "$HOME" --backup
 omztty dot status --root "$HOME/dotfiles" --target "$HOME"
 ```
 
-Plan only reads. Apply refuses an existing destination by default. For the existing `.zshrc` example, explicitly request a backup if the plan matches what you intend:
-
-```sh
-omztty dot apply --root "$HOME/dotfiles" --target "$HOME" --backup
-```
-
-Repeated apply keeps matching links. Edits made through a managed symlink change the source file in the repository.
+Plan only reads. Apply creates the managed link and records the saved original. Without `--backup`, an existing destination stops the operation. Repeating apply keeps matching links. Edits made through a managed symlink change the source file in the repository.
 
 ## Remove a deployment
 
@@ -45,7 +43,7 @@ Remove uses the saved deployment profile, checks link ownership and restores ori
 
 To change a deployed profile, remove its previous deployment, edit it, then apply again. Keep the repository at its original path until removal.
 
-Uninstalling oh-my-ztty restores the adopted `omztty config` home profile before removing its runtime. Independent repositories deployed through `omztty dot` remain independently managed.
+For a per-user installation, `omztty uninstall` restores the adopted `omztty config` home profile before removing the runtime. Before removing the AUR package, run `omztty config remove` to restore that profile. Independent repositories deployed through `omztty dot` remain independently managed.
 
 ## Synchronize with Git
 
