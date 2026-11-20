@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "source_base": "740b82f3a1628d0c14b0405bfb36c76832fedfec",
+  "source_dir": "/home/lightjunction/Documents/GITHUB/oh-my-ztty/dist/consumer-ztty-0.5.0-20261120/source",
+  "scope": "CLI forwarding compatibility; unchanged upstream pin, temporary HOME lifecycle tests. No graphical test or real new ztty binary test yet.",
+  "script_sha256": "d01b3f03e0ee0b8884334c1156b8e2707879e5fa6ffe468b49931a1431c83fdd",
+  "changed_files": {
+    "bin/omztty": "0fd180598284f2eaa6ecfb25414d593cd8c5ee5b5ee6573965f2e597438b7859",
+    "tests/test_terminal_exec.py": "5c4c60574228d471065d56c3b3baa0513807ffa13cc64307f1efa9ac09f6f47e"
+  },
+  "cgroup": "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/app.slice/omztty-forwarding-20261120.service",
+  "ok": true,
+  "steps": [
+    {
+      "name": "submodules",
+      "command": [
+        "git",
+        "submodule",
+        "update",
+        "--init",
+        "--checkout",
+        "--depth",
+        "1"
+      ],
+      "exit_code": 0,
+      "seconds": 20.908202321996214,
+      "stdout": "submodules.stdout",
+      "stderr": "submodules.stderr"
+    },
+    {
+      "name": "suite-check",
+      "command": [
+        "make",
+        "check"
+      ],
+      "exit_code": 0,
+      "seconds": 14.34219462001056,
+      "stdout": "suite-check.stdout",
+      "stderr": "suite-check.stderr"
+    },
+    {
+      "name": "diff-check",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0,
+      "seconds": 0.4648867720097769,
+      "stdout": "diff-check.stdout",
+      "stderr": "diff-check.stderr"
+    }
+  ],
+  "seconds": 35.7163288849988,
+  "resources": {
+    "memory.peak": "149250048",
+    "memory.swap.peak": "0",
+    "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nsock_throttled 0",
+    "cpu.max": "100000 100000"
+  },
+  "source_status": " M bin/omztty\n M tests/test_terminal_exec.py\n",
+  "main_status": "",
+  "component_sources": " 52a531a59e9ec9236a76eafc0f4f068799e44b15 components/ssmcp (52a531a)\n e6b5feb98b05c59e0986624c0742dfe4a9187a2a components/zdot (e6b5feb)\n f19b278676206d76626dd01e4b89f7ad9ce9318f components/zfetch (f19b278)\n ef8bd9571e206c8086e38b9dcbdc760a466b5133 components/zrc (v0.1.0)\n 1cfa1a1eb761d14e2ccfd5381282b6ccd1491cff components/zshard (v0.2.0)\n 6b91e29e923aaee0207953f2b04393087f19e0d8 components/ztty (6b91e29)\n"
+}
