@@ -1,0 +1,355 @@
+#compdef coolapk
+# Native coolapk 0.1.1 grammar, verified from installed --help.
+# Only static choices and local paths; no CLI, account or network access.
+autoload -Uz _omztty_directories
+local context state state_descr line node=root token
+typeset -A opt_args
+local -a words=("$words[@]")
+local -i CURRENT=$CURRENT index selected help_only=0
+local -a specs positional value_options subcommands names
+local -a common=(
+    '(--pretty)--pretty[]'
+    '(--raw)--raw[保留 API data 中的空字段]'
+    '(--config-dir)--config-dir=[]:config dir:_omztty_directories'
+    '(-h --help)-h[Print help]'
+    '(-h --help)--help[Print help]'
+)
+while true; do
+    specs=("$common[@]")
+    positional=()
+    value_options=()
+    subcommands=()
+    case $node in
+        root)
+            specs+=(
+                '(-V --version)-V[Print version]'
+                '(-V --version)--version[Print version]'
+            )
+            value_options=('--config-dir')
+            subcommands=(
+                'search:搜索帖子、用户、话题或应用'
+                'home:浏览首页推荐、热门或最新动态'
+                'main:浏览主首页'
+                'hot:浏览热榜'
+                'boards:列出全部 21 个板块'
+                'board:按板块 ID、页面名或 URL 浏览'
+                'secondhand:浏览二手交易'
+                'feed:获取帖子详情及评论'
+                'replies:独立获取评论或热门评论'
+                'user:查看用户资料或动态'
+                'topic:查看话题详情或动态'
+                'app:获取应用详情'
+                'notify:查看通知或未读计数'
+                'message:管理私信会话与消息'
+                'like:点赞帖子'
+                'unlike:取消帖子点赞'
+                'like-reply:点赞评论'
+                'reply:回复帖子或评论'
+                'follow:关注用户'
+                'unfollow:取消关注'
+                'post:发布动态'
+                'upload:上传图片并返回 URL'
+                'login:Cookie、ADB、短信登录或查看状态'
+                'logout:清除本地登录凭据和短信会话'
+                'whoami:查看本地身份或在线校验会话'
+                'auth:从 APK 初始化 v3 鉴权数据'
+            )
+            ;;
+        root/search)
+            specs+=(
+                '(--type)--type=[]:kind:('\''feed'\'' '\''user'\'' '\''feedTopic'\'' '\''app'\'')'
+                '(--feed-type)--feed-type=[]:feed type:('\''feed'\'' '\''trade'\'' '\''feedArticle'\'')'
+                '(--sort)--sort=[]:sort:()'
+                '(--page)--page=[]:page:()'
+            )
+            value_options=('--type' '--feed-type' '--config-dir' '--sort' '--page')
+            positional=(
+                '1:keyword:_guard "[^-]*" '\''keyword'\'''
+            )
+            ;;
+        root/home)
+            specs+=(
+                '(--tab)--tab=[]:tab:('\''recommend'\'' '\''hot'\'' '\''latest'\'')'
+                '(--page)--page=[]:page:()'
+            )
+            value_options=('--tab' '--page' '--config-dir')
+            ;;
+        root/main)
+            specs+=(
+                '(--page)--page=[]:page:()'
+            )
+            value_options=('--page' '--config-dir')
+            ;;
+        root/hot)
+            specs+=(
+                '(--page)--page=[]:page:()'
+            )
+            value_options=('--page' '--config-dir')
+            ;;
+        root/boards)
+            value_options=('--config-dir')
+            ;;
+        root/board)
+            specs+=(
+                '(--page)--page=[]:page:()'
+            )
+            value_options=('--page' '--config-dir')
+            positional=(
+                '1:board id:_guard "[^-]*" '\''board id'\'''
+            )
+            ;;
+        root/secondhand)
+            specs+=(
+                '(--brand)--brand=[]:brand:()'
+                '(--page)--page=[]:page:()'
+            )
+            value_options=('--brand' '--page' '--config-dir')
+            ;;
+        root/feed)
+            specs+=(
+                '(--no-replies)--no-replies[]'
+                '(--replies)--replies[]'
+                '(--reply-page)--reply-page=[]:reply page:()'
+                '(--feed-type)--feed-type=[]:feed type:('\''feed'\'' '\''trade'\'' '\''feedArticle'\'')'
+            )
+            value_options=('--config-dir' '--reply-page' '--feed-type')
+            positional=(
+                '1:feed id:_guard "[^-]*" '\''feed id'\'''
+            )
+            ;;
+        root/replies)
+            specs+=(
+                '(--hot)--hot[]'
+                '(--sort)--sort=[]:sort:()'
+                '(--feed-type)--feed-type=[]:feed type:('\''feed'\'' '\''trade'\'' '\''feedArticle'\'')'
+                '(--page)--page=[]:page:()'
+            )
+            value_options=('--sort' '--config-dir' '--feed-type' '--page')
+            positional=(
+                '1:feed id:_guard "[^-]*" '\''feed id'\'''
+            )
+            ;;
+        root/user)
+            specs+=(
+                '(--feeds)--feeds[]'
+                '(--profile)--profile[]'
+                '(--first-item)--first-item=[]:first item:()'
+                '(--last-item)--last-item=[]:last item:()'
+                '(--page)--page=[]:page:()'
+            )
+            value_options=('--config-dir' '--first-item' '--last-item' '--page')
+            positional=(
+                '1:uid:_guard "[^-]*" '\''uid'\'''
+            )
+            ;;
+        root/topic)
+            specs+=(
+                '(--feeds)--feeds[]'
+                '(--page)--page=[]:page:()'
+            )
+            value_options=('--page' '--config-dir')
+            positional=(
+                '1:tag:_guard "[^-]*" '\''tag'\'''
+            )
+            ;;
+        root/app)
+            value_options=('--config-dir')
+            positional=(
+                '1:package:_guard "[^-]*" '\''package'\'''
+            )
+            ;;
+        root/notify)
+            specs+=(
+                '(--page)--page=[]:page:()'
+            )
+            value_options=('--page' '--config-dir')
+            positional=(
+                '1:kind:('\''checkCount'\'' '\''atMeMeFeed'\'' '\''atComment'\'' '\''comment'\'' '\''feedLike'\'' '\''contactsFollow'\'' '\''message'\'')'
+            )
+            ;;
+        root/message)
+            value_options=('--config-dir')
+            subcommands=(
+                'list:list'
+                'chat:chat'
+                'read:read'
+                'send:send'
+            )
+            ;;
+        root/like)
+            value_options=('--config-dir')
+            positional=(
+                '1:feed id:_guard "[^-]*" '\''feed id'\'''
+            )
+            ;;
+        root/unlike)
+            value_options=('--config-dir')
+            positional=(
+                '1:feed id:_guard "[^-]*" '\''feed id'\'''
+            )
+            ;;
+        root/like-reply)
+            value_options=('--config-dir')
+            positional=(
+                '1:reply id:_guard "[^-]*" '\''reply id'\'''
+            )
+            ;;
+        root/reply)
+            specs+=(
+                '(-m --message)-m+[]:message:()'
+                '(-m --message)--message=[]:message:()'
+                '(--type)--type=[]:kind:('\''feed'\'' '\''reply'\'')'
+            )
+            value_options=('-m' '--message' '--type' '--config-dir')
+            positional=(
+                '1:target id:_guard "[^-]*" '\''target id'\'''
+            )
+            ;;
+        root/follow)
+            value_options=('--config-dir')
+            positional=(
+                '1:uid:_guard "[^-]*" '\''uid'\'''
+            )
+            ;;
+        root/unfollow)
+            value_options=('--config-dir')
+            positional=(
+                '1:uid:_guard "[^-]*" '\''uid'\'''
+            )
+            ;;
+        root/post)
+            specs+=(
+                '(-m --message)-m+[]:message:()'
+                '(-m --message)--message=[]:message:()'
+                '(--pic)--pic=[]:pic:()'
+            )
+            value_options=('-m' '--message' '--pic' '--config-dir')
+            ;;
+        root/upload)
+            specs+=(
+                '(--dir)--dir=[]:dir:('\''feed'\'' '\''message'\'')'
+            )
+            value_options=('--dir' '--config-dir')
+            positional=(
+                '1:file path:_files'
+            )
+            ;;
+        root/login)
+            specs+=(
+                '(--cookie)--cookie=[]:cookie:()'
+                '(--cookie-stdin)--cookie-stdin[]'
+                '(--status)--status[]'
+                '(--adb)--adb[]'
+                '(--sms)--sms[]'
+                '(--phone)--phone=[]:phone:()'
+                '(--captcha)--captcha=[]:captcha:()'
+                '(--code)--code=[]:code:()'
+                '(--sessid)--sessid=[]:sessid:()'
+                '(--request-hash)--request-hash=[]:request hash:()'
+                '(--validate-url)--validate-url=[]:validate url:()'
+                '(--captcha-file)--captcha-file=[]:captcha file:_files'
+                '(--country)--country=[]:country:()'
+            )
+            value_options=('--cookie' '--config-dir' '--phone' '--captcha' '--code' '--sessid' '--request-hash' '--validate-url' '--captcha-file' '--country')
+            ;;
+        root/logout)
+            value_options=('--config-dir')
+            ;;
+        root/whoami)
+            specs+=(
+                '(--online)--online[]'
+            )
+            value_options=('--config-dir')
+            ;;
+        root/auth)
+            specs+=(
+                '(--extract)--extract=[]:extract:_files'
+                '(--device)--device=[]:device:()'
+                '(--app-version)--app-version=[]:app version:()'
+                '(--version-code)--version-code=[]:version code:()'
+            )
+            value_options=('--extract' '--device' '--app-version' '--config-dir' '--version-code')
+            ;;
+        root/message/list)
+            specs+=(
+                '(--page)--page=[]:page:()'
+            )
+            value_options=('--page' '--config-dir')
+            ;;
+        root/message/read)
+            value_options=('--config-dir')
+            positional=(
+                '1:ukey:_guard "[^-]*" '\''ukey'\'''
+            )
+            ;;
+        root/message/chat)
+            specs+=(
+                '(--page)--page=[]:page:()'
+            )
+            value_options=('--page' '--config-dir')
+            positional=(
+                '1:ukey:_guard "[^-]*" '\''ukey'\'''
+            )
+            ;;
+        root/message/send)
+            specs+=(
+                '(-m --message)-m+[]:message:()'
+                '(-m --message)--message=[]:message:()'
+                '(--pic)--pic=[]:pic:()'
+            )
+            value_options=('-m' '--message' '--pic' '--config-dir')
+            positional=(
+                '1:uid:_guard "[^-]*" '\''uid'\'''
+            )
+            ;;
+        *) return 1 ;;
+    esac
+
+    if (( help_only )); then
+        specs=()
+        positional=()
+    fi
+    selected=0
+    if (( ${#subcommands} )); then
+        names=("${subcommands[@]%%:*}")
+        index=2
+        while (( index < CURRENT )); do
+            token=${(Q)words[index]}
+            case $token in
+                --) break ;;
+                -*)
+                    if (( ${value_options[(Ie)$token]} )); then
+                        if (( index + 1 < CURRENT )) && [[ $words[index+1] == -* ]]; then
+                            words[index+1]=__native_option_value__
+                        fi
+                        (( index += 2 ))
+                    else
+                        (( ++index ))
+                    fi
+                    ;;
+                *)
+                    if [[ $token == help && $help_only == 0 ]]; then
+                        help_only=1
+                        selected=1
+                    elif (( ${names[(Ie)$token]} )); then
+                        node+=/$token
+                        selected=1
+                    fi
+                    if (( selected )); then
+                        shift $(( index - 1 )) words
+                        (( CURRENT -= index - 1 ))
+                    fi
+                    break
+                    ;;
+            esac
+        done
+        (( selected )) && continue
+        positional=('1:command:->subcommand')
+        (( help_only )) || subcommands+=('help:Show command help')
+    fi
+    state=''
+    _arguments -s -S -C "$specs[@]" "$positional[@]"
+    [[ $state == subcommand ]] && _describe 'command' subcommands
+    return
+done
+

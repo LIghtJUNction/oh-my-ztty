@@ -1,0 +1,169 @@
+#compdef rustup
+# Rustup 1.29.3 native grammar. Read local toolchain names without running rustup.
+autoload -Uz _omztty_directories
+_omztty_rustup_toolchains() {
+    local expl rustup_home=${RUSTUP_HOME:-$HOME/.rustup}
+    local -Ua toolchains=(stable beta nightly "$rustup_home"/toolchains/*(N/:t))
+    _wanted toolchains expl toolchain compadd -a toolchains
+}
+_omztty_rustup_default() {
+    compadd -- none
+    _omztty_rustup_toolchains
+}
+_omztty_rustup_components() {
+    _values component cargo clippy rustc rust-std rust-docs rust-src rustfmt
+}
+local context state state_descr line node=root token
+typeset -A opt_args
+local -a words=("$words[@]")
+local -i CURRENT=$CURRENT index=2 selected help_only=0
+local -a specs positional subcommands names
+local -a common=('(-h --help)'{-h,--help}'[Show help]')
+local -a toolchain_option=('--toolchain=[Select a toolchain]:toolchain:_omztty_rustup_toolchains')
+# A +toolchain selector is optional before the command; it is not a free-text
+# positional candidate competing with command completion.
+while (( index <= CURRENT )); do
+    token=${(Q)words[index]}
+    if [[ $token == +* ]]; then
+        if (( index == CURRENT )); then
+            compset -P '+'
+            _omztty_rustup_toolchains
+            return
+        fi
+        words[index]=()
+        (( --CURRENT ))
+        break
+    fi
+    [[ $token == (-v|--verbose|-q|--quiet) ]] || break
+    (( ++index ))
+done
+while true; do
+    specs=("$common[@]")
+    positional=()
+    subcommands=()
+    case $node in
+        root)
+            specs+=('(-v --verbose)'{-v,--verbose}'[Show verbose diagnostics]'
+                '(-q --quiet)'{-q,--quiet}'[Hide progress]'
+                '(-V --version)'{-V,--version}'[Show rustup version]')
+            subcommands=(install uninstall toolchain default show update check target
+                component override run which doc man self set completions)
+            ;;
+        root/toolchain) subcommands=(list install uninstall link) ;;
+        root/target|root/component) subcommands=(list add remove) ;;
+        root/override) subcommands=(list set unset) ;;
+        root/show)
+            specs+=('(-v --verbose)'{-v,--verbose}'[Show all compiler versions]')
+            subcommands=(active-toolchain home profile) ;;
+        root/self) subcommands=(update uninstall upgrade-data) ;;
+        root/set) subcommands=(default-host profile auto-self-update auto-install) ;;
+        root/install|root/toolchain/install)
+            specs+=('--profile=[Select installed components]:profile:(minimal default complete)'
+                '*'{-c+,--component=}'[Add components on installation]:components:_values -s , component cargo clippy rustc rust-std rust-docs rust-src rustfmt'
+                '*'{-t+,--target=}'[Add target triples]:target triples:()'
+                '--no-self-update[Skip updating rustup]' '--no-update[Keep an installed toolchain]'
+                '--force[Continue if components are missing]' '--allow-downgrade[Allow an older toolchain]'
+                '--force-non-host[Allow a non-host toolchain]'
+                '--override[Set the directory override]' '--default[Set the default toolchain]')
+            positional=('*:toolchain:_omztty_rustup_toolchains') ;;
+        root/update)
+            specs+=('--no-self-update[Skip updating rustup]' '--force[Continue if components are missing]'
+                '--force-non-host[Allow a non-host toolchain]')
+            positional=('*:toolchain:_omztty_rustup_toolchains') ;;
+        root/uninstall|root/toolchain/uninstall)
+            positional=('*:toolchain:_omztty_rustup_toolchains') ;;
+        root/default)
+            specs+=('--force-non-host[Allow a non-host toolchain]')
+            positional=('1:toolchain:_omztty_rustup_default') ;;
+        root/toolchain/list)
+            specs+=('(-v --verbose)'{-v,--verbose}'[Show toolchain details]'
+                '(-q --quiet)'{-q,--quiet}'[Use a single column]') ;;
+        root/toolchain/link)
+            positional=('1:custom toolchain:_guard "[^-]*" "toolchain name"'
+                '2:toolchain directory:_omztty_directories') ;;
+        root/target/list|root/component/list)
+            specs+=("$toolchain_option[@]" '--installed[Show installed entries]'
+                '(-q --quiet)'{-q,--quiet}'[Use a single column]') ;;
+        root/target/add|root/target/remove)
+            specs+=("$toolchain_option[@]")
+            positional=('*:target triple:_guard "[^-]*" "target triple"') ;;
+        root/component/add|root/component/remove)
+            specs+=("$toolchain_option[@]" '--target=[Select the target triple]:target:()')
+            positional=('*:component:_omztty_rustup_components') ;;
+        root/override/set)
+            specs+=('--path=[Set an override for a directory]:directory:_omztty_directories')
+            positional=('1:toolchain:_omztty_rustup_toolchains') ;;
+        root/override/unset)
+            specs+=('--path=[Remove the override for a directory]:directory:_omztty_directories'
+                '--nonexistent[Remove overrides for nonexistent directories]') ;;
+        root/run)
+            # Once the executable is present, all following words belong to it.
+            local -i argument_count=0
+            for (( index=2; index<CURRENT; ++index )); do
+                if [[ $words[index] == -- ]]; then
+                    (( argument_count )) || continue
+                elif [[ $words[index] == -* && $argument_count == 0 ]]; then
+                    continue
+                else
+                    (( ++argument_count ))
+                fi
+                if (( argument_count >= 2 )); then _files; return; fi
+            done
+            specs+=('--install[Install the requested toolchain if missing]')
+            positional=('1:toolchain:_omztty_rustup_toolchains'
+                '2:command:_command_names' '*:command argument:_files') ;;
+        root/which)
+            specs+=("$toolchain_option[@]")
+            positional=('1:command:_command_names') ;;
+        root/doc)
+            specs+=("$toolchain_option[@]" '--path[Print the documentation path]'
+                '--serve[Serve documentation locally]' '--alloc[Allocation library]'
+                '--book[Rust language book]' '--cargo[Cargo book]' '--clippy[Clippy documentation]'
+                '--core[Core library]' '--edition-guide[Edition guide]' '--embedded-book[Embedded book]'
+                '--error-codes[Compiler diagnostics]' '--nomicon[Unsafe Rust book]'
+                '--proc_macro[Macro library]' '--reference[Language reference]'
+                '--releases[Release notes]' '--rust-by-example[Rust by Example]'
+                '--rustc[Compiler documentation]' '--rustc-docs[Compiler API documentation]'
+                '--rustdoc[Documentation generator]' '--std[Standard library]'
+                '--style-guide[Style guide]' '--test[Test library]' '--unstable-book[Unstable features]')
+            positional=('1:documentation topic:_guard "[^-]*" "topic"') ;;
+        root/man) positional=('1:manual page:(rustc cargo rustdoc)') ;;
+        root/completions)
+            positional=('1:shell:(bash elvish fish powershell zsh)'
+                '2:command:(rustup cargo)') ;;
+        root/set/profile) positional=('1:profile:(minimal default complete)') ;;
+        root/set/auto-self-update) positional=('1:mode:(enable disable check-only)') ;;
+        root/set/auto-install) positional=('1:mode:(enable disable)') ;;
+        root/set/default-host) positional=('1:host triple:_guard "[^-]*" "host triple"') ;;
+        root/check|root/override/list|root/show/*|root/self/*) ;;
+        *) return 1 ;;
+    esac
+    (( help_only )) && specs=() positional=()
+    if (( ${#subcommands} )); then
+        selected=0
+        for (( index=2; index<CURRENT; ++index )); do
+            token=${(Q)words[index]}
+            [[ $token == -- ]] && break
+            [[ $token == -* ]] && continue
+            if [[ $token == help && $help_only == 0 ]]; then
+                help_only=1
+                selected=1
+            elif (( ${subcommands[(Ie)$token]} )); then
+                node+=/$token
+                selected=1
+            fi
+            if (( selected )); then
+                shift $(( index - 1 )) words
+                (( CURRENT -= index - 1 ))
+            fi
+            break
+        done
+        (( selected )) && continue
+        positional=('1:command:->command')
+        (( help_only )) || subcommands+=(help)
+    fi
+    state=''
+    _arguments -s -S -C "$specs[@]" "$positional[@]"
+    [[ $state == command ]] && _describe 'rustup command' subcommands
+    return
+done

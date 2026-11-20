@@ -4,7 +4,7 @@
 
 [官网](https://lightjunction.github.io/oh-my-ztty/) · [English](README.md) · [安装说明](docs/installation.md) · [配置与恢复](docs/configuration.md) · [性能记录](docs/performance.md) · [0.2.1 实机报告](docs/reports/workspace-0.2.1.md)
 
-原生 Tab 补全覆盖 `ssmcp`、`ztty`、`zdot`、`zfetch`、`zshard`、`zai` 和 `omztty`，支持多级命令、参数取值与中文路径。直接输入组件命令或使用套件入口都能补全，个人补全规则优先。详见[补全说明](docs/configuration.md#native-completion)。
+原生 Tab 补全覆盖套件组件、Codex／Claude／Gemini／OpenCode／pi／Amp、Go／Rust／Node 开发命令，以及 Project Z 等自研 CLI；Git、uv、Cargo 等复用已安装的系统补全。支持多级命令、参数取值与中文路径，个人补全规则优先。详见[补全说明](docs/configuration.md#native-completion)与[覆盖清单](docs/completions.md)。
 
 ## 安装
 

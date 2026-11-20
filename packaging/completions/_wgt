@@ -1,0 +1,324 @@
+#compdef wgt
+# Native wgt 0.1.2 grammar, verified from installed --help.
+# Only static choices and local paths; no CLI, account or network access.
+autoload -Uz _omztty_directories
+local context state state_descr line node=root token
+typeset -A opt_args
+local -a words=("$words[@]")
+local -i CURRENT=$CURRENT index selected help_only=0
+local -a specs positional value_options subcommands names
+local -a common=(
+    '(-C --directory)-C+[]:directory:_omztty_directories'
+    '(-C --directory)--directory=[]:directory:_omztty_directories'
+    '(--offline)--offline[Disable package network access (plugins manage their own network)]'
+    '(--locked)--locked[Require the existing lock file; refuse resolution changes]'
+    '(--registry)--registry=[GitHub Git index repository used for short package names and submissions]:registry:()'
+    '(-h --help)-h[Print help]'
+    '(-h --help)--help[Print help]'
+)
+while true; do
+    specs=("$common[@]")
+    positional=()
+    value_options=()
+    subcommands=()
+    case $node in
+        root)
+            specs+=(
+                '(--list)--list[List built-in commands and PATH extensions]'
+                '(-V --version)-V[Print version]'
+                '(-V --version)--version[Print version]'
+            )
+            value_options=('-C' '--directory' '--registry')
+            subcommands=(
+                'version:Show the project pin, or write an exact wgt version to .wgt-version'
+                'toolchain:Install a native wgt version from a release or a trusted local executable'
+                'new:Create a new project directory'
+                'init:Initialize an existing directory without overwriting files'
+                'add:Add a dependency (latest stable release by default), then pin and fetch it'
+                'remove:Remove a dependency and its lock entries (does not edit imports)'
+                'update:Update wgt, one dependency, or all dependencies with --all'
+                'self:Manage the wgt executable itself'
+                'download:Download and verify a wgt version without selecting it'
+                'fetch:Fetch and verify every pinned dependency'
+                'tree:Print direct dependency tree'
+                'metadata:Print project metadata as JSON'
+                'check:Check all sources using weightc, without training'
+                'build:Build a source ZIP bundle; never initialize weights or train'
+                'package:Bundle sources and explicitly selected embedded or external weights'
+                'train:Continue the current weight revision; use --fresh to explicitly initialize'
+                'install:Verify and unpack a ZIP bundle into a new directory'
+                'export:Explicitly initialize weights without training'
+                'run:Build in the disposable disk cache and run one model'
+                'test:Build and run JSON behavior tests from tests/*.json'
+                'verify:Verify a local artifact or all locked dependencies'
+                'graph:Render verified model architecture without Python'
+                'release-assets:Package prebuilt artifacts; no compiler or Python required'
+                'publish:Publish release assets and submit a registry PR (requires git and gh)'
+                'register:Verify and propose an existing published package to the registry'
+                'cache:Print the native cache directory (never deletes cached weights)'
+                'doctor:Print runtime/tool availability'
+            )
+            ;;
+        root/version)
+            value_options=('-C' '--directory' '--registry')
+            positional=(
+                '1:version:_guard "[^-]*" '\''version'\'''
+            )
+            ;;
+        root/toolchain)
+            specs+=(
+                '(--path)--path=[]:path:_files'
+            )
+            value_options=('-C' '--directory' '--path' '--registry')
+            positional=(
+                '1:version:_guard "[^-]*" '\''version'\'''
+            )
+            ;;
+        root/new)
+            specs+=(
+                '(--module)--module=[]:module:()'
+            )
+            value_options=('-C' '--directory' '--module' '--registry')
+            positional=(
+                '1:path:_omztty_directories'
+            )
+            ;;
+        root/init)
+            specs+=(
+                '(--module)--module=[]:module:()'
+            )
+            value_options=('-C' '--directory' '--module' '--registry')
+            positional=(
+                '1:path:_omztty_directories'
+            )
+            ;;
+        root/add)
+            specs+=(
+                '(--version)--version=[]:version:()'
+            )
+            value_options=('-C' '--directory' '--version' '--registry')
+            positional=(
+                '1:module:_guard "[^-]*" '\''module'\'''
+            )
+            ;;
+        root/remove)
+            value_options=('-C' '--directory' '--registry')
+            positional=(
+                '1:module:_guard "[^-]*" '\''module'\'''
+            )
+            ;;
+        root/update)
+            specs+=(
+                '(--version)--version=[]:version:()'
+                '(--all)--all[Upgrade every direct model dependency to its latest registered/stable version]'
+            )
+            value_options=('-C' '--directory' '--version' '--registry')
+            positional=(
+                '1:module:_guard "[^-]*" '\''module'\'''
+            )
+            ;;
+        root/self)
+            value_options=('-C' '--directory' '--registry')
+            subcommands=(
+                'update:Download, verify and select the latest stable native wgt'
+            )
+            ;;
+        root/download)
+            value_options=('-C' '--directory' '--registry')
+            positional=(
+                '1:version:_guard "[^-]*" '\''version'\'''
+            )
+            ;;
+        root/fetch)
+            value_options=('-C' '--directory' '--registry')
+            ;;
+        root/tree)
+            value_options=('-C' '--directory' '--registry')
+            ;;
+        root/metadata)
+            value_options=('-C' '--directory' '--registry')
+            ;;
+        root/check)
+            specs+=(
+                '(--shapes)--shapes[Display inferred input/output shapes for each layer]'
+            )
+            value_options=('-C' '--directory' '--registry')
+            positional=(
+                '1:source:_guard "[^-]*" '\''source'\'''
+            )
+            ;;
+        root/build)
+            specs+=(
+                '(--entry)--entry=[]:entry:_files -g "*.wgt(-.)"'
+                '(-o --output)-o+[]:output:_files'
+                '(-o --output)--output=[]:output:_files'
+                '(--force)--force[]'
+            )
+            value_options=('-C' '--directory' '--entry' '-o' '--output' '--registry')
+            ;;
+        root/package)
+            specs+=(
+                '(--entry)--entry=[]:entry:_files -g "*.wgt(-.)"'
+                '(-o --output)-o+[]:output:_files'
+                '(-o --output)--output=[]:output:_files'
+                '(--weights)--weights=[]:weights:_files'
+                '(--reference)--reference=[]:reference:()'
+                '(--force)--force[]'
+            )
+            value_options=('-C' '--directory' '--entry' '-o' '--output' '--weights' '--reference' '--registry')
+            ;;
+        root/train)
+            value_options=('-C' '--directory' '--registry')
+            positional=(
+                '*:args:_files'
+            )
+            ;;
+        root/install)
+            specs+=(
+                '(-o --output)-o+[]:output:_omztty_directories'
+                '(-o --output)--output=[]:output:_omztty_directories'
+            )
+            value_options=('-C' '--directory' '-o' '--output' '--registry')
+            positional=(
+                '1:archive:_files'
+            )
+            ;;
+        root/export)
+            specs+=(
+                '(-o --output)-o+[Output root; writes <root>/<model>/]:output:_omztty_directories'
+                '(-o --output)--output=[Output root; writes <root>/<model>/]:output:_omztty_directories'
+                '(--force)--force[Replace an existing WeightLang model directory]'
+                '*--trainer=[Load a trusted Python trainer\: NAME=FILE.py\:FUNCTION (repeatable)]:trainers:()'
+            )
+            value_options=('-C' '--directory' '-o' '--output' '--trainer' '--registry')
+            positional=(
+                '1:source:_files -g "*.wgt(-.)"'
+            )
+            ;;
+        root/run)
+            specs+=(
+                '(--source)--source=[]:source:_files -g "*.wgt(-.)"'
+                '(--input)--input=[]:input:()'
+            )
+            value_options=('-C' '--directory' '--source' '--input' '--registry')
+            ;;
+        root/test)
+            value_options=('-C' '--directory' '--registry')
+            ;;
+        root/verify)
+            value_options=('-C' '--directory' '--registry')
+            positional=(
+                '1:artifact:_files'
+            )
+            ;;
+        root/graph)
+            specs+=(
+                '(--format)--format=[]:format:('\''md'\'' '\''json'\'' '\''toon'\'' '\''html'\'' '\''svg'\'' '\''mermaid'\'' '\''dot'\'')'
+                '(-o --output)-o+[]:output:_files'
+                '(-o --output)--output=[]:output:_files'
+                '(--open)--open[Open the generated HTML in the system'\''s default browser]'
+                '(--stdout)--stdout[Write the document to stdout instead of a temporary file]'
+            )
+            value_options=('-C' '--directory' '--format' '-o' '--output' '--registry')
+            positional=(
+                '1:artifact:_files'
+            )
+            ;;
+        root/release-assets)
+            specs+=(
+                '(--version)--version=[]:version:()'
+                '(--artifacts)--artifacts=[]:artifacts:_omztty_directories'
+                '(-o --output)-o+[]:output:_omztty_directories'
+                '(-o --output)--output=[]:output:_omztty_directories'
+                '(--allow-untrained)--allow-untrained[]'
+            )
+            value_options=('-C' '--directory' '--version' '--artifacts' '-o' '--output' '--registry')
+            ;;
+        root/publish)
+            specs+=(
+                '(--index)--index=[]:index:()'
+                '(--name)--name=[Registry name owner/package; inferred from the canonical module when omitted]:name:()'
+                '(--license)--license=[Package license expression, e.g. MIT or Apache-2.0]:license:()'
+                '(--edition)--edition=[]:edition:()'
+                '(--register-only)--register-only[Submit an already uploaded release; useful after a registry submission failure]'
+                '(--no-register)--no-register[]'
+                '(--dry-run)--dry-run[]'
+            )
+            value_options=('-C' '--directory' '--index' '--name' '--license' '--edition' '--registry')
+            ;;
+        root/register)
+            specs+=(
+                '(--name)--name=[]:name:()'
+                '(--version)--version=[]:version:()'
+                '(--license)--license=[]:license:()'
+                '(--edition)--edition=[]:edition:()'
+                '(--dry-run)--dry-run[]'
+            )
+            value_options=('-C' '--directory' '--name' '--version' '--license' '--edition' '--registry')
+            positional=(
+                '1:module:_guard "[^-]*" '\''module'\'''
+            )
+            ;;
+        root/cache)
+            value_options=('-C' '--directory' '--registry')
+            ;;
+        root/doctor)
+            value_options=('-C' '--directory' '--registry')
+            ;;
+        root/self/update)
+            specs+=(
+                '(--version)--version=[]:version:()'
+            )
+            value_options=('-C' '--directory' '--version' '--registry')
+            ;;
+        *) return 1 ;;
+    esac
+
+    if (( help_only )); then
+        specs=()
+        positional=()
+    fi
+    selected=0
+    if (( ${#subcommands} )); then
+        names=("${subcommands[@]%%:*}")
+        index=2
+        while (( index < CURRENT )); do
+            token=${(Q)words[index]}
+            case $token in
+                --) break ;;
+                -*)
+                    if (( ${value_options[(Ie)$token]} )); then
+                        if (( index + 1 < CURRENT )) && [[ $words[index+1] == -* ]]; then
+                            words[index+1]=__native_option_value__
+                        fi
+                        (( index += 2 ))
+                    else
+                        (( ++index ))
+                    fi
+                    ;;
+                *)
+                    if [[ $token == help && $help_only == 0 ]]; then
+                        help_only=1
+                        selected=1
+                    elif (( ${names[(Ie)$token]} )); then
+                        node+=/$token
+                        selected=1
+                    fi
+                    if (( selected )); then
+                        shift $(( index - 1 )) words
+                        (( CURRENT -= index - 1 ))
+                    fi
+                    break
+                    ;;
+            esac
+        done
+        (( selected )) && continue
+        positional=('1:command:->subcommand')
+        (( help_only )) || subcommands+=('help:Show command help')
+    fi
+    state=''
+    _arguments -s -S -C "$specs[@]" "$positional[@]"
+    [[ $state == subcommand ]] && _describe 'command' subcommands
+    return
+done
+
