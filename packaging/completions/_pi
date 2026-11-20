@@ -1,0 +1,185 @@
+#compdef pi
+
+# Static built-in grammar from pi 1.5.2 --help. Extension flags stay extension-owned.
+# Never inspect credentials, discover sessions, load extensions or invoke pi on Tab.
+autoload -Uz _omztty_directories
+local context state state_descr line service=pi curcontext="$curcontext"
+local -a words=("$words[@]") options arguments commands
+local -i CURRENT=$CURRENT index
+local route=''
+typeset -A opt_args
+commands=(install remove uninstall update list config auth mcp)
+if (( CURRENT > 2 )) && (( ${commands[(Ie)$words[2]]} )); then
+    route=$words[2]
+    shift words
+    (( --CURRENT ))
+    if [[ $route == (auth|mcp) ]] && (( CURRENT > 2 )); then
+        if [[ $route == auth ]]; then commands=(login logout print-api-key print-bearer-token check)
+        else commands=(add remove list login logout)
+        fi
+        if (( ${commands[(Ie)$words[2]]} )); then
+            route+="/$words[2]"
+            shift words
+            (( --CURRENT ))
+        fi
+    fi
+fi
+options=('(-h --help)'{-h,--help}'[Show help]')
+case $route in
+    '')
+        options+=(
+            '(-v --version)'{-v,--version}'[Show version]'
+            '--provider[Provider for the selected model]:provider:'
+            '--model[Model pattern or provider/model]:model:'
+            '--api-key[Set an API key]:API key:'
+            '--system-prompt[Set the system prompt]:text:'
+            '*--append-system-prompt[Append prompt text or a file path]:text or path:'
+            '--mode[Output mode]:mode:(text json rpc)'
+            '(-p --print)'{-p,--print}'[Process the prompt and exit]'
+            '(-c --continue)'{-c,--continue}'[Continue the latest session]'
+            '(-r --resume)'{-r,--resume}'[Pick a session to resume]'
+            '--session[Open a session file or ID]:session file or ID:_files'
+            '--session-id[Open or create a session ID]:session ID:'
+            '--fork[Fork a session file or ID]:session file or ID:_files'
+            '--session-dir[Session storage directory]:directory:_omztty_directories'
+            '--no-session[Do not save the session]'
+            '(-n --name)'{-n,--name}'[Set the session name]:name:'
+            '--models[Model patterns for cycling]:comma-separated model patterns:'
+            '(-nt --no-tools)'{-nt,--no-tools}'[Disable all tools by default]'
+            '(-nbt --no-builtin-tools)'{-nbt,--no-builtin-tools}'[Disable built-in tools]'
+            '(-t --tools)'{-t,--tools}'[Tool allowlist or patterns]:tools:->tools'
+            '(-xt --exclude-tools)'{-xt,--exclude-tools}'[Tool denylist or patterns]:tools:->tools'
+            '--thinking[Reasoning level]:level:(off minimal low medium high xhigh max)'
+            '*'{-e,--extension}'[Load an extension file or builtin name]:extension:_files'
+            '(-ne --no-extensions)'{-ne,--no-extensions}'[Disable extension discovery]'
+            '--no-mcp[Disable MCP support]'
+            '*--skill[Load a skill file or directory]:path:_files'
+            '(-ns --no-skills)'{-ns,--no-skills}'[Disable skill discovery]'
+            '*--prompt-template[Load a prompt file or directory]:path:_files'
+            '(-np --no-prompt-templates)'{-np,--no-prompt-templates}'[Disable prompt discovery]'
+            '*--theme[Load a theme file or directory]:path:_files'
+            '--use-theme[Select the interactive theme]:theme name:'
+            '--no-themes[Disable theme discovery]'
+            '(-nc --no-context-files)'{-nc,--no-context-files}'[Disable context file discovery]'
+            '--export[Export a session to HTML]:session file:_files'
+            '--list-models[List available models]::model search:'
+            '--verbose[Show verbose startup]'
+            '--tui-mode[Terminal UI mode]:mode:(fullscreen regular)'
+            '(-na --no-approve -a --approve)'{-a,--approve}'[Trust project files for this run]'
+            '(-a --approve -na --no-approve)'{-na,--no-approve}'[Ignore project files for this run]'
+            '--offline[Disable startup network operations]'
+        )
+        arguments=('*:message or @file:->message') ;;
+    install|remove|uninstall|config|list|update)
+        options+=(
+            '(-na --no-approve -a --approve)'{-a,--approve}'[Trust project files]'
+            '(-a --approve -na --no-approve)'{-na,--no-approve}'[Ignore project files]'
+        )
+        case $route in
+            install|remove|uninstall)
+                options+=('(-l --local)'{-l,--local}'[Use project settings]')
+                arguments=('1:package source or local path:_files') ;;
+            config) options+=('(-l --local)'{-l,--local}'[Edit project settings]') ;;
+            update)
+                options+=('--self[Update pi only]' '--extensions[Update extensions]'
+                    '--models[Refresh model catalogs]' '--all[Update pi and extensions]'
+                    '--extension[Update one package]:package source:'
+                    '--force[Reinstall the current version]')
+                arguments=('1:update target:->update') ;;
+        esac ;;
+    auth)
+        commands=(login logout print-api-key print-bearer-token check)
+        arguments=('1:authentication action:->command') ;;
+    auth/login)
+        # Unlike the root option, login --api-key is a boolean.
+        options+=('--api-key[Save a key instead of browser login]' '--no-browser[Do not open a browser]')
+        arguments=('1:provider:->text') ;;
+    auth/logout) arguments=('1:provider:->text') ;;
+    auth/print-api-key|auth/print-bearer-token|auth/check)
+        options+=('--provider[Select a provider]:provider:' '--model[Select a model]:model:')
+        if [[ $route == auth/print-bearer-token ]]; then
+            options+=('--min-expiry[Minimum remaining token lifetime]:duration:')
+        elif [[ $route == auth/check ]]; then
+            options+=('--json[Emit JSON]' '--credentials[Include the resolved credential]'
+                '--no-refresh[Do not refresh expired credentials]')
+        fi ;;
+    mcp)
+        commands=(add remove list login logout)
+        arguments=('1:MCP action:->command') ;;
+    mcp/add)
+        options+=('(-l --local)'{-l,--local}'[Use project MCP configuration]'
+            '--url[Remote server URL]:URL:' '*--env[Local server environment]:name=value:'
+            '--cwd[Local server working directory]:directory:_omztty_directories'
+            '*--header[HTTP header]:name=value:'
+            '--bearer-token-env-var[Name of the token variable]:variable name:'
+            '--oauth-client-id[OAuth client ID]:client ID:'
+            '--oauth-client-secret[OAuth client secret reference]:secret reference:'
+            '--oauth-callback-port[Fixed callback port]:port:'
+            '--oauth-client-name[OAuth registration name]:name:'
+            '--oauth-client-registration[Registration mode]:mode:(auto cimd dcr)'
+            '--exposure[Tool exposure mode]:mode:(codemode deferred direct hidden)'
+            '--description[Server description]:text:')
+        index=2
+        while (( index < CURRENT )); do
+            case $words[index] in
+                --url|--env|--cwd|--header|--bearer-token-env-var|--oauth-client-id|--oauth-client-secret|--oauth-callback-port|--oauth-client-name|--oauth-client-registration|--exposure|--description)
+                    (( index += 2 )) ;;
+                --)
+                    shift $index words
+                    (( CURRENT -= index ))
+                    if (( CURRENT == 1 )); then _command_names
+                    else service=$words[1]; _normal
+                    fi
+                    return ;;
+                *) (( ++index )) ;;
+            esac
+        done
+        arguments=('1:server name:->text' '*:command after --:->text') ;;
+    mcp/remove|mcp/login|mcp/logout)
+        options+=('(-l --local)'{-l,--local}'[Use project MCP configuration]')
+        [[ $route == mcp/login ]] && options+=('--timeout[Login time limit]:seconds:')
+        arguments=('1:server name:->text') ;;
+    mcp/list) options+=('--json[Emit JSON]') ;;
+esac
+
+# _arguments treats a prior literal -- as a separator even when it is an
+# option value. Preserve the real parser's required-value boundaries.
+local -a value_options
+local specification option_name
+for specification in "$options[@]"; do
+    if [[ $specification == *']:'* && $specification != *']::'* ]]; then
+        option_name=${specification%%\[*}
+        option_name=${option_name##*\)}
+        value_options+=("${option_name#\*}")
+    fi
+done
+index=2
+while (( index < CURRENT )); do
+    [[ $words[index] == -- ]] && break
+    if (( ${value_options[(Ie)$words[index]]} )); then
+        if (( index + 1 < CURRENT )) && [[ $words[index+1] == -* ]]; then
+            words[index+1]=__omztty_option_value__
+        fi
+        (( index += 2 ))
+    else
+        (( ++index ))
+    fi
+done
+_arguments -C -S "$options[@]" "$arguments[@]"
+case $state in
+    command) _describe 'command' commands ;;
+    tools) _values -s , 'tool name or pattern' read bash edit write grep find ls ;;
+    update) compadd -- self pi ;;
+    text) _message "$state_descr" ;;
+    message)
+        if [[ -n ${opt_args[--export]-} ]]; then
+            _files
+        elif compset -P '@'; then
+            _files
+        elif (( CURRENT == 2 )) && [[ $PREFIX != -* ]]; then
+            commands=(install remove uninstall update list config auth mcp)
+            _describe 'command' commands
+        else
+            _message 'message text; use @ for a file'
+        fi ;;
+esac

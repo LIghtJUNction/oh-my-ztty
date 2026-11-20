@@ -1,0 +1,150 @@
+#compdef go
+autoload -Uz _omztty_directories
+# Go command grammar from Go 1.27 help. Package completion uses local paths.
+_omztty_go_sources() { _files -W "$go_directory" -g '*.go(-.)'; }
+_omztty_go_dirs() { _omztty_directories -W "$go_directory"; }
+
+local context state state_descr line action
+typeset -A opt_args
+local -a words=("$words[@]")
+local -i CURRENT=$CURRENT
+local go_directory=. first_option=${(Q)words[2]}
+local -a commands=(
+    'build:Compile packages' 'clean:Remove generated files' 'doc:Show documentation'
+    'env:Inspect Go settings' 'fix:Apply source fixes' 'fmt:Format package sources'
+    'generate:Run source generators' 'get:Update module dependencies'
+    'install:Compile and install packages' 'list:List packages or modules'
+    'mod:Manage modules' 'run:Compile and run a program' 'telemetry:Manage telemetry'
+    'test:Run package tests' 'tool:Run a Go tool' 'version:Show Go version'
+    'vet:Check packages' 'work:Manage a workspace' 'help:Show command help'
+    'bug:Start a bug report'
+)
+if [[ $first_option == -C=* ]] && (( CURRENT == 2 )); then
+    compset -P "-C="
+    _omztty_directories
+    return
+fi
+if [[ $first_option == -C ]]; then
+    if (( CURRENT == 3 )); then _omztty_directories; return; fi
+    if (( CURRENT > 3 )); then
+        go_directory=${(Q)words[3]}
+        words=("$words[1]" "${words[@]:3}")
+        (( CURRENT -= 2 ))
+    fi
+elif [[ $first_option == -C=* ]] && (( CURRENT > 2 )); then
+    go_directory=${first_option#-C=}
+    words=("$words[1]" "${words[@]:2}")
+    (( --CURRENT ))
+fi
+go_directory=${go_directory:A}
+if (( CURRENT == 2 )); then
+    _arguments -C '-C+[Run in a directory]:directory:_omztty_directories' '1:command:->command'
+    [[ $state == command ]] && _describe 'Go command' commands
+    return
+fi
+action=$words[2]
+shift words
+(( --CURRENT ))
+local -a build_flags=(
+    '-a[Rebuild packages]' '-n[Print commands without executing]' '-v[Show package names]'
+    '-x[Show executed commands]' '-work[Keep the build directory]'
+    '-p+[Set parallel build count]:count:' '-race[Enable race detection]'
+    '-msan[Enable memory sanitizer]' '-asan[Enable address sanitizer]'
+    '-cover[Enable coverage instrumentation]'
+    '-covermode=[Select coverage accounting]:mode:(set count atomic)'
+    '-coverpkg=[Select coverage packages]:package patterns:'
+    '-buildmode=[Select build mode]:mode:(archive c-archive c-shared default shared exe pie plugin)'
+    '-buildvcs=[Include version control metadata]:mode:(auto true false)'
+    '-compiler=[Select compiler]:compiler:(gc gccgo)'
+    '-mod=[Select module mode]:mode:(readonly vendor mod)'
+    '-modfile=[Use an alternate module file]:module file:_files'
+    '-overlay=[Read a file overlay]:JSON file:_files -g "*.json(-.)"'
+    '-pgo=[Select a profile]:profile:_files'
+    '-pkgdir=[Select package directory]:directory:_omztty_go_dirs'
+    '-tags=[Enable build tags]:tags:'
+    '-trimpath[Remove local path prefixes]' '-modcacherw[Keep module cache writable]'
+    '-asmflags=[Pass assembler options]:options:' '-gcflags=[Pass compiler options]:options:'
+    '-gccgoflags=[Pass gccgo options]:options:' '-ldflags=[Pass linker options]:options:'
+    '-installsuffix=[Set installation suffix]:suffix:' '-toolexec=[Wrap tool commands]:command:'
+)
+case $action in
+    mod|work)
+        local -a operations
+        if [[ $action == mod ]]; then operations=(download edit graph init tidy vendor verify why)
+        else operations=(edit init sync use vendor)
+        fi
+        if (( CURRENT == 2 )); then _describe "$action operation" operations; return; fi
+        local operation=$words[2]
+        shift words
+        (( --CURRENT ))
+        case $action:$operation in
+            mod:tidy) _arguments '-diff[Print the required changes]' '-e[Continue after errors]' \
+                '-v[Show removed modules]' '-x[Show commands]' \
+                '-go=[Set the Go compatibility version]:version:' '-compat=[Check compatibility]:version:' ;;
+            mod:download) _arguments '-json[Emit JSON]' '-x[Show commands]' \
+                '-reuse=[Reuse a previous JSON result]:file:_files' '*:module version:' ;;
+            mod:init) _arguments '1:module path:' ;;
+            mod:vendor|work:vendor) _arguments '-e[Continue after errors]' '-v[Show packages]' \
+                '-o+[Set output directory]:directory:_omztty_go_dirs' ;;
+            mod:graph) _arguments '-go=[Select Go version]:version:' ;;
+            mod:why) _arguments '-m[Explain modules]' '-vendor[Exclude tests outside the main module]' '*:package or module:' ;;
+            mod:edit)
+                _arguments '-json[Print JSON]' '-print[Print the edited file]' \
+                    '-fmt[Format the module file]' '-go=[Set Go version]:version:' \
+                    '-toolchain=[Set toolchain]:toolchain:' '-module=[Set module path]:module:' \
+                    '*-require=[Require a module]:module@version:' '*-droprequire=[Drop a requirement]:module:' \
+                    '*-replace=[Replace a module]:old=new:' '*-dropreplace=[Drop a replacement]:module:' \
+                    '*-exclude=[Exclude a module version]:module@version:' '*-dropexclude=[Drop an exclusion]:module@version:' \
+                    '1:module file:_files' ;;
+            work:edit)
+                _arguments '-json[Print JSON]' '-print[Print the edited file]' \
+                    '-fmt[Format the workspace file]' '-go=[Set Go version]:version:' \
+                    '-toolchain=[Set toolchain]:toolchain:' '*-replace=[Replace a module]:old=new:' \
+                    '*-dropreplace=[Drop a replacement]:module:' \
+                    '*-use=[Add a workspace module]:directory:_omztty_go_dirs' \
+                    '*-dropuse=[Drop a workspace module]:directory:_omztty_go_dirs' \
+                    '1:workspace file:_files' ;;
+            work:init) _arguments '*:module directory:_omztty_go_dirs' ;;
+            work:use) _arguments '-r[Find module directories recursively]' '*:module directory:_omztty_go_dirs' ;;
+            *) return 1 ;;
+        esac
+        ;;
+    env)
+        _arguments '-json[Emit JSON]' '-changed[Show changed settings]' '-u[Unset saved settings]' \
+            '-w[Write saved settings]' \
+            '*:Go variable:(GO111MODULE GOARCH GOAUTH GOBIN GOCACHE GOCACHEPROG GOENV GOFLAGS GOHOSTARCH GOHOSTOS GOMOD GOMODCACHE GONOPROXY GONOSUMDB GOOS GOPATH GOPRIVATE GOPROXY GOROOT GOSUMDB GOTELEMETRY GOTOOLCHAIN GOTOOLDIR GOWORK CGO_ENABLED CC CXX)'
+        ;;
+    telemetry) _arguments '1:telemetry mode:(off local on)' ;;
+    help)
+        if (( CURRENT == 2 )); then _describe 'help topic' commands
+        elif [[ $words[2] == mod ]]; then _values 'module operation' download edit graph init tidy vendor verify why
+        elif [[ $words[2] == work ]]; then _values 'workspace operation' edit init sync use vendor
+        fi ;;
+    version) _arguments '-m[Show module metadata]' '-v[Show unrecognized files]' '-json[Emit JSON]' '*:executable:_files' ;;
+    tool) _arguments '-n[Print the command]' '-modfile=[Use another module file]:file:_files' \
+        '1:tool:(addr2line asm buildid cgo compile covdata cover doc fix link nm objdump pack pprof test2json trace vet)' '*:tool argument:_files' ;;
+    build|install|test|run|list|generate|get|vet|clean|fmt|fix|doc)
+        local -a flags=()
+        [[ $action == (build|install|test|run|list|get|vet) ]] && flags=("$build_flags[@]")
+        case $action in
+            build|test) flags+=('-o+[Write output]:output file:_files') ;;
+        esac
+        case $action in
+            test) flags+=('-c[Compile tests without running]' '-run=[Select tests]:regular expression:'
+                '-skip=[Skip matching tests]:regular expression:' '-bench=[Select benchmarks]:regular expression:'
+                '-count=[Set repetitions]:count:' '-timeout=[Set test timeout]:duration:'
+                '-short[Run short tests]' '-failfast[Stop after the first failure]' '-json[Emit JSON]'
+                '-benchmem[Report benchmark allocation counts]' '-parallel=[Set parallel tests]:count:'
+                '-shuffle=[Shuffle tests]:seed or mode:(off on)' '-coverprofile=[Write coverage]:file:_files'
+                '-cpuprofile=[Write CPU profile]:file:_files' '-memprofile=[Write memory profile]:file:_files'
+                '-fuzz=[Select a fuzz target]:regular expression:' '-fuzztime=[Set fuzzing duration]:duration:') ;;
+            run) flags+=('-exec=[Run through another program]:command:_command_names') ;;
+            list) flags+=('-json[Emit JSON]' '-m[List modules]' '-deps[Include dependencies]' '-f+[Use a format template]:format:') ;;
+            generate) flags+=('-n[Print commands]' '-v[Show packages]' '-x[Show executed commands]' '-tags=[Enable build tags]:tags:' '-run=[Select generators]:regular expression:' '-skip=[Skip generators]:regular expression:') ;;
+            get) flags+=('-t[Include test dependencies]' '-u[Upgrade dependencies]' '-tool[Add a module tool]') ;;
+            clean) flags+=('-i[Remove installed archives]' '-r[Clean dependencies recursively]' '-n[Print commands]' '-x[Show executed commands]' '-cache[Clear the build cache]' '-testcache[Clear test results]' '-modcache[Clear the module download cache]' '-fuzzcache[Clear the fuzzing cache]') ;;
+            fmt) flags+=('-n[Print commands]' '-x[Show executed commands]') ;;
+        esac
+        _arguments "$flags[@]" '*:package or Go source:_omztty_go_sources'
+        ;;
+esac

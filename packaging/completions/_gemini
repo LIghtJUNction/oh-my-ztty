@@ -1,0 +1,200 @@
+#compdef gemini
+# Native completion verified against gemini 0.46.0 --help and subcommand help.
+# Never execute the client or read authentication/session configuration on Tab.
+
+_gemini_directories() {
+    local expl
+    _wanted directories expl directory _path_files -/ "$@"
+}
+
+_gemini_directory_list() {
+    # Keep directory navigation; split only an explicitly typed list separator.
+    compset -P '*,'
+    _gemini_directories
+}
+
+_gemini_source() {
+    if [[ $PREFIX == (https://*|http://*|git@*) ]]; then
+        _message 'repository URL'
+    else
+        _files
+    fi
+}
+
+_gemini_specs() {
+    specs=("${common_specs[@]}")
+    subcommands=()
+    positionals=('*:prompt or argument:->text')
+    case $1 in
+        '')
+            subcommands=('mcp:Manage MCP servers' 'extensions:Manage extensions' 'extension:Manage extensions'
+                         'skills:Manage agent skills' 'skill:Manage agent skills'
+                         'hooks:Manage hooks' 'hook:Manage hooks' 'gemma:Manage local Gemma routing')
+            specs+=(
+                '(-m --model)'{-m,--model}'[Select a model]:model:->text'
+                '(-p --prompt)'{-p,--prompt}'[Run with a headless prompt]:prompt:->text'
+                '(-i --prompt-interactive)'{-i,--prompt-interactive}'[Start with an interactive prompt]:prompt:->text'
+                '--skip-trust[Trust this workspace for the session]'
+                '(-w --worktree)'{-w,--worktree}'[Create a worktree]::name:->text'
+                '(-s --sandbox)'{-s,--sandbox}'[Use a sandbox]'
+                '(-y --yolo)'{-y,--yolo}'[Automatically approve actions]'
+                '--approval-mode[Select approval handling]:mode:(default auto_edit yolo plan)'
+                '*--policy[Load another policy file or directory]:policy path:_files'
+                '*--admin-policy[Load an admin policy file or directory]:policy path:_files'
+                '--acp[Start ACP mode]' '--experimental-acp[Start ACP mode (deprecated)]'
+                '*--allowed-mcp-server-names[Allow named MCP servers]:server name:->text'
+                '*--allowed-tools[Allow tool names (deprecated)]:tool name:->text'
+                '*-e[Select extensions]:extension name:->text'
+                '*--extensions[Select extensions]:extension name:->text'
+                '(-l --list-extensions)'{-l,--list-extensions}'[List available extensions]'
+                '(-r --resume)'{-r,--resume}'[Resume a saved session]:session:(latest)'
+                '--session-file[Load a JSON session file]:session file:_files'
+                '--session-id[Use a session UUID]:UUID:->text'
+                '--list-sessions[List saved sessions]'
+                '--delete-session[Delete a session by index]:index:->text'
+                '*--include-directories[Add working directories]:directories:_gemini_directory_list'
+                '--screen-reader[Enable accessible output]'
+                '(-o --output-format)'{-o,--output-format}'[Select output encoding]:format:(text json stream-json)'
+                '--raw-output[Emit unsanitized output]' '--accept-raw-output-risk[Acknowledge raw output risk]'
+                '(-v --version)'{-v,--version}'[Show version]'
+            )
+            ;;
+        mcp)
+            subcommands=('add:Add a server' 'remove:Remove a server' 'list:List servers'
+                         'enable:Enable a server' 'disable:Disable a server')
+            ;;
+        'mcp add')
+            specs+=(
+                '(-s --scope)'{-s,--scope}'[Set configuration scope]:scope:(user project)'
+                '(-t --transport --type)'{-t,--transport,--type}'[Select transport]:transport:(stdio sse http)'
+                '*-e[Set a server environment variable]:KEY=VALUE:->text'
+                '*--env[Set a server environment variable]:KEY=VALUE:->text'
+                '*-H[Set an HTTP header]:header:->text' '*--header[Set an HTTP header]:header:->text'
+                '--timeout[Set the connection timeout]:milliseconds:->text'
+                '--trust[Trust server tool calls]' '--description[Describe the server]:description:->text'
+                '*--include-tools[Include named tools]:tool names:->text'
+                '*--exclude-tools[Exclude named tools]:tool names:->text'
+            )
+            positionals=('1:server name:->text' '2:server command or URL:->server-command' '*:server argument:->text')
+            ;;
+        extensions)
+            subcommands=('install:Install an extension' 'uninstall:Remove extensions' 'list:List extensions'
+                         'update:Update extensions' 'disable:Disable an extension' 'enable:Enable an extension'
+                         'link:Link a local extension' 'new:Create an extension' 'validate:Validate an extension'
+                         'config:Configure extension settings')
+            ;;
+        'extensions install')
+            specs+=('--ref[Select a Git ref]:ref:->text' '--auto-update[Enable automatic updates]'
+                    '--pre-release[Allow prerelease versions]' '--consent[Skip the consent prompt]'
+                    '--skip-settings[Skip configuration during installation]')
+            positionals=('1:repository URL or local path:_gemini_source')
+            ;;
+        'extensions update') specs+=('--all[Update every installed extension]') ;;
+        'extensions enable'|'extensions disable')
+            specs+=('--scope[Set extension scope]:scope:(user workspace)')
+            ;;
+        'extensions link'|'extensions validate')
+            positionals=('1:extension directory:_gemini_directories')
+            ;;
+        'extensions new')
+            positionals=('1:extension directory:_gemini_directories'
+                         '2:template:(custom-commands exclude-tools hooks mcp-server policies skills themes-example)')
+            ;;
+        skills)
+            subcommands=('list:List skills' 'enable:Enable a skill' 'disable:Disable a skill'
+                         'install:Install a skill' 'link:Link a skill' 'uninstall:Remove a skill')
+            ;;
+        'skills list') specs+=('--all[Show every discovered skill]') ;;
+        'skills install')
+            specs+=('--scope[Choose installation scope]:scope:(user workspace)'
+                    '--path[Select a repository subdirectory]:repository path:->text'
+                    '--consent[Skip the consent prompt]')
+            positionals=('1:repository URL or local path:_gemini_source')
+            ;;
+        'skills disable'|'skills uninstall') specs+=('--scope[Choose skill scope]:scope:(user workspace)') ;;
+        'skills link') positionals=('1:skill directory:_gemini_directories') ;;
+        hooks) subcommands=('migrate:Import Claude Code hooks') ;;
+        gemma)
+            subcommands=('setup:Configure local routing' 'start:Start the model server'
+                         'stop:Stop the model server' 'status:Show routing status' 'logs:Show server logs')
+            ;;
+
+    esac
+}
+
+_gemini() {
+    local context state state_descr line command_path='' token flag tail item candidate
+    local -a words=("$words[@]") specs subcommands positionals
+    local -a common_specs=(
+        '(-h --help)-h[Show help]'
+        '(-h --help)--help[Show help]'
+        '(-d --debug)-d[Enable debug mode]'
+        '(-d --debug)--debug[Enable debug mode]'
+    )
+    local -A aliases=(
+        'extension' 'extensions'
+        'skill' 'skills'
+        'hook' 'hooks'
+    )
+    typeset -A opt_args
+    local -i CURRENT=$CURRENT index consumed descended
+    while true; do
+        _gemini_specs "$command_path"
+        index=2
+        descended=0
+        while (( index < CURRENT )); do
+            token=$words[index]
+            [[ $token == -- ]] && break
+            if [[ $token == -* ]]; then
+                consumed=1
+                for item in "${specs[@]}"; do
+                    flag=${item%%\[*}
+                    flag=${flag##*\)}
+                    flag=${flag#\*}
+                    flag=${flag%[+=]}
+                    [[ $token == "$flag" ]] || continue
+                    tail=${item#*\]}
+                    if [[ $tail == ::* ]]; then
+                        if (( index + 1 < CURRENT )) && [[ $words[index+1] != -* ]]; then consumed=2; fi
+                    elif [[ $tail == :* ]]; then
+                        consumed=2
+                        if (( index + 1 < CURRENT )) && [[ $words[index+1] == -* ]]; then
+                            words[index+1]=__gemini_option_value__
+                        fi
+                    fi
+                    break
+                done
+                (( index += consumed ))
+                continue
+            fi
+            for item in "${subcommands[@]}"; do
+                candidate=${item%%:*}
+                [[ $token == "$candidate" ]] || continue
+                command_path="${command_path:+$command_path }$token"
+                command_path=${aliases[$command_path]-$command_path}
+                shift $(( index - 1 )) words
+                (( CURRENT -= index - 1 ))
+                descended=1
+                break
+            done
+            break
+        done
+        (( descended )) || break
+    done
+    if (( ${#subcommands} )); then
+        positionals=('1:command or prompt:->command' '*:prompt or argument:->text')
+    fi
+    _arguments -s -S -C "${specs[@]}" "${positionals[@]}"
+    case $state in
+        command) _describe 'command' subcommands || _message 'command or prompt text' ;;
+        text) _message 'prompt or argument text' ;;
+        server-command)
+            local transport=${opt_args[--transport]:-${opt_args[--type]:-${opt_args[-t]:-stdio}}}
+            if [[ $transport != stdio || $PREFIX == (https://*|http://*) ]]; then _message 'server URL'
+            else _command_names -e
+            fi
+            ;;
+    esac
+}
+
+_gemini "$@"

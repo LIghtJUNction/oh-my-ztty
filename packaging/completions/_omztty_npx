@@ -1,0 +1,50 @@
+#compdef npx
+autoload -Uz _omztty_directories
+# npm 12 npx grammar; package names remain user input, with no registry lookup.
+_omztty_npx_commands() {
+    local -a executables=(node_modules/.bin/*(N:t))
+    compadd -a executables
+    _command_names
+}
+local context state state_descr line
+typeset -A opt_args
+local -a words=("$words[@]")
+local -i CURRENT=$CURRENT index=2 command_index=0
+while (( index < CURRENT )); do
+    case $words[index] in
+        -p|--package|-c|--call|-w|--workspace|--cache|--userconfig|--script-shell|--shell|--registry|--allow-scripts)
+            if (( index + 1 < CURRENT )) && [[ $words[index+1] == -* ]]; then
+                words[index+1]=__npx_option_value__
+            fi
+            (( index += 2 )) ;;
+        --) command_index=$(( index + 1 )); break ;;
+        -*) (( ++index )) ;;
+        *) command_index=$index; break ;;
+    esac
+done
+if (( command_index )); then
+    if (( CURRENT == command_index )); then
+        _omztty_npx_commands
+    else
+        # Arguments after the package belong to that program, not to npx.
+        _files
+    fi
+    return
+fi
+_arguments -s -S \
+    '(-h --help)'{-h,--help}'[Show help]' '(-v --version)'{-v,--version}'[Show npm version]' \
+    '*'{-p+,--package=}'[Make a package available]:package specification:' \
+    '(-c --call)'{-c+,--call=}'[Execute a shell command]:shell command:' \
+    '*'{-w+,--workspace=}'[Select a workspace]:workspace or path:_omztty_directories' \
+    '--workspaces[Use all workspaces]' '--include-workspace-root[Include the root workspace]' \
+    '(-y --yes)'{-y,--yes}'[Allow installing the requested package]' \
+    '--no[Decline installation]' '--no-install[Use already available packages]' \
+    '--offline[Use cached packages]' '--prefer-offline[Prefer cached packages]' \
+    '--cache=[Use a cache directory]:directory:_omztty_directories' \
+    '--userconfig=[Use an npm configuration file]:file:_files' \
+    '--script-shell=[Select a shell executable]:executable:_files -g "*(*)"' \
+    '--registry=[Select a package registry]:URL:' \
+    '*--allow-scripts=[Allow lifecycle scripts for listed packages]:package list:' \
+    '--strict-allow-scripts[Reject packages with disallowed install scripts]' \
+    '--dangerously-allow-all-scripts[Allow all install scripts]' \
+    '1:package command:_omztty_npx_commands' '*:program argument:_files'

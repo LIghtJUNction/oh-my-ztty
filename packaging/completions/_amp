@@ -1,0 +1,261 @@
+#compdef amp
+
+# Static command tree and flags from @ampcode/cli 0.0.1795147237-g4dbcdb.
+# No account, thread, credential, tool, plugin or server lookup runs on Tab.
+autoload -Uz _omztty_directories
+_amp_commands() {
+    case $1 in
+        '') commands=(version logout account login orb portal net profile runner clone git-setup files top last l report-bug report diagnostics threads t thread tools tool plugins plugin skill skills permissions permission mcp config domains projects spaces space boxes oauth-clients secrets svc usage update up completions) ;;
+        'account') commands=(list switch) ;;
+        'orb') commands=(provider bootstrap system-metrics portal service services simulator desktop restart-processes id-token redact-output) ;;
+        'orb/provider') commands=(create set-default) ;;
+        'orb/portal') commands=(access list) ;;
+        'orb/service') commands=(ensure start restart stop status logs list) ;;
+        'orb/simulator') commands=(serve) ;;
+        'orb/desktop') commands=(ensure) ;;
+        'portal') commands=(login-url) ;;
+        'net') commands=(exit-node route status ping run) ;;
+        'profile') commands=(list create rename delete rm use none status) ;;
+        'runner') commands=(list dirs desktop) ;;
+        'runner/dirs') commands=(add remove list) ;;
+        'runner/desktop') commands=(status allow) ;;
+        'files') commands=(get delete) ;;
+        'threads') commands=(new n continue c list l ls usage context analyze-context search find color label share s import rename r archive delete markdown md export raw raw-thread) ;;
+        'threads/share') commands=(multiplayer) ;;
+        'threads/share/multiplayer') commands=(on off ttl) ;;
+        'threads/import') commands=(detect codex claude claude-code cursor devin windsurf opencode pi conductor) ;;
+        'tools') commands=(list ls show) ;;
+        'plugins') commands=(add remove rm update list ls import repositories repos show-agent-options exec show-docs) ;;
+        'skill') commands=(add list ls remove rm info repositories repos) ;;
+        'permissions') commands=(list ls test edit add) ;;
+        'mcp') commands=(add list remove remote oauth doctor approve) ;;
+        'mcp/remote') commands=(list add update remove check tools login logout) ;;
+        'mcp/oauth') commands=(login logout status) ;;
+        'config') commands=(edit keymap model-providers vocabulary) ;;
+        'config/model-providers') commands=(list activate deactivate set-priority show delete test check-access add-router edit-router add-key setup-guide edit-key add-chatgpt-subscription add-github-copilot-subscription) ;;
+        'config/vocabulary') commands=(show add set) ;;
+        'domains') commands=(list add check remove rm) ;;
+        'projects') commands=(create update list status get snapshots gallery-media feedback-widget archive unarchive delete rm) ;;
+        'projects/snapshots') commands=(list delete rm) ;;
+        'projects/gallery-media') commands=(get set) ;;
+        'projects/feedback-widget') commands=(get enable disable remove-origin) ;;
+        'spaces') commands=(create) ;;
+        'boxes') commands=(deploy deployments cancel-deploy undeploy create list show exec cp delete rename schedule start stop rotate-credential) ;;
+        'oauth-clients') commands=(list create edit) ;;
+        'secrets') commands=(list history get set delete rm) ;;
+        'svc') commands=(gmail) ;;
+        'svc/gmail') commands=(search_messages read_message list_labels modify_labels) ;;
+        *) commands=() ;;
+    esac
+}
+local context state state_descr line service=amp curcontext="$curcontext"
+local -a words=("$words[@]") commands options arguments
+local -i CURRENT=$CURRENT index found
+local route='' candidate
+typeset -A opt_args
+
+while true; do
+    _amp_commands "$route"
+    (( $#commands )) || break
+    index=2 found=0
+    while (( index < CURRENT )); do
+        case $words[index] in
+            --visibility|--settings-file|--log-level|--log-file|--mcp-config|--mode|-m|--effort|--features|--executor|--runner-dir|--model|--attach|--profile|--title|--label|-l|--space|--orb-size|--orb-provider)
+                (( index += 2 )) ;;
+            --execute|-x|--project|--plugin-ready-timeout)
+                (( ++index ))
+                if (( index < CURRENT )) && [[ $words[index] != -* ]]; then (( ++index )); fi ;;
+            --) break ;;
+            --*=*|-*) (( ++index )) ;;
+            *)
+                candidate=$words[index]
+                if (( ${commands[(Ie)$candidate]} )); then
+                    case "$route/$candidate" in
+                    'orb/services') candidate=service ;;
+                    'profile/rm') candidate=delete ;;
+                    '/l') candidate=last ;;
+                    '/report') candidate=report-bug ;;
+                    '/diagnostics') candidate=report-bug ;;
+                    '/t') candidate=threads ;;
+                    '/thread') candidate=threads ;;
+                    'threads/n') candidate=new ;;
+                    'threads/c') candidate=continue ;;
+                    'threads/l') candidate=list ;;
+                    'threads/ls') candidate=list ;;
+                    'threads/analyze-context') candidate=context ;;
+                    'threads/find') candidate=search ;;
+                    'threads/s') candidate=share ;;
+                    'threads/import/claude-code') candidate=claude ;;
+                    'threads/import/windsurf') candidate=devin ;;
+                    'threads/r') candidate=rename ;;
+                    'threads/md') candidate=markdown ;;
+                    'threads/raw-thread') candidate=raw ;;
+                    '/tool') candidate=tools ;;
+                    'tools/ls') candidate=list ;;
+                    '/plugin') candidate=plugins ;;
+                    'plugins/rm') candidate=remove ;;
+                    'plugins/ls') candidate=list ;;
+                    'plugins/repos') candidate=repositories ;;
+                    '/skills') candidate=skill ;;
+                    'skill/ls') candidate=list ;;
+                    'skill/rm') candidate=remove ;;
+                    'skill/repos') candidate=repositories ;;
+                    '/permission') candidate=permissions ;;
+                    'permissions/ls') candidate=list ;;
+                    'domains/rm') candidate=remove ;;
+                    'projects/snapshots/rm') candidate=delete ;;
+                    'projects/rm') candidate=delete ;;
+                    '/space') candidate=spaces ;;
+                    'secrets/rm') candidate=delete ;;
+                    '/up') candidate=update ;;
+                    esac
+                    [[ -n $route ]] && route+="/"
+                    route+=$candidate
+                    shift $(( index - 1 )) words
+                    (( CURRENT -= index - 1 ))
+                    found=1
+                fi
+                break ;;
+        esac
+    done
+    (( found )) || break
+done
+
+options=(
+    '(-h --help)'{-h,--help}'[Show help]'
+    '(-V -v --version)'{-V,-v,--version}'[Show version]'
+    '--visibility[Thread visibility]:visibility:(private unlisted workspace group)'
+    '--settings-file[Custom settings file]:file:_files'
+    '--log-level[Set log level]:level:'
+    '--log-file[Log output path]:file:_files'
+    '--mcp-config[MCP configuration JSON or path]:JSON or file:_files'
+    '(-m --mode)'{-m,--mode}'[Agent mode or provider/model]:mode:(low medium high ultra claude-code)'
+    '--effort[Reasoning effort]:level:'
+    '--features[Thread features]:features:->features'
+    '--fast[Use fast serving]'
+    '--executor[New thread executor]:executor:(local orb runner:)'
+    '--runner-dir[Directory served by a runner]:directory:_omztty_directories'
+    '--no-tui[Serve remote requests without a TUI]'
+    '--share[Share this runner with the workspace]'
+    '--desktop[Share a desktop with runner threads]'
+    '--share-network[Share runner network access]'
+    '--amp-env[Inject configured environment variables]'
+    '--model[New thread model]:provider/model:'
+    '*--attach[Attach a local file]:file:_files'
+    '--profile[Orb desktop profile]:profile name or ID:'
+    '--title[New thread title]:title:'
+    '--stream-json[Emit JSON stream]'
+    '--stream-json-thinking[Include thinking in JSON output]'
+    '--stream-json-input[Read JSON lines from stdin]'
+    '--plugin-ready-timeout[Wait for plugins]::seconds:'
+    '--timings[Show execution timings]'
+    '--no-archive-after-execute[Keep the thread unarchived]'
+    '*'{-l,--label}'[Add a thread label]:label:'
+    '--space[Add the thread to a Space]:Space URL or ID:'
+)
+if (( $#commands )); then arguments=('1:command:->command')
+else arguments=('*:argument:->text')
+fi
+case $route in
+    '')
+        options+=(
+            '(--no-notifications)--notifications[Enable notifications]'
+            '(--notifications)--no-notifications[Disable notifications]'
+            '(--no-color)--color[Enable color]' '(--color)--no-color[Disable color]'
+            '(--no-ide)--ide[Enable IDE context]' '(--ide)--no-ide[Disable IDE context]'
+            '(--no-remote-control-terminal)--remote-control-terminal[Enable terminal access]'
+            '(--remote-control-terminal)--no-remote-control-terminal[Disable terminal access]'
+            '(-x --execute)'{-x,--execute}'[Execute one prompt]::message:'
+            '(-ox --orb-execute)'{-ox,--orb-execute}'[Execute asynchronously in an orb]'
+            '--project[Use an Amp project]::project:'
+            '--orb-size[Orb size]:size:(a1.tiny a1.small a1.medium a1.large a1.xxlarge a1.3xlarge)'
+            '--orb-provider[Orb provider]:provider name or ID:'
+        ) ;;
+    threads/new) arguments=() ;;
+    threads/continue)
+        options+=('--last[Continue the last thread]' '--pick[Open the thread picker]')
+        arguments=('*:thread URL or ID:->text') ;;
+    threads/list)
+        options+=('--include-archived[Include archived threads]'
+            '--installation-id[Filter installation]:installation ID:'
+            '--limit[Maximum threads]:count:' '--offset[Skip threads]:count:' '--json[Emit JSON]')
+        arguments=() ;;
+    threads/search)
+        options+=('(-n --limit)'{-n,--limit}'[Maximum threads]:count:' '--json[Emit JSON]')
+        arguments=('1:search query:->text') ;;
+    mcp/add)
+        options+=('*--env[Local server environment]:name=value:'
+            '*--header[Remote server header]:name=value:'
+            '--workspace[Use workspace settings]')
+        index=2
+        while (( index < CURRENT )); do
+            case $words[index] in
+                --env|--header|--visibility|--settings-file|--log-level|--log-file|--mcp-config|--mode|-m|--effort|--features|--executor|--runner-dir|--model|--attach|--profile|--title|--label|-l|--space)
+                    (( index += 2 )) ;;
+                --)
+                    shift $index words
+                    (( CURRENT -= index ))
+                    if (( CURRENT == 1 )); then _command_names
+                    else service=$words[1]; _normal
+                    fi
+                    return ;;
+                *) (( ++index )) ;;
+            esac
+        done
+        arguments=('1:server name:->text' '*:server URL or command after --:->text') ;;
+    mcp/oauth/login)
+        options+=('--server-url[MCP server URL]:URL:'
+            '--client-id[OAuth client ID]:client ID:'
+            '--client-secret[OAuth client secret]:secret:'
+            '--scopes[Comma-separated OAuth scopes]:scopes:'
+            '--auth-url[Authorization URL]:URL:' '--token-url[Token URL]:URL:')
+        arguments=('1:server name:->text') ;;
+    skill/add)
+        options+=('--target[Skill installation directory]:directory:_omztty_directories'
+            '--global[Install globally]' '--overwrite[Replace an existing skill]'
+            '--name[Custom installed name]:name:')
+        arguments=('1:skill source or local path:_files') ;;
+    plugins/add)
+        options+=('--auto-update[Update when loading plugins]'
+            '--target[Installation scope]:scope:(system workspace)')
+        arguments=('1:plugin URL:->text') ;;
+    permissions/add)
+        options+=('--to[Decision delegate program]:program:_command_names'
+            '--context[Limit rule context]:context:(thread subagent)'
+            '(-w --workspace)'{-w,--workspace}'[Use workspace permissions]')
+        arguments=('1:permission action:(allow reject ask delegate)' '2:tool name or pattern:->text') ;;
+    runner/dirs/add)
+        options+=('--runner-id[Runner to change]:runner ID:')
+        arguments=('*:directory:_omztty_directories') ;;
+    completions) arguments=('1:shell:->text') ;;
+esac
+
+# _arguments treats a prior literal -- as a separator even when it is an
+# option value. Preserve the real parser's required-value boundaries.
+local -a value_options
+local specification option_name
+for specification in "$options[@]"; do
+    if [[ $specification == *']:'* && $specification != *']::'* ]]; then
+        option_name=${specification%%\[*}
+        option_name=${option_name##*\)}
+        value_options+=("${option_name#\*}")
+    fi
+done
+index=2
+while (( index < CURRENT )); do
+    [[ $words[index] == -- ]] && break
+    if (( ${value_options[(Ie)$words[index]]} )); then
+        if (( index + 1 < CURRENT )) && [[ $words[index+1] == -* ]]; then
+            words[index+1]=__omztty_option_value__
+        fi
+        (( index += 2 ))
+    else
+        (( ++index ))
+    fi
+done
+_arguments -C -S "$options[@]" "$arguments[@]"
+case $state in
+    command) _describe 'command' commands ;;
+    features) _values -s , 'feature' fast plaid pro ;;
+    text) _message "$state_descr" ;;
+esac

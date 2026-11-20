@@ -34,7 +34,8 @@ class InteractiveCompletion(unittest.TestCase):
                         ignore=shutil.ignore_patterns(".git", ".github", "tests", "scripts", "docs"))
         (self.runtime / "bin").mkdir()
         shutil.copy2(ROOT / "bin/omztty", self.runtime / "bin/omztty")
-        for name in ("ztty", "ssmcp", "zdot", "zfetch"):
+        for name in ("ztty", "ssmcp", "zdot", "zfetch", "codex", "claude", "gemini",
+                     "opencode", "pi", "amp", "go", "npx", "yarn", "rustc", "node", "cmake"):
             path = self.runtime / "bin" / name
             path.write_text('#!/bin/sh\nprintf "%s\\n" "$0" >> "$PROBE_EXECUTED"\nexit 99\n')
             path.chmod(0o755)
@@ -321,6 +322,90 @@ class InteractiveCompletion(unittest.TestCase):
         ]:
             with self.subTest(line=line):
                 self.assertEqual(self.complete(line)[-1], expected)
+
+
+    def test_native_codex_claude_and_gemini(self):
+        self.start()
+        self.cases({
+            "codex exec --sand": "codex exec --sandbox=",
+            "codex exec --sandbox work": "codex exec --sandbox workspace-write",
+            "codex --model mcp --cd direc":
+                "codex --model mcp --cd 'directory with spaces 中文/'",
+            "codex exec check file": "codex exec check file",
+            "claude mcp add demo --transport ht": "claude mcp add demo --transport http",
+            "claude --output-format str": "claude --output-format stream-json",
+            "claude --add-dir . direc": "claude --add-dir . 'directory with spaces 中文/'",
+            "claude -p file": "claude -p file",
+            "gemini extensions up": "gemini extensions update",
+            "gemini --output-format str": "gemini --output-format stream-json",
+            "gemini extensions link direc": "gemini extensions link 'directory with spaces 中文/'",
+            "gemini -p file": "gemini -p file",
+            "codex exec --cd file": "codex exec --cd file",
+            "claude --add-dir file": "claude --add-dir file",
+            "gemini --include-directories file": "gemini --include-directories file",
+        })
+
+    def test_native_opencode_pi_and_amp(self):
+        self.start()
+        self.cases({
+            "opencode auth logi": "opencode auth login",
+            "opencode session list --format j": "opencode session list --format json",
+            "opencode --server https://example.invalid run --format j":
+                "opencode --server https://example.invalid run --format json",
+            "opencode session import --directory direc":
+                "opencode session import --directory 'directory with spaces 中文/'",
+            "pi --thinking x": "pi --thinking xhigh",
+            "pi auth print-bear": "pi auth print-bearer-token",
+            "pi mcp add demo --oauth-client-registration c":
+                "pi mcp add demo --oauth-client-registration cimd",
+            "pi @file": "pi '@file with spaces 中文.txt'",
+            "amp t li": "amp t list",
+            "amp plugins add --target w": "amp plugins add --target workspace",
+            "amp config model-providers add-github":
+                "amp config model-providers add-github-copilot-subscription",
+            "amp runner dirs add direc": "amp runner dirs add 'directory with spaces 中文/'",
+            "opencode session import --directory file": "opencode session import --directory file",
+            "pi --session-dir file": "pi --session-dir file",
+            "amp runner dirs add file": "amp runner dirs add file",
+        })
+        for command in ("opencode", "pi", "amp"):
+            self.assertEqual(self.complete(command + " mcp add demo -- git checko"),
+                             [command, "mcp", "add", "demo", "--", "git", "checkout"])
+
+    def test_native_developer_options_and_boundaries(self):
+        self.start()
+        self.cases({
+            "go mod ti": "go mod tidy",
+            "npx fixture --offl": "npx fixture --offl",
+            "yarn cache cl": "yarn cache clean",
+            "yarn --cwd . cache cl": "yarn --cwd . cache clean",
+            "rustc -C panic=ab": "rustc -C panic=abort",
+            "node --input-type mod": "node --input-type module",
+            "node fixture.js --wat": "node fixture.js --wat",
+            "cmake --build . --config Deb": "cmake --build . --config Debug",
+        })
+
+    def test_native_developer_paths_and_quoting(self):
+        (self.project / "directory with spaces 中文/nested.go").write_text("package fixture\n")
+        self.start()
+        self.cases({
+            'go -C "directory with spaces 中文" build nest':
+                'go -C "directory with spaces 中文" build nested.go',
+            "npx --cache direc": "npx --cache 'directory with spaces 中文/'",
+            "rustc -L native=direc": "rustc -L 'native=directory with spaces 中文/'",
+            "cmake --install . --prefix direc":
+                "cmake --install . --prefix 'directory with spaces 中文/'",
+            "npx --cache file": "npx --cache file",
+            "cmake --install . --prefix file": "cmake --install . --prefix file",
+        })
+
+    def test_personal_ai_and_developer_completion_priority(self):
+        for name in ("codex", "go"):
+            (self.personal / ("_" + name)).write_text(
+                f"#compdef {name}\ncompadd -- personal-{name}\n")
+        self.start()
+        self.cases({"codex personal": "codex personal-codex", "go personal": "go personal-go"})
+
 
     def personal_component_completions(self):
         for name in ("zshard", "zai", "ssmcp"):

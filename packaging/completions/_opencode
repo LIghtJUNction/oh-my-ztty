@@ -1,0 +1,211 @@
+#compdef opencode
+
+# Static grammar from OpenCode 2.3.2 --help. No server or account discovery.
+autoload -Uz _omztty_directories
+
+_opencode_commands() {
+    case $1 in
+        '') commands=(
+            'upgrade:Upgrade OpenCode' 'update:Upgrade OpenCode'
+            'uninstall:Remove the executable' 'acp:Start an ACP server'
+            'api:Call the server API' 'debug:Inspect diagnostics'
+            'auth:Manage integrations' 'mcp:Manage MCP servers'
+            'plugin:Manage plugins' 'models:List models'
+            'stats:Show usage statistics' 'mini:Open the minimal interface'
+            'run:Run with a message' 'session:Manage sessions'
+            'service:Manage the background server' 'reload:Reload configuration'
+            'pair:Create a pairing link' 'serve:Start the API server'
+        ) ;;
+        auth) commands=('list:List integrations' 'login:Connect an integration'
+            'logout:Log out' 'export:Export credentials'
+            'import:Import credentials' 'switch:Switch account') ;;
+        mcp) commands=('list:List servers' 'add:Add a server'
+            'auth:Authenticate a server' 'logout:Remove server credentials') ;;
+        plugin) commands=('list:List plugins' 'add:Install a plugin'
+            'check:Check for updates' 'update:Update plugins' 'remove:Remove a plugin') ;;
+        session) commands=('list:List sessions' 'delete:Delete a session'
+            'export:Export session data' 'import:Import session data') ;;
+        service) commands=('start:Start the server' 'restart:Restart the server'
+            'status:Show server status' 'stop:Stop the server'
+            'get:Read service configuration' 'set:Set service configuration'
+            'unset:Unset service configuration') ;;
+        debug) commands=('agents:List agents' 'config:List configuration sources'
+            'heap-dump:Write a heap snapshot' 'paths:Show global paths') ;;
+        *) commands=() ;;
+    esac
+}
+
+local context state state_descr line service=opencode curcontext="$curcontext"
+local -a words=("$words[@]") commands options arguments names
+local -i CURRENT=$CURRENT index found
+local route='' candidate entry
+typeset -A opt_args
+
+# Rebase at complete command words while preserving option-value boundaries.
+while true; do
+    _opencode_commands "$route"
+    (( $#commands )) || break
+    names=()
+    for entry in "$commands[@]"; do names+=("${entry%%:*}"); done
+    index=2 found=0
+    while (( index < CURRENT )); do
+        case $words[index] in
+            --server|--log-level|--completions|--session|-s|--prompt)
+                (( index += 2 )) ;;
+            --) break ;;
+            --*=*|-*) (( ++index )) ;;
+            *)
+                candidate=$words[index]
+                if (( ${names[(Ie)$candidate]} )); then
+                    [[ -n $route ]] && route+="/"
+                    route+=$candidate
+                    shift $(( index - 1 )) words
+                    (( CURRENT -= index - 1 ))
+                    found=1
+                fi
+                break ;;
+        esac
+    done
+    (( found )) || break
+done
+
+options=(
+    '(-h --help)'{-h,--help}'[Show help]'
+    '(-v --version)'{-v,--version}'[Show version]'
+    '--wizard[Open command wizard]'
+    '--completions[Print shell completions]:shell:(bash zsh fish powershell sh pwsh)'
+    '--log-level[Set minimum log level]:level:(all trace debug info warn warning error fatal none)'
+    '--print-logs[Print logs to stderr]'
+)
+case $route in
+    ''|run|mini|auth|auth/*|session|session/*|models|stats|api)
+        options+=('--standalone[Use a private server]' '--server[Connect to a server]:URL:') ;;
+esac
+
+case $route in
+    '')
+        options+=('--auto[Auto-approve permitted actions]'
+            '(-c --continue)'{-c,--continue}'[Continue the last session]'
+            '(-s --session)'{-s,--session}'[Continue or create a session]:session ID:'
+            '--prompt[Initial prompt]:prompt:')
+        arguments=('1:command or directory:->root') ;;
+    auth|mcp|plugin|session|service|debug)
+        arguments=('1:command:->command') ;;
+    run)
+        options+=(
+            '(-c --continue)'{-c,--continue}'[Continue the last session]'
+            '(-s --session)'{-s,--session}'[Continue or create a session]:session ID:'
+            '--fork[Fork before continuing]'
+            '(-w --worktree)'{-w,--worktree}'[Create a worktree]::worktree name:'
+            '(-m --model)'{-m,--model}'[Select provider/model#variant]:model:'
+            '--agent[Select an agent]:agent:'
+            '--format[Output format]:format:(default json)'
+            '*'{-f,--file}'[Attach a file]:file:_files'
+            '--title[Set session title]:title:'
+            '--archived[Create an archived session]' '--thinking[Show thinking blocks]'
+            '--auto[Auto-approve permitted actions]'
+        )
+        arguments=('*:message:->text') ;;
+    mini)
+        options+=('(-c --continue)'{-c,--continue}'[Continue the last session]'
+            '(-s --session)'{-s,--session}'[Continue or create a session]:session ID:'
+            '--fork[Fork before continuing]' '(--no-replay)--replay[Restore history]'
+            '(--replay)--no-replay[Do not replay history]'
+            '--replay-limit[Maximum replay messages]:count:'
+            '(-m --model)'{-m,--model}'[Select provider/model]:model:'
+            '--agent[Select an agent]:agent:' '--prompt[Initial prompt]:prompt:') ;;
+    upgrade|update)
+        options+=('(-m --method)'{-m,--method}'[Installation method]:method:(curl npm pnpm bun yarn vp brew winget)')
+        arguments=('1:version:->text') ;;
+    uninstall)
+        options+=('--dry-run[Preview removal]' '(-f --force)'{-f,--force}'[Skip confirmation]') ;;
+    serve)
+        options+=('--hostname[Bind hostname]:hostname:' '--port[Bind port]:port:'
+            '*--cors[Allow an additional origin]:origin:' '--service[Run as service]'
+            '--stdio[Use standard input and output]') ;;
+    acp) options+=('--login[Run login instead of starting ACP]') ;;
+    pair)
+        options+=('--url[External server address]:URL:' '--remote[Use remote access]'
+            '(-y --yes)'{-y,--yes}'[Accept enabling remote access]') ;;
+    api)
+        options+=('(-d --data)'{-d,--data}'[Request body]:body:'
+            '*'{-H,--header}'[Request header]:name=value:' '*--param[API parameter]:key=value:')
+        arguments=('*:operation or HTTP method and path:->text') ;;
+    stats)
+        options+=('--days[Last N days]:days:' '--year[Calendar year]:year:'
+            '--all[Show lifetime usage]' '--project[Project ID or dot]:project:'
+            '--models[Show model usage]' '--tools[Show tool reliability]'
+            '--cost[Show cost details]' '--full[Show every section]'
+            '--limit[Maximum rows]:count:' '--json[Emit JSON]') ;;
+    auth/login)
+        options+=('--method[Authentication method]:method:' '*--answer[Provider form answer]:key=value:')
+        arguments=('1:integration or provider URL:->text') ;;
+    auth/import) arguments=('1:JSON file:_files') ;;
+    auth/switch) arguments=('1:integration:->text' '2:credential ID or label:->text') ;;
+    auth/logout) arguments=('1:integration:->text') ;;
+    mcp/add)
+        options+=('--url[Remote server URL]:URL:' '*--header[HTTP header]:name=value:'
+            '*--env[Server environment]:name=value:' '--global[Use global configuration]')
+        # Complete the local executable only after an actual -- separator.
+        index=2
+        while (( index < CURRENT )); do
+            case $words[index] in
+                --url|--header|--env|--log-level|--completions) (( index += 2 )) ;;
+                --)
+                    shift $index words
+                    (( CURRENT -= index ))
+                    if (( CURRENT == 1 )); then _command_names
+                    else service=$words[1]; _normal
+                    fi
+                    return ;;
+                *) (( ++index )) ;;
+            esac
+        done
+        arguments=('1:server name:->text' '*:command after --:->text') ;;
+    mcp/auth|mcp/logout) arguments=('1:server name:->text') ;;
+    plugin/add|plugin/remove|plugin/update) arguments=('1:package specifier:->text') ;;
+    session/list)
+        options+=('(-n --max-count)'{-n,--max-count}'[Maximum sessions]:count:'
+            '--format[Output format]:format:(table json)') ;;
+    session/export)
+        options+=('--sanitize[Redact transcript and file data]')
+        arguments=('1:session ID:->text') ;;
+    session/import)
+        options+=('--directory[Import into a directory]:directory:_omztty_directories')
+        arguments=('1:JSON file or URL:_files') ;;
+    session/delete) arguments=('1:session ID:->text') ;;
+    service/set) arguments=('1:setting key:->text' '2:value or environment name:->text' '3:environment value:->text') ;;
+    service/unset) arguments=('1:setting key:->text' '2:environment name:->text') ;;
+esac
+
+# _arguments treats a prior literal -- as a separator even when it is an
+# option value. Preserve the real parser's required-value boundaries.
+local -a value_options
+local specification option_name
+for specification in "$options[@]"; do
+    if [[ $specification == *']:'* && $specification != *']::'* ]]; then
+        option_name=${specification%%\[*}
+        option_name=${option_name##*\)}
+        value_options+=("${option_name#\*}")
+    fi
+done
+index=2
+while (( index < CURRENT )); do
+    [[ $words[index] == -- ]] && break
+    if (( ${value_options[(Ie)$words[index]]} )); then
+        if (( index + 1 < CURRENT )) && [[ $words[index+1] == -* ]]; then
+            words[index+1]=__omztty_option_value__
+        fi
+        (( index += 2 ))
+    else
+        (( ++index ))
+    fi
+done
+_arguments -C -S "$options[@]" "$arguments[@]"
+case $state in
+    root)
+        _describe 'command' commands
+        _omztty_directories ;;
+    command) _describe 'command' commands ;;
+    text) _message "$state_descr" ;;
+esac

@@ -1,0 +1,253 @@
+#compdef claude
+# Native completion verified against claude 2.1.329 --help and subcommand help.
+# Never execute the client or read authentication/session configuration on Tab.
+
+_claude_directories() {
+    local expl
+    _wanted directories expl directory _path_files -/ "$@"
+}
+
+_claude_source() {
+    if [[ $PREFIX == (https://*|http://*|git@*) ]]; then
+        _message 'repository URL'
+    else
+        _files
+    fi
+}
+
+_claude_file_or_json() {
+    if [[ $PREFIX == (\{*|\[*) ]]; then _message 'JSON configuration'
+    else _files
+    fi
+}
+
+_claude_specs() {
+    specs=("${common_specs[@]}")
+    subcommands=()
+    positionals=('*:prompt or argument:->text')
+    case $1 in
+        '')
+            subcommands=(
+                'agents:Manage background agents' 'attach:Attach to a background session'
+                'auth:Manage authentication' 'auto-mode:Inspect automatic mode' 'doctor:Check the installation'
+                'gateway:Run the enterprise gateway' 'import:Import another agent configuration'
+                'install:Install Claude Code' 'logs:Read background session output'
+                'mcp:Manage MCP servers' 'plugin:Manage plugins' 'plugins:Manage plugins'
+                'purge:Remove local project data' 'respawn:Restart background sessions'
+                'rm:Remove a background session' 'setup-token:Set up a long-lived token'
+                'stop:Stop a background session' 'kill:Stop a background session'
+                'ultrareview:Run a cloud code review' 'update:Update Claude Code' 'upgrade:Update Claude Code'
+            )
+            specs+=(
+                '*--add-dir[Allow another working directory]:directory:_claude_directories'
+                '--agent[Select an agent]:agent:->text'
+                '--agents[Define custom agents]:JSON or file:_claude_file_or_json'
+                '--allow-dangerously-skip-permissions[Make permission bypass available]'
+                '*--allowedTools[Allow tool names]:tools:->text'
+                '*--allowed-tools[Allow tool names]:tools:->text'
+                '--append-system-prompt[Append system instructions]:prompt:->text'
+                '--autocompact[Set the compact window]:auto or token count:->text'
+                '--ax-screen-reader[Use accessible flat output]'
+                '(--bg --background)'{--bg,--background}'[Start a background session]'
+                '--bare[Skip optional customizations]' '*--betas[Set beta headers]:headers:->text'
+                '--brief[Use user-message updates]' '(--no-chrome)--chrome[Enable Claude in Chrome]'
+                '(--chrome)--no-chrome[Disable Claude in Chrome]'
+                '--cloud[Create or attach a cloud session]::description or session:->text'
+                '(-c --continue)'{-c,--continue}'[Continue the latest conversation]'
+                '--dangerously-skip-permissions[Bypass permission checks]'
+                '(-d --debug)'{-d,--debug}'[Enable debug logging]::filter:->text'
+                '--debug-file[Write a debug log]:log file:_files'
+                '--desktop[Open Claude Desktop]' '--disable-slash-commands[Disable skills and commands]'
+                '*--disallowedTools[Deny tool names]:tools:->text'
+                '*--disallowed-tools[Deny tool names]:tools:->text'
+                '--effort[Select the reasoning effort]:effort:(low medium high xhigh max)'
+                '--environment[Select a cloud environment]:identifier:->text'
+                '--exclude-dynamic-system-prompt-sections[Move machine data out of the system prompt]'
+                '--fallback-model[Set fallback models]:models:->text'
+                '*--file[Download a remote file at startup]:remote file specification:->text'
+                '--fork-session[Create a new session while resuming]'
+                '--forward-subagent-text[Forward subagent stream messages]'
+                '--from-pr[Resume a pull request session]::pull request or search:->text'
+                '--ide[Connect to an available IDE]' '--include-hook-events[Include hook stream events]'
+                '--include-partial-messages[Include partial stream messages]'
+                '--input-format[Select input encoding]:format:(text stream-json)'
+                '--json-schema[Set the response schema]:JSON schema:->text'
+                '--max-budget-usd[Set the API budget]:amount:->text'
+                '*--mcp-config[Load MCP configuration]:JSON or file:_claude_file_or_json'
+                '--model[Select a model]:model:(fable opus sonnet)'
+                '(-n --name)'{-n,--name}'[Name the session]:name:->text'
+                '--no-session-persistence[Do not save this print session]'
+                '--output-format[Select output encoding]:format:(text json stream-json)'
+                '--permission-mode[Select permission handling]:mode:(acceptEdits auto bypassPermissions manual dontAsk plan)'
+                '--permission-prompts[Choose who answers approvals]:target:(host none)'
+                '*--plugin-dir[Load a plugin folder or ZIP]:plugin path:_files'
+                '*--plugin-url[Load a plugin ZIP URL]:URL:->text'
+                '(-p --print)'{-p,--print}'[Print the response and exit]'
+                '--prompt-suggestions[Enable prompt suggestions]::enabled:(true false 1 0 yes no on off)'
+                '--remote-control[Enable remote control]::name:->text'
+                '--remote-control-session-name-prefix[Set remote session name prefix]:prefix:->text'
+                '--replay-user-messages[Repeat incoming stream messages]'
+                '--restricted[Use restricted tools and configuration]'
+                '(-r --resume)'{-r,--resume}'[Resume a conversation]::session or search:->text'
+                '--safe-mode[Disable customizations]' '--session-id[Use a session UUID]:UUID:->text'
+                '--setting-sources[Choose configuration sources]:sources:_values -s , source user project local'
+                '--settings[Load additional settings]:JSON or file:_claude_file_or_json'
+                '--strict-mcp-config[Load only explicit MCP configuration]'
+                '--system-prompt[Set the system instructions]:prompt:->text'
+                '--system-prompt-snapshot[Reuse the recorded system prompt]:mode:(on off)'
+                '--teleport[Resume a teleport session]::session:->text'
+                '*--tools[Choose available built-in tools]:tools:->text'
+                '--tmux[Create a worktree tmux session]' '--verbose[Use verbose output]'
+                '(-v --version)'{-v,--version}'[Show version]'
+                '(-w --worktree)'{-w,--worktree}'[Create a worktree]::name:->text'
+            )
+            ;;
+        mcp)
+            subcommands=('add:Add a server' 'add-json:Add a JSON server definition'
+                         'add-from-claude-desktop:Import desktop servers' 'get:Show a server'
+                         'list:List servers' 'login:Authenticate a server' 'logout:Forget authentication'
+                         'remove:Remove a server' 'reset-project-choices:Reset project decisions'
+                         'serve:Run an MCP server' 'help:Show help')
+            ;;
+        'mcp add')
+            specs+=(
+                '--callback-port[Set an OAuth callback port]:port:->text'
+                '--client-id[Set an OAuth client identifier]:identifier:->text'
+                '--client-secret[Prompt for the OAuth secret]'
+                '*-e[Set a server environment variable]:KEY=VALUE:->text'
+                '*--env[Set a server environment variable]:KEY=VALUE:->text'
+                '*-H[Set an HTTP header]:header:->text' '*--header[Set an HTTP header]:header:->text'
+                '(-s --scope)'{-s,--scope}'[Set the configuration scope]:scope:(local user project)'
+                '(-t --transport)'{-t,--transport}'[Set the transport]:transport:(stdio sse http)'
+            )
+            positionals=('1:server name:->text' '2:server command or URL:->server-command' '*:server argument:->text')
+            ;;
+        'mcp add-json')
+            specs+=('--client-secret[Prompt for the OAuth secret]'
+                    '(-s --scope)'{-s,--scope}'[Set the configuration scope]:scope:(local user project)')
+            ;;
+        'mcp remove')
+            specs+=('(-s --scope)'{-s,--scope}'[Set the configuration scope]:scope:(local user project)')
+            ;;
+        'mcp login') specs+=('--no-browser[Print the authorization URL]') ;;
+        'mcp serve')
+            specs+=('(-d --debug)'{-d,--debug}'[Enable debugging]' '--verbose[Use verbose output]')
+            ;;
+        auth)
+            subcommands=('login:Sign in' 'logout:Sign out' 'status:Show authentication status' 'help:Show help')
+            ;;
+        'auth login')
+            specs+=('(--console)--claudeai[Use a Claude subscription]'
+                    '(--claudeai)--console[Use the Anthropic Console]' '--email[Prefill an email]:email:->text'
+                    '--sso[Use single sign-on]')
+            ;;
+        'auth status') specs+=('(--text)--json[Emit JSON]' '(--json)--text[Emit plain text]') ;;
+        plugin)
+            subcommands=('configure:Configure a plugin' 'details:Show plugin components'
+                         'disable:Disable a plugin' 'enable:Enable a plugin' 'eval:Run plugin evaluations'
+                         'init:Create a plugin' 'new:Create a plugin' 'install:Install a plugin' 'i:Install a plugin'
+                         'list:List plugins' 'marketplace:Manage marketplaces' 'prune:Remove unused dependencies'
+                         'autoremove:Remove unused dependencies' 'restore-set-aside:Restore plugin settings'
+                         'tag:Create a plugin tag' 'test:Run plugin tests' 'uninstall:Uninstall a plugin'
+                         'remove:Uninstall a plugin' 'update:Update a plugin' 'validate:Validate a plugin'
+                         'help:Show help')
+            ;;
+        'plugin validate'|'plugin test') positionals=('1:plugin path:_files') ;;
+
+    esac
+}
+
+_claude() {
+    local context state state_descr line command_path='' token flag tail item candidate
+    local -a words=("$words[@]") specs subcommands positionals
+    local -a variadic_flags=(--add-dir --allowedTools --allowed-tools --disallowedTools
+                             --disallowed-tools --betas --file --mcp-config --tools)
+    local -a common_specs=(
+        '(-h --help)-h[Show help]'
+        '(-h --help)--help[Show help]'
+    )
+    local -A aliases=(
+        'plugins' 'plugin'
+        'kill' 'stop'
+        'upgrade' 'update'
+        'plugin i' 'plugin install'
+        'plugin new' 'plugin init'
+        'plugin remove' 'plugin uninstall'
+        'plugin autoremove' 'plugin prune'
+    )
+    typeset -A opt_args
+    local -i CURRENT=$CURRENT index consumed descended
+    while true; do
+        _claude_specs "$command_path"
+        index=2
+        descended=0
+        while (( index < CURRENT )); do
+            token=$words[index]
+            if [[ -z $command_path ]] && (( ${variadic_flags[(Ie)$token]} )); then
+                # Commander variadic options own every value until another option.
+                    (( ++index ))
+                    while (( index < CURRENT )) && [[ $words[index] != -* ]]; do (( ++index )); done
+                    if (( index == CURRENT )) && [[ $PREFIX != -* ]]; then
+                        case $token in
+                            --add-dir) _claude_directories ;;
+                            --mcp-config) _claude_file_or_json ;;
+                            *) _message 'option value' ;;
+                        esac
+                        return
+                    fi
+                    continue
+            fi
+            [[ $token == -- ]] && break
+            if [[ $token == -* ]]; then
+                consumed=1
+                for item in "${specs[@]}"; do
+                    flag=${item%%\[*}
+                    flag=${flag##*\)}
+                    flag=${flag#\*}
+                    flag=${flag%[+=]}
+                    [[ $token == "$flag" ]] || continue
+                    tail=${item#*\]}
+                    if [[ $tail == ::* ]]; then
+                        if (( index + 1 < CURRENT )) && [[ $words[index+1] != -* ]]; then consumed=2; fi
+                    elif [[ $tail == :* ]]; then
+                        consumed=2
+                        if (( index + 1 < CURRENT )) && [[ $words[index+1] == -* ]]; then
+                            words[index+1]=__claude_option_value__
+                        fi
+                    fi
+                    break
+                done
+                (( index += consumed ))
+                continue
+            fi
+            for item in "${subcommands[@]}"; do
+                candidate=${item%%:*}
+                [[ $token == "$candidate" ]] || continue
+                command_path="${command_path:+$command_path }$token"
+                command_path=${aliases[$command_path]-$command_path}
+                shift $(( index - 1 )) words
+                (( CURRENT -= index - 1 ))
+                descended=1
+                break
+            done
+            break
+        done
+        (( descended )) || break
+    done
+    if (( ${#subcommands} )); then
+        positionals=('1:command or prompt:->command' '*:prompt or argument:->text')
+    fi
+    _arguments -s -S -C "${specs[@]}" "${positionals[@]}"
+    case $state in
+        command) _describe 'command' subcommands || _message 'command or prompt text' ;;
+        text) _message 'prompt or argument text' ;;
+        server-command)
+            local transport=${opt_args[--transport]:-${opt_args[-t]:-stdio}}
+            if [[ $transport != stdio || $PREFIX == (https://*|http://*) ]]; then _message 'server URL'
+            else _command_names -e
+            fi
+            ;;
+    esac
+}
+
+_claude "$@"
