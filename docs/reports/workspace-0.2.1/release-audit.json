@@ -1,0 +1,74 @@
+{
+  "schema": "omztty.public-release-audit.v1",
+  "release": "v0.2.1",
+  "source": "7b69b751772a839f090e408228d94f810fd96d1e",
+  "assets": [
+    {
+      "name": "install.sh",
+      "size": 10917,
+      "sha256": "ef8b3855f69287663ea9dd5afb8e39037d3e44e7647cd741ec9413c25ee91abd"
+    },
+    {
+      "name": "install.sh.sha256",
+      "size": 77,
+      "sha256": "2b1889be82f7b50431b5a61d1c18571cddfb261369feaae28601d60ac0f7b891"
+    },
+    {
+      "name": "oh-my-ztty-0.2.1-linux-aarch64.tar.gz",
+      "size": 5100813,
+      "sha256": "0ccf5494e0fd09341884c2372fe77be4b56425a4a8a2aa1815928f49ee2a1b0c"
+    },
+    {
+      "name": "oh-my-ztty-0.2.1-linux-aarch64.tar.gz.sha256",
+      "size": 104,
+      "sha256": "3ea07d8e0eabfc77979850f1d2399568636d3b58586c11dd654b75b19320848b"
+    },
+    {
+      "name": "oh-my-ztty-0.2.1-linux-x86_64.tar.gz",
+      "size": 5291545,
+      "sha256": "2e3f86191a3d461d9ad2a330a9b323fd261696bf273622cd9d31de9c90a64861"
+    },
+    {
+      "name": "oh-my-ztty-0.2.1-linux-x86_64.tar.gz.sha256",
+      "size": 103,
+      "sha256": "bfe889d9556b6f742f2994358e1fbe04d22d99a422c24f21191296b7567bfd48"
+    }
+  ],
+  "architectures": {
+    "x86_64": {
+      "build": {
+        "platform": "linux-x86_64",
+        "schema": 1,
+        "source_commits": {
+          "ssmcp": "52a531a59e9ec9236a76eafc0f4f068799e44b15",
+          "zdot": "e6b5feb98b05c59e0986624c0742dfe4a9187a2a",
+          "zfetch": "f19b278676206d76626dd01e4b89f7ad9ce9318f",
+          "zrc": "ef8bd9571e206c8086e38b9dcbdc760a466b5133",
+          "zshard": "1cfa1a1eb761d14e2ccfd5381282b6ccd1491cff",
+          "ztty": "6b91e29e923aaee0207953f2b04393087f19e0d8"
+        },
+        "suite_version": "0.2.1"
+      },
+      "verified_files": 84,
+      "elf_architecture": "pass"
+    },
+    "aarch64": {
+      "build": {
+        "platform": "linux-aarch64",
+        "schema": 1,
+        "source_commits": {
+          "ssmcp": "52a531a59e9ec9236a76eafc0f4f068799e44b15",
+          "zdot": "e6b5feb98b05c59e0986624c0742dfe4a9187a2a",
+          "zfetch": "f19b278676206d76626dd01e4b89f7ad9ce9318f",
+          "zrc": "ef8bd9571e206c8086e38b9dcbdc760a466b5133",
+          "zshard": "1cfa1a1eb761d14e2ccfd5381282b6ccd1491cff",
+          "ztty": "6b91e29e923aaee0207953f2b04393087f19e0d8"
+        },
+        "suite_version": "0.2.1"
+      },
+      "verified_files": 84,
+      "elf_architecture": "pass"
+    }
+  },
+  "downloaded_x86_64_lifecycle": "pass"
+}

@@ -1,0 +1,64 @@
+{
+  "schema": "omztty.actual-desktop-acceptance.v1",
+  "recorded_at_utc": "2026-11-20T00:28:47.207801+00:00",
+  "suite_version": "0.2.1",
+  "suite_source": "7b69b751772a839f090e408228d94f810fd96d1e",
+  "ztty_binary_sha256": "65d5487ef55c92e982d601f5621d0364d1c2f17836e50b872fc331ccc86868fa",
+  "display_backend": "Hyprland / XWayland",
+  "host_display": ":0",
+  "initial_failure": {
+    "new_display_connection": "failed",
+    "cause": "A private Xvfb occupied the host display zero endpoints; fresh clients reached the private authentication boundary. An existing system broker kept its older real-desktop connection.",
+    "independent_xopen_display_reproduced": true,
+    "real_xwayland_alternate_socket_setup_succeeded": true
+  },
+  "recovery": {
+    "private_display_owner_released_resource": true,
+    "suite_stop_not_executed_after_resource_state_changed": true,
+    "existing_guarded_ztty_launcher_restored_X0_to_X0_": true,
+    "real_xwayland_preserved": true,
+    "private_authentication_not_imported": true,
+    "fresh_xopen_display_after_recovery": "passed",
+    "runtime_binary_changed": false,
+    "transient_precondition_failure_before_preference_write": "One verification attempt aborted before modifying the preference during the live recovery; subsequent traced fresh connection and full default-chain verification passed."
+  },
+  "fresh_suite": {
+    "new_broker_different_from_existing_system_broker": true,
+    "window_mapped": true,
+    "shell_marker": true,
+    "stderr_empty": true,
+    "temporary_window_and_broker_auto_exited": true
+  },
+  "default_chain": {
+    "launch_chain": [
+      "omarchy-launch-terminal",
+      "uwsm-app",
+      "xdg-terminal-exec",
+      "omztty terminal"
+    ],
+    "selector": "oh-my-ztty.desktop",
+    "default_window_mapped": true,
+    "default_shell": "zsh",
+    "explicit_command_marker": true,
+    "reused_same_broker": true,
+    "command_window_mapped": true,
+    "command_window_auto_closed": true,
+    "normal_terminal_left_available": true,
+    "preference_symlink_preserved": true,
+    "preference_mode": "0o600",
+    "log_empty": true,
+    "passed": true
+  },
+  "verification_scope": {
+    "actual_host_window_and_program_execution": true,
+    "physical_shortcut_keypress_injected": false,
+    "screenshots": "The three published appearance images use an isolated display; no host screenshot is claimed."
+  },
+  "prevention_followup": {
+    "owner": "Existing SSMCP application / private desktop owner",
+    "accepted_in": "SSMCP coordination checkpoint 2026-11-20T00:24Z",
+    "source_work": "fix/private-display-allocation-20261120",
+    "required_changes": "Explicit high display allocation, same-user serialization, endpoint ownership/readiness checks and owned-only cleanup",
+    "formal_application_artifacts_received": false
+  }
+}

@@ -2,7 +2,7 @@
 
 基于 Project Z 的 Linux 工作环境：**ztty + zshard + zrc + zdot + zfetch + ssmcp**。系统 zsh 负责执行命令，套件统一终端、编辑器和常用工具的配置。
 
-[官网](https://lightjunction.github.io/oh-my-ztty/) · [English](README.md) · [安装说明](docs/installation.md) · [配置与恢复](docs/configuration.md) · [性能记录](docs/performance.md)
+[官网](https://lightjunction.github.io/oh-my-ztty/) · [English](README.md) · [安装说明](docs/installation.md) · [配置与恢复](docs/configuration.md) · [性能记录](docs/performance.md) · [0.2.1 实机报告](docs/reports/workspace-0.2.1.md)
 
 ## 安装
 
@@ -33,7 +33,9 @@ sh install.sh
 
 暖石墨背景、亚麻白文字、铜色重点、28 px 内边距与两行提示符，把路径、Git 分支和输入区分开。Neovim 与终端工具沿用同一套配色。提示符使用 zsh 内置能力；字体通过 Fontconfig 回退，不强制安装图标字体。[自定义预设](docs/installation.md#ink-appearance)。
 
-![使用 Ink 配色的真实 Neovim 默认页面](docs/reports/workspace-0.2.0/nvim-home.jpg)
+![使用 Ink 配色的真实 Neovim 默认页面](docs/reports/workspace-0.2.1/nvim-home.jpg)
+
+这是隔离显示中运行已部署配置的实际截图。记录机器的真实桌面启动链已另行通过新 broker、程序执行和复用验收，默认入口现为 oh-my-ztty；详见[报告、恢复过程与验收范围](docs/reports/workspace-0.2.1.md)。
 
 ## 设为默认工作环境
 

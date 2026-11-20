@@ -1,0 +1,51 @@
+{
+  "schema": "omztty.workstation-acceptance.v1",
+  "suite_version": "0.2.1",
+  "mappings": 21,
+  "checks": {
+    "personal_completion_warm": "pass",
+    "plain_shell": "pass",
+    "login_shell": "pass",
+    "native_nvim": "pass",
+    "default_terminal": "pass",
+    "doctor": "pass"
+  },
+  "idempotent_reapply": true,
+  "external_state_directory": true,
+  "old_zshrc_bytes": 1922585,
+  "new_bootstrap_bytes": 387,
+  "history_imported_bytes": 41901,
+  "history_old_file_preserved": true,
+  "legacy_roots": [
+    ".zim",
+    ".zimrc",
+    ".p10k.zsh",
+    ".oh-my-zsh",
+    ".config/starship.toml"
+  ],
+  "legacy_archived_entries": 1566,
+  "legacy_archive_bytes": 81719145,
+  "legacy_removed_cache_count": 10,
+  "recovery_check": "pass",
+  "starship_system_package": "retained: required by illogical-impulse-fonts-themes; no shell initialization",
+  "disk_available_bytes": 20812275712,
+  "disk_total_bytes": 1000203091968,
+  "scope": "User environment and declared application configuration. Existing system services, unique project/data files and package dependencies were preserved. Private configuration and secret values are excluded.",
+  "default_terminal": {
+    "status": "pass",
+    "desktop_entry": "oh-my-ztty.desktop",
+    "host_display": ":0",
+    "evidence": "actual-desktop.json",
+    "initial_host_suite_launch": "failed",
+    "fallback_restored_during_recovery": "ztty.desktop",
+    "same_official_runtime_after_recovery": true,
+    "fresh_suite_broker_different_from_old_system_broker": true,
+    "actual_default_launch_chain": "pass",
+    "external_command_and_broker_reuse": "pass",
+    "transient_failed_precondition_aborted_before_preference_write": true,
+    "physical_shortcut_keypress_injected": false,
+    "appearance_screenshots_use_isolated_display": true,
+    "prevention_followup": "pending: existing SSMCP owner accepted display-allocation/ownership work; formal artifacts not yet received"
+  },
+  "doctor_scope": "Bundled executable/system dependency checks and configured DISPLAY presence; not a fresh X11 connection probe."
+}
