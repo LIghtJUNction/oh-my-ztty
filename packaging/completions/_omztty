@@ -1,10 +1,203 @@
 #compdef omztty
-if (( CURRENT > 2 )) && [[ $words[2] == update ]]; then
-    _arguments '1:command:(update)' \
-        '(--no-desktop)--desktop[Enable the managed desktop entry]' \
-        '(--desktop)--no-desktop[Disable the managed desktop entry]'
-elif (( CURRENT > 2 )) && [[ $words[2] == config ]]; then
-    _arguments '1:command:(config)' '2:action:(init plan refresh apply status remove path audit sync)' '*:argument:(--backup --json)'
-else
-    _arguments '1:command:(shell terminal ai config dot zdot zshard ztty ssmcp info zfetch doctor version update uninstall)' '*:argument:_files'
-fi
+
+_omztty_config() {
+    local -a actions=(
+        'init:Prepare an editable profile' 'plan:Preview configuration deployment'
+        'refresh:Update unchanged defaults' 'apply:Deploy the profile'
+        'status:Inspect managed files' 'remove:Restore saved originals'
+        'path:Print the profile directory' 'audit:Inspect the configuration'
+        'sync:Synchronize the profile with Git' 'help:Show configuration help'
+    )
+    if (( CURRENT == 2 )); then _describe 'configuration action' actions; return; fi
+    case $words[2] in
+        plan) _arguments '1:action:(plan)' '--json[Emit machine-readable output]' ;;
+        apply) _arguments '1:action:(apply)' '--backup[Preserve conflicting files]' ;;
+        sync) _arguments '1:action:(sync)' '2:operation:(status pull push)' ;;
+        *) return 1 ;;
+    esac
+}
+
+_omztty_zdot() {
+    local -a options=(
+        '--root[Dotfile repository]:directory:_directories'
+        '(-h --help)'{-h,--help}'[Show help]'
+        '(-V --version)'{-V,--version}'[Show version]'
+    )
+    local action=''
+    local -i index=2
+    while (( index < CURRENT )); do
+        case $words[index] in
+            --root|--target|--profile|--state-dir) (( index += 2 )) ;;
+            --root=*|--target=*|--profile=*|--state-dir=*|--backup|--json|-h|--help|-V|--version)
+                (( ++index )) ;;
+            *) action=$words[index]; break ;;
+        esac
+    done
+    case $action in
+        sync)
+            _arguments "$options[@]" '1:command:(sync)' '2:operation:(status pull push)'
+            ;;
+        init)
+            _arguments "$options[@]" '1:command:(init)' '--json[Emit machine-readable output]'
+            ;;
+        *)
+            options+=(
+                '--target[Target home directory]:directory:_directories'
+                '--profile[Repository-relative manifest]:file:_files'
+                '--state-dir[Private journal directory]:directory:_directories'
+                '--json[Emit machine-readable output]'
+            )
+            [[ $action == (plan|apply) ]] && options+=('--backup[Preserve conflicting files]')
+            _arguments "$options[@]" '1:command:(init plan apply status remove sync)'
+            ;;
+    esac
+}
+
+_omztty_terminal() {
+    local context state state_descr line
+    typeset -A opt_args
+    local -a words=("$words[@]")
+    local -i CURRENT=$CURRENT index=2
+    local service=ztty
+    # Follow the launcher's option arity: a value named -e is not a boundary.
+    while (( index < CURRENT )); do
+        case $words[index] in
+            --config|--name|--cwd|--font|--geometry|--scrollback|--tab|--split-right|--split-down|--backend|--text-plugin)
+                if (( index + 1 < CURRENT )) && [[ $words[index+1] == -* ]]; then
+                    words[index+1]=__omztty_option_value__
+                fi
+                (( index += 2 )) ;;
+            --observe) (( ++index )) ;;
+            -e|--)
+                shift $index words
+                (( CURRENT -= index ))
+                if (( CURRENT == 1 )); then _command_names
+                else local service=$words[1]; _normal
+                fi
+                return ;;
+            *) break ;;
+        esac
+    done
+    local action=$words[2]
+    case $action in
+        attach|detach|close|rename|list|action|move|control|commands|command-output|shell-integration|plugin|save-layout|restore-layout|mcp)
+            if (( CURRENT > 2 )); then
+                shift words
+                (( --CURRENT ))
+                case $action in
+                    attach) _arguments '--observe[Attach without input control]' \
+                        '--backend[Select the Linux host]:backend:(x11 wayland)' '1:session name or address:' ;;
+                    detach|close|commands|save-layout) _arguments '1:session name:' ;;
+                    rename) _arguments '1:session name:' '2:new name:' ;;
+                    list) _arguments '*:session filter:' ;;
+                    action) _arguments '1:session name:' '2:action:' ;;
+                    move) _arguments '1:session name:' '2:target session:' '3:layout:(tab right down)' ;;
+                    control) _arguments '1:session name:' '2:operation:(acquire release)' '--takeover[Take input control]' ;;
+                    command-output) _arguments '1:session name:' '2:command identifier:' ;;
+                    shell-integration) _arguments '1:shell:(bash zsh fish nu)' ;;
+                    plugin) _arguments '1:operation:(check run)' '2:plugin library:_files' ;;
+                    restore-layout) _arguments '1:layout file:_files' ;;
+                    mcp) _arguments \
+                        '--transport[MCP transport]:transport:(stdio http)' \
+                        '--host[HTTP bind address]:host:' '--port[HTTP bind port]:port:' \
+                        '--read-only[Restrict all clients to reads]' \
+                        '--token[Operator token]:token:' '--observer-token[Observer token]:token:' \
+                        '*--allow-host[Allow an HTTP Host authority]:authority:' \
+                        '--http-response[Response format]:format:(json sse)' \
+                        '(-h --help)'{-h,--help}'[Show help]' ;;
+                esac
+                return
+            fi ;;
+    esac
+    _arguments -C \
+        '--backend[Select the Linux host]:backend:(x11 wayland)' \
+        '--name[Name the session]:session name:' \
+        '(--tab --split-right --split-down)--observe[Open a read-only view]' \
+        '(--observe --split-right --split-down)--tab[Open a tab in a session]:session name:' \
+        '(--observe --tab --split-down)--split-right[Open a pane to the right]:session name:' \
+        '(--observe --tab --split-right)--split-down[Open a pane below]:session name:' \
+        '--cwd[Start in a directory]:directory:_directories' \
+        '--config[Read an appearance file]:file:_files' \
+        '*--text-plugin[Register a trusted text extension]:NAME=absolute library:->text-plugin' \
+        '--font[Fontconfig pattern]:font pattern:' \
+        '--geometry[Initial character dimensions]:columns x rows:' \
+        '--scrollback[Retained line count]:lines:' \
+        '(-h --help)'{-h,--help}'[Show help]' \
+        '(-V --version)'{-V,--version}'[Show version]' \
+        '-e[Execute a command]:command:_command_names' \
+        '1:command:(attach detach close rename list action move control commands command-output shell-integration plugin save-layout restore-layout mcp)'
+    if [[ $state == text-plugin ]]; then
+        if compset -P '*='; then _files -S ''
+        else _message 'NAME=/absolute/path/to/library.so'
+        fi
+    fi
+}
+
+_omztty() {
+    local context state state_descr line
+    typeset -A opt_args
+    local -a commands=(
+        'shell:Open the preset zsh' 'terminal:Open ztty with the preset'
+        'ai:Use explicit AI actions' 'config:Manage the unified profile'
+        'dot:Run zdot' 'zdot:Run zdot' 'zshard:Manage shell plugins'
+        'ztty:Run ztty' 'ssmcp:Run ssmcp'
+        'info:Show system information' 'zfetch:Run zfetch'
+        'doctor:Check dependencies' 'version:Show suite version'
+        'update:Update a per-user installation' 'uninstall:Remove a per-user installation'
+        'help:Show help'
+    )
+    if (( CURRENT == 2 )); then
+        _arguments '(-h --help)'{-h,--help}'[Show help]' \
+            '(-V --version)'{-V,--version}'[Show version]' '1:command:->command'
+        [[ $state == command ]] && _describe 'command' commands
+        return
+    fi
+    local command=$words[2]
+    local -a words=("$words[@]")
+    shift words
+    local -i CURRENT=$(( CURRENT - 1 ))
+    local service=$command
+    local curcontext="$curcontext"
+    case $command in
+        config) _omztty_config ;;
+        terminal|ztty)
+            words[1]=ztty
+            service=ztty
+            if (( $+_comps[ztty] )); then _normal
+            else _omztty_terminal
+            fi ;;
+        dot|zdot)
+            words[1]=zdot
+            service=zdot
+            if (( $+_comps[zdot] )); then _normal
+            else _omztty_zdot
+            fi ;;
+        info|zfetch)
+            words[1]=zfetch
+            service=zfetch
+            if (( $+_comps[zfetch] )); then _normal
+            else
+                _arguments '--json[Emit structured information]' '--no-color[Disable color]' \
+                    '(-h --help)'{-h,--help}'[Show help]' '(-V --version)'{-V,--version}'[Show version]'
+            fi ;;
+        shell) words[1]=zsh; service=zsh; _normal ;;
+        zshard|ssmcp) _normal ;;
+        ai)
+            if (( CURRENT == 2 )); then
+                _arguments '1:action:(context connect ask propose help)'
+            elif [[ $words[2] == connect ]]; then
+                shift words
+                (( --CURRENT ))
+                words[1]=ssmcp
+                service=ssmcp
+                _normal
+            elif [[ $words[2] == (ask|propose) ]]; then
+                _message 'request text'
+            fi ;;
+        update) _arguments '(--no-desktop)--desktop[Enable the desktop entry]' \
+            '(--desktop)--no-desktop[Disable the desktop entry]' ;;
+        *) return 1 ;;
+    esac
+}
+
+_omztty "$@"
