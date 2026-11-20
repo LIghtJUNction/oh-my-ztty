@@ -74,5 +74,21 @@
       "bytes": 23904,
       "sha256": "8be778056fef776edbb353dbc7da97724f3ef104db69b12f720302adb6e00bf0"
     }
-  }
+  },
+  "historical_versions": [
+    {
+      "archive_bytes": 19107,
+      "archive_sha256": "39c519f1a198d086079dbcd469b6fe76cd028c0f59782bb4d800478f2265ef4a",
+      "files": [
+        {
+          "git_blob": "905a3d691ed5af26dbd8202743d1afd67a6a8ea0",
+          "original_path": "docs/reports/linux-x86_64-terminal.png",
+          "archive_member": "historical/905a3d691ed5af26dbd8202743d1afd67a6a8ea0/linux-x86_64-terminal.png",
+          "bytes": 24147,
+          "sha256": "6698dbf3038945c0651bb4f6e7b038a098b35f5864ecbbf958c37e894ac46a7f"
+        }
+      ],
+      "archive_url": "https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.6/oh-my-ztty-generated-evidence-history-20261121.tar.gz"
+    }
+  ]
 }
