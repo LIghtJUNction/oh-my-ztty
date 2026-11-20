@@ -1,0 +1,99 @@
+Installed oh-my-ztty 0.2.1
+Run: /home/lightjunction/Documents/GITHUB/oh-my-ztty/dist/consumer-ztty-0.5.0-20261120/acceptance-v050/tmp/oh-my-ztty real smoke y6_2ztgc/home with spaces/.local/bin/omztty shell
+Open a window: /home/lightjunction/Documents/GITHUB/oh-my-ztty/dist/consumer-ztty-0.5.0-20261120/acceptance-v050/tmp/oh-my-ztty real smoke y6_2ztgc/home with spaces/.local/bin/omztty terminal
+Uninstall: /home/lightjunction/Documents/GITHUB/oh-my-ztty/dist/consumer-ztty-0.5.0-20261120/acceptance-v050/tmp/oh-my-ztty real smoke y6_2ztgc/home with spaces/.local/bin/omztty uninstall
+Add /home/lightjunction/Documents/GITHUB/oh-my-ztty/dist/consumer-ztty-0.5.0-20261120/acceptance-v050/tmp/oh-my-ztty real smoke y6_2ztgc/home with spaces/.local/bin to PATH to use the short command names.
+Installed oh-my-ztty 0.2.1
+Run: /home/lightjunction/Documents/GITHUB/oh-my-ztty/dist/consumer-ztty-0.5.0-20261120/acceptance-v050/tmp/oh-my-ztty real smoke y6_2ztgc/home with spaces/.local/bin/omztty shell
+Open a window: /home/lightjunction/Documents/GITHUB/oh-my-ztty/dist/consumer-ztty-0.5.0-20261120/acceptance-v050/tmp/oh-my-ztty real smoke y6_2ztgc/home with spaces/.local/bin/omztty terminal
+Uninstall: /home/lightjunction/Documents/GITHUB/oh-my-ztty/dist/consumer-ztty-0.5.0-20261120/acceptance-v050/tmp/oh-my-ztty real smoke y6_2ztgc/home with spaces/.local/bin/omztty uninstall
+Add /home/lightjunction/Documents/GITHUB/oh-my-ztty/dist/consumer-ztty-0.5.0-20261120/acceptance-v050/tmp/oh-my-ztty real smoke y6_2ztgc/home with spaces/.local/bin to PATH to use the short command names.
+oh-my-ztty 0.2.1
+ok   system zsh
+ok   system git
+ok   ztty 0.5.0
+ok   ssmcp 0.10.10
+ok   zdot 0.2.0
+ok   zfetch 0.1.0
+ok   zshard
+info no DISPLAY; shell and AI commands still work
+No connection or background service was started.
+OMZTTY_SHELL_OK
+{"schema":"zshard.context.v1","cwd":"/home/lightjunction/Documents/GITHUB/oh-my-ztty/dist/consumer-ztty-0.5.0-20261120/source","shell":"zsh","shell_version":"5.9.2","last_exit":0,"capabilities":["context","stage-command","ssmcp"],"history_included":false,"environment_included":false}
+zdot — explicit dotfiles, small native core
+
+Usage:
+  zdot init --root REPO
+  zdot plan|apply|status|remove --root REPO [--target HOME] [--profile FILE]
+  zdot sync --root REPO status|pull|push
+
+Options:
+  --root PATH      Dotfile repository (default: current directory)
+  --target PATH    Existing target directory (default: HOME)
+  --profile FILE   Relative tab-separated manifest (default: profile.zdot)
+  --state-dir PATH Absolute private journal directory (default: TARGET/.zdot-state)
+  --backup         Move conflicts to the deployment journal (apply/plan only)
+  --json           Machine-readable plan, status or result
+  -h, --help       Show this help
+  -V, --version    Show the version
+
+Profiles contain source<TAB>destination, both relative. Blank lines and # comments
+are ignored. Sources may be files or directories. Sources and parent directories
+must not be symlinks. Apply refuses conflicts unless --backup is explicit.
+Remove restores backups and refuses to remove replaced or edited destinations.
+Git runs only for the explicit sync command; pull is always --ff-only.
+ssmcp — connect a device; control its tools remotely
+
+Usage: ssmcp [username@server] [options]
+
+Start
+  ssmcp                         Reuse your last authorized account
+  ssmcp alice@relay.example     Connect and sign in when needed
+  ssmcp list                    List your online devices
+  ssmcp -i                      Open an authorized remote terminal
+
+Manage
+  config · whoami · logout      Account and server settings
+  update [--check]              Update the installed client
+  invite · join                Share a temporary session
+  sessions · attach · service  Saved and background sessions
+  setup · ui · 007             Setup, appearance and recovery
+
+Options
+  --name NAME   --title TEXT   --server URL   --context-root PATH
+  --no-browser  --no-watchdog  --theme NAME   --no-color
+
+Use ssmcp COMMAND --help for command options; --help-full lists all connection flags.
+In a connected chat: /help, @file, $skill, !command; Left opens Agents.
+ztty 0.5.0
+{"schema":"zfetch.system.v1","os":"Omarchy","kernel":"7.3.4-arch1-1","architecture":"x86_64","cpu":"12th Gen Intel(R) Core(TM) i9-12900HX","logical_cpus":24,"memory_total_bytes":16476704768,"memory_used_bytes":11976744960,"uptime_seconds":82638,"shell":"sh","terminal":null}
+Prepared /home/lightjunction/Documents/GITHUB/oh-my-ztty/dist/consumer-ztty-0.5.0-20261120/acceptance-v050/tmp/oh-my-ztty real smoke y6_2ztgc/home with spaces/.config/oh-my-ztty/profile
+Next: omztty config plan
+Apply: omztty config apply --backup
+Profile already exists: /home/lightjunction/Documents/GITHUB/oh-my-ztty/dist/consumer-ztty-0.5.0-20261120/acceptance-v050/tmp/oh-my-ztty real smoke y6_2ztgc/home with spaces/.config/oh-my-ztty/profile
+{"schema":"zdot.plan.v1","root":"/home/lightjunction/Documents/GITHUB/oh-my-ztty/dist/consumer-ztty-0.5.0-20261120/acceptance-v050/tmp/oh-my-ztty real smoke y6_2ztgc/home with spaces/.config/oh-my-ztty/profile","target":"/home/lightjunction/Documents/GITHUB/oh-my-ztty/dist/consumer-ztty-0.5.0-20261120/acceptance-v050/tmp/oh-my-ztty real smoke y6_2ztgc/home with spaces","profile":"profile.zdot","state_dir":"/home/lightjunction/Documents/GITHUB/oh-my-ztty/dist/consumer-ztty-0.5.0-20261120/acceptance-v050/tmp/oh-my-ztty real smoke y6_2ztgc/home with spaces/.local/state/zdot/oh-my-ztty","entries":[{"source":"files/.config/nvim","destination":".config/nvim","action":"link"},{"source":"files/.config/kitty","destination":".config/kitty","action":"link"},{"source":"files/.config/foot","destination":".config/foot","action":"link"},{"source":"files/.config/ghostty","destination":".config/ghostty","action":"link"},{"source":"files/.config/tmux","destination":".config/tmux","action":"link"},{"source":"files/.config/fzf","destination":".config/fzf","action":"link"},{"source":"files/.config/bat","destination":".config/bat","action":"link"},{"source":"files/.config/ripgrep","destination":".config/ripgrep","action":"link"},{"source":"files/.config/zrc/git.inc","destination":".config/zrc/git.inc","action":"link"},{"source":"files/.config/zrc/shell.zsh","destination":".config/zrc/shell.zsh","action":"link"},{"source":"files/.zshrc","destination":".zshrc","action":"conflict"},{"source":"files/.config/ztty","destination":".config/ztty","action":"link"}]}
+apply: 12 mapping(s) changed
+apply: 0 mapping(s) changed
+DIRECT_SHELL_OK
+keep	files/.config/nvim	.config/nvim
+keep	files/.config/kitty	.config/kitty
+keep	files/.config/foot	.config/foot
+keep	files/.config/ghostty	.config/ghostty
+keep	files/.config/tmux	.config/tmux
+keep	files/.config/fzf	.config/fzf
+keep	files/.config/bat	.config/bat
+keep	files/.config/ripgrep	.config/ripgrep
+keep	files/.config/zrc/git.inc	.config/zrc/git.inc
+keep	files/.config/zrc/shell.zsh	.config/zrc/shell.zsh
+keep	files/.zshrc	.zshrc
+keep	files/.config/ztty	.config/ztty
+remove: 12 mapping(s) changed
+Prepared /home/lightjunction/Documents/GITHUB/oh-my-ztty/dist/consumer-ztty-0.5.0-20261120/acceptance-v050/tmp/oh-my-ztty real smoke y6_2ztgc/home with spaces/custom-config/oh-my-ztty/profile
+Next: omztty config plan
+Apply: omztty config apply --backup
+apply: 12 mapping(s) changed
+remove: 12 mapping(s) changed
+apply: 12 mapping(s) changed
+remove: 12 mapping(s) changed
+Uninstalled oh-my-ztty. User configuration, history and dotfiles are preserved.
+PASS: actual bundle install, repeat, doctor, zsh, local AI context, component commands, zdot adoption/restore and uninstall.

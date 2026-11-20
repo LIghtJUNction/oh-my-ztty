@@ -1,0 +1,52 @@
+#!/usr/bin/python3
+"""Adapt the unchanged suite GUI fixture to ztty's verified private Xvfb owner."""
+import hashlib
+import importlib.util
+import json
+import os
+from pathlib import Path
+import signal
+import sys
+import time
+
+control=Path(__file__).resolve().parents[2]
+helper=control/"harness/isolated_xvfb.py"
+spec=importlib.util.spec_from_file_location("suite_private_xvfb",helper)
+module=importlib.util.module_from_spec(spec)
+spec.loader.exec_module(module)
+expected=["-displayfd","1","-screen","0","1600x1000x24","-nolisten","tcp"]
+if sys.argv[1:] != expected:
+    raise SystemExit("unexpected Xvfb fixture arguments; refusing an unreviewed launch")
+out=Path(os.environ["SUITE_ACCEPTANCE_OUTPUT"])/"xvfb-owner.json"
+if out.exists():
+    raise SystemExit("owned Xvfb receipt already exists")
+real_path=os.pathsep.join(p for p in os.environ["PATH"].split(os.pathsep)
+                         if Path(p).resolve() != Path(__file__).resolve().parent)
+env={**os.environ,"PATH":real_path}
+receipt={"schema":1,"helper_source":"LIghtJUNction/ztty@9f5a77a1299093d0ba609bfafa2cec3b0ba931dd:tools/isolated_xvfb.py",
+         "helper_sha256":hashlib.sha256(helper.read_bytes()).hexdigest(),
+         "wrapper_sha256":hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+         "created_utc":time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime()),
+         "native_display_zero_before":module.display_endpoints(0)}
+server=None
+def save():
+    out.write_text(json.dumps(receipt,indent=2)+"\n")
+def stop(signum,_frame):
+    raise SystemExit(128+signum)
+for signum in (signal.SIGTERM,signal.SIGINT,signal.SIGHUP):
+    signal.signal(signum,stop)
+try:
+    server=module.start_xvfb(screen="1600x1000x24",stderr=sys.stderr,env=env)
+    receipt["owned"]=server.evidence
+    save()
+    print(server.number,flush=True)
+    raise SystemExit(server.process.wait())
+finally:
+    if server is not None:
+        server.close()
+        receipt["child_returncode"]=server.process.poll()
+        receipt["owned_endpoints_after"]=module.display_endpoints(server.number)
+        receipt["cleanup_complete"]=server.process.poll() is not None
+    receipt["native_display_zero_after"]=module.display_endpoints(0)
+    receipt["native_display_zero_unchanged"]=(receipt["native_display_zero_before"]==receipt["native_display_zero_after"])
+    save()

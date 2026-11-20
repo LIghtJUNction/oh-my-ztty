@@ -1,0 +1,106 @@
+{
+  "schema": 1,
+  "suite_before": "86bbbe3a54b62a1beffbc3f4596a9338b8ef7530",
+  "ztty_expected": "c4f8f48c9598284a589e609f25242b49ceabfea8",
+  "release_id": 452238617,
+  "release_run": 44668398577,
+  "script_sha256": "1b07d09d0965c32692eb725fa1c4b0976e5872e23a3a669a2dd30b2824cfe15d",
+  "old_lock_sha256": "aba96e79b11a583eaaef4b3009091d405ff2e8ca7443f4a6124bf2220de3e53b",
+  "cgroup": "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/app.slice/omztty-pin-ztty050-20261120.service",
+  "ok": true,
+  "new_lock_sha256": "8a547dade3a73ce7cac9840d44be910be90adb3e9388f6e95c25116206ad794c",
+  "ztty_pin": "c4f8f48c9598284a589e609f25242b49ceabfea8",
+  "status": "M components/ztty\n M dependencies.lock.json",
+  "submodules": "52a531a59e9ec9236a76eafc0f4f068799e44b15 components/ssmcp (v0.10.10)\n-84e370450f1d047d43119bf81caf73f742ba6b0a components/ssmcp/crates/zharness\n-3e758b5c21af1bad1cfaf10264b43fe15440e69c components/ssmcp/crates/zplugin\n e6b5feb98b05c59e0986624c0742dfe4a9187a2a components/zdot (e6b5feb)\n f19b278676206d76626dd01e4b89f7ad9ce9318f components/zfetch (f19b278)\n ef8bd9571e206c8086e38b9dcbdc760a466b5133 components/zrc (v0.1.0)\n 1cfa1a1eb761d14e2ccfd5381282b6ccd1491cff components/zshard (v0.2.0)\n+c4f8f48c9598284a589e609f25242b49ceabfea8 components/ztty (v0.5.0)\n 1d796d1fc63808dc099ed7b10c92e75835ae2814 components/ztty/crates/zgpui (v0.1.0)\n fe6357f98cf80fb6cc74739e45e8866ee17706ad components/ztty/crates/zgraphics (v0.2.0)\n 37617313dd7aaabcca9dd567344a76c4cbe03907 components/ztty/crates/zinput (v0.1.3)\n 66919bc6dcb7757e0437fe955bfa809fb1282b68 components/ztty/crates/zpty (v0.2.2)\n a2074bac4c030cfd7c0b2514c852a89dcf54648f components/ztty/crates/zterm (v0.5.1)",
+  "new_lock": {
+    "schema": 1,
+    "components": {
+      "ztty": {
+        "repository": "LIghtJUNction/ztty",
+        "tag": "v0.5.0",
+        "assets": {
+          "x86_64": {
+            "url": "https://github.com/LIghtJUNction/ztty/releases/download/v0.5.0/ztty-linux-x86_64.tar.gz",
+            "sha256": "4b79ded489c37325ac049e4962e75c7ff773c2c5d073d8fbad154bb47dfed6b2"
+          },
+          "aarch64": {
+            "url": "https://github.com/LIghtJUNction/ztty/releases/download/v0.5.0/ztty-linux-aarch64.tar.gz",
+            "sha256": "f86ddc20d6359c8301e7198adf80359c067ea02c28228139e2a39705a5ddd09d"
+          }
+        }
+      },
+      "ssmcp": {
+        "repository": "LIghtJUNction/ssmcp",
+        "tag": "v0.10.10",
+        "assets": {
+          "x86_64": {
+            "url": "https://github.com/LIghtJUNction/ssmcp/releases/download/v0.10.10/ssmcp-x86_64-unknown-linux-gnu.tar.gz",
+            "sha256": "42c22dabfe41d4fc2fecbabaaf222c9d35bb9b77b4550c4daccada4290530920"
+          },
+          "aarch64": {
+            "url": "https://github.com/LIghtJUNction/ssmcp/releases/download/v0.10.10/ssmcp-aarch64-unknown-linux-gnu.tar.gz",
+            "sha256": "4065ded7d71f5d7cb1ee33f32c5f306402f3825825aa68fa549bf9c998c080ce"
+          }
+        }
+      }
+    }
+  },
+  "steps": [
+    {
+      "name": "published-metadata",
+      "command": [
+        "gh",
+        "api",
+        "repos/LIghtJUNction/ztty/releases/tags/v0.5.0"
+      ],
+      "cwd": "/home/lightjunction/Documents/GITHUB/oh-my-ztty/dist/consumer-ztty-0.5.0-20261120/source",
+      "exit_code": 0,
+      "seconds": 5.926165780998417
+    },
+    {
+      "name": "workspace-pin",
+      "command": [
+        "/usr/bin/python3",
+        "scripts/workspace.py",
+        "pin",
+        "ztty",
+        "v0.5.0"
+      ],
+      "cwd": "/home/lightjunction/Documents/GITHUB/oh-my-ztty/dist/consumer-ztty-0.5.0-20261120/source",
+      "exit_code": 0,
+      "seconds": 13.856971781991888
+    },
+    {
+      "name": "retain-official-tag",
+      "command": [
+        "git",
+        "fetch",
+        "--depth=1",
+        "origin",
+        "tag",
+        "v0.5.0"
+      ],
+      "cwd": "/home/lightjunction/Documents/GITHUB/oh-my-ztty/dist/consumer-ztty-0.5.0-20261120/source/components/ztty",
+      "exit_code": 0,
+      "seconds": 2.218720791002852
+    },
+    {
+      "name": "diff-check",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "cwd": "/home/lightjunction/Documents/GITHUB/oh-my-ztty/dist/consumer-ztty-0.5.0-20261120/source",
+      "exit_code": 0,
+      "seconds": 0.01568018899706658
+    }
+  ],
+  "seconds": 22.337587628004258,
+  "resources": {
+    "memory.peak": "76152832",
+    "memory.swap.peak": "0",
+    "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nsock_throttled 0",
+    "cpu.max": "100000 100000"
+  }
+}

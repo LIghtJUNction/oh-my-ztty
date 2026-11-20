@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "suite_source": "5a99afc170dc51455beb1491e04ab76cf18f4564",
+  "source_clean": true,
+  "original_main_clean_unchanged": "740b82f3a1628d0c14b0405bfb36c76832fedfec",
+  "installed_anchors_unchanged": true,
+  "owned_units": {
+    "omztty-forwarding-20261120.service": {
+      "ActiveState": "inactive",
+      "SubState": "dead",
+      "MainPID": "0",
+      "ExecMainStatus": "0",
+      "ControlGroup": ""
+    },
+    "omztty-pin-ztty050-20261120.service": {
+      "ActiveState": "inactive",
+      "SubState": "dead",
+      "MainPID": "0",
+      "ExecMainStatus": "0",
+      "ControlGroup": ""
+    },
+    "omztty-acceptance-v050-20261120.service": {
+      "ActiveState": "inactive",
+      "SubState": "dead",
+      "MainPID": "0",
+      "ExecMainStatus": "0",
+      "ControlGroup": ""
+    }
+  },
+  "owned_cgroup_absent": true,
+  "adopted_children_after": "",
+  "xvfb_cleanup": true,
+  "native_display_zero_unchanged": true,
+  "acceptance_sha256": "b8f128f73e4c336abbfbe98191ee24b6ed791ad2da3ffd75a06d553c5fc6223f",
+  "graphical_sha256": "ebb15e15168b74809f305e1576aad9d7fca3b06bc7d330410ab6cd92360c47b3",
+  "adapter_sha256": "5ec5dbc1f63fbc8a4c2df5e70c3cd57c39d1c9615d4a5f5dae2cb2a21848282c",
+  "xvfb_owner_raw_sha256": "cc547d4ba6ae37dc21b3e339027eeceb25520efd561569be654ba25b5722e265"
+}
