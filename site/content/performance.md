@@ -1,6 +1,8 @@
 # Performance
 
-The measurements below describe specific configurations and workloads. Shell initialization, first completion and terminal memory are separate experiments.
+These measurements come from earlier releases and the configurations named in each section. They describe the costs observed in those runs; the current suite needs its own measurements.
+
+Shell initialization, first completion and terminal memory are separate experiments. Each result includes its method and source record so you can inspect the scope or repeat the run.
 
 ## Framework startup
 
@@ -32,7 +34,7 @@ zshard 0.1.2 validates current completion files and native audit exclusions, inc
 
 ## Complete suite startup
 
-A separate **40-sample interleaved experiment** measured the full `omztty shell -i -c exit` path with the Ink preset:
+The suite 0.1.1 record includes a **40-sample interleaved experiment** of the full `omztty shell -i -c exit` path with the Ink preset:
 
 | Configuration | Median, ms | p95, ms |
 | --- | ---: | ---: |
@@ -43,7 +45,7 @@ This includes the launcher and preset initialization. It excludes the prompt, fi
 
 ## Live terminal memory
 
-The graphical check opened one actual 100 × 28 cell window on an isolated Xvfb display, with a temporary HOME and Git checkout. It used the preset's 24 px padding and 13 pt font request. Fontconfig resolved JetBrainsMono Nerd Font in that environment.
+The same historical suite check opened one actual 100 × 28 cell window on an isolated Xvfb display, with a temporary HOME and Git checkout. It used the preset's 24 px padding and 13 pt font request. Fontconfig resolved JetBrainsMono Nerd Font in that environment.
 
 No AI connection was active. Application memory excludes the X server and includes the resident ztty broker.
 
