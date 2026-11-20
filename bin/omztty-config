@@ -55,6 +55,35 @@ prepare_profile() {
     printf '%s\n' omztty-profile-v1 > "$defaults_out/.omztty-profile"
     cp -- "$1/VERSION" "$defaults_out/.suite-version"
 }
+baseline_manifest() (
+    cd -- "$1" || exit
+    find . -type f ! -path ./MANIFEST.sha256 -print | LC_ALL=C sort |
+      while IFS= read -r file; do sha256sum -- "$file" || exit; done
+)
+save_baseline() {
+    baseline_source=$1
+    baseline_out=$2
+    mkdir -- "$baseline_out"
+    cp -R -- "$baseline_source/files" "$baseline_out/files"
+    cp -- "$baseline_source/profile.zdot" "$baseline_source/.suite-version" "$baseline_out/"
+    printf '%s\n' omztty-defaults-v1 > "$baseline_out/.omztty-defaults"
+    baseline_manifest "$baseline_out" > "$baseline_out/MANIFEST.sha256"
+}
+validate_baseline() {
+    [ -d "$1" ] && [ ! -L "$1" ] ||
+      die 'profile baseline must be an owned directory'
+    [ -z "$(find "$1" ! -type d ! -type f -print -quit)" ] ||
+      die 'profile baseline contains a link or special file'
+    [ -f "$1/.omztty-defaults" ] &&
+      [ "$(cat "$1/.omztty-defaults")" = omztty-defaults-v1 ] &&
+      [ -f "$1/.suite-version" ] && [ -f "$1/profile.zdot" ] &&
+      [ -d "$1/files" ] && [ -f "$1/MANIFEST.sha256" ] ||
+      die 'profile baseline is incomplete or unowned'
+    [ "$(cat "$1/.suite-version")" = "$2" ] ||
+      die 'profile baseline version does not match .suite-version'
+    baseline_manifest "$1" | cmp -s "$1/MANIFEST.sha256" - ||
+      die 'profile baseline verification failed'
+}
 regular_profile_file() {
     probe=$1
     while [ "$probe" != "$profile" ]; do
@@ -83,6 +112,7 @@ case "$action" in
         trap 'exit 130' INT
         trap 'exit 143' HUP TERM
         prepare_profile "$root" "$stage"
+        save_baseline "$stage" "$stage/.baseline"
         mv -T -- "$stage" "$profile"
         printf 'Prepared %s\nNext: omztty config plan\nApply: omztty config apply --backup\n' "$profile"
         exit 0 ;;
@@ -110,31 +140,57 @@ if [ "$action" = refresh ]; then
         printf '%s\n' "$value" | LC_ALL=C grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' ||
           die 'profile and suite versions must be stable semantic versions'
     done
+    stored_baseline=0
+    if [ -e "$profile/.baseline" ] || [ -L "$profile/.baseline" ]; then
+        validate_baseline "$profile/.baseline" "$previous"
+        stored_baseline=1
+    fi
     if [ "$previous" = "$version" ]; then
         printf 'Profile baseline is already suite %s.\n' "$version"
         exit 0
     fi
-    releases=${root%/*}
-    base=${releases%/*}
-    [ "${releases##*/}" = releases ] &&
-      [ "$(cat "$base/.owner" 2>/dev/null)" = oh-my-ztty-v1 ] ||
-      die 'refresh requires an installed suite'
-    platform=$(cat "$root/PLATFORM")
-    case "$platform" in linux-x86_64|linux-aarch64) ;; *) die 'unsupported suite platform' ;; esac
-    baseline="$releases/$previous-$platform"
-    [ -d "$baseline" ] && [ ! -L "$baseline" ] &&
-      [ -f "$baseline/MANIFEST.sha256" ] ||
-      die "baseline release $previous is unavailable; restore that installed release before refreshing"
-    for release in "$baseline" "$root"; do
-        (cd "$release" && sha256sum --quiet -c MANIFEST.sha256) ||
-          die "release defaults were modified: $release"
-    done
+    if [ "$stored_baseline" -eq 0 ]; then
+        releases=${root%/*}
+        base=${releases%/*}
+        [ "${releases##*/}" = releases ] &&
+          [ "$(cat "$base/.owner" 2>/dev/null)" = oh-my-ztty-v1 ] ||
+          die 'profile has no saved baseline; its original installed release is required'
+        platform=$(cat "$root/PLATFORM")
+        case "$platform" in linux-x86_64|linux-aarch64) ;; *) die 'unsupported suite platform' ;; esac
+        baseline="$releases/$previous-$platform"
+        [ -d "$baseline" ] && [ ! -L "$baseline" ] &&
+          [ -f "$baseline/MANIFEST.sha256" ] ||
+          die "baseline release $previous is unavailable; restore that installed release before refreshing"
+        (cd "$baseline" && sha256sum --quiet -c MANIFEST.sha256) ||
+          die "release defaults were modified: $baseline"
+    fi
+    (cd "$root" && sha256sum --quiet -c MANIFEST.sha256) ||
+      die "release defaults were modified: $root"
     stage=$(mktemp -d "$config/oh-my-ztty/.refresh.XXXXXXXX")
-    trap 'rm -rf -- "$stage"' EXIT
+    cleanup_refresh() {
+        # Keep the recorded version and baseline paired if publication fails.
+        if [ "$(cat "$profile/.suite-version" 2>/dev/null)" != "$version" ]; then
+            if [ -d "$stage/previous-baseline" ]; then
+                if [ -d "$profile/.baseline" ]; then
+                    mv -T -- "$profile/.baseline" "$stage/uncommitted-baseline" || return
+                fi
+                mv -T -- "$stage/previous-baseline" "$profile/.baseline" || return
+            elif [ "$stored_baseline" -eq 0 ] && [ -d "$profile/.baseline" ]; then
+                mv -T -- "$profile/.baseline" "$stage/uncommitted-baseline" || return
+            fi
+        fi
+        rm -rf -- "$stage"
+    }
+    trap cleanup_refresh EXIT
     trap 'exit 130' INT
     trap 'exit 143' HUP TERM
-    prepare_profile "$baseline" "$stage/old"
+    if [ "$stored_baseline" -eq 1 ]; then
+        cp -R -- "$profile/.baseline" "$stage/old"
+    else
+        prepare_profile "$baseline" "$stage/old"
+    fi
     prepare_profile "$root" "$stage/new"
+    save_baseline "$stage/new" "$stage/baseline"
     (cd "$stage/old" && find files -type f -print | LC_ALL=C sort) > "$stage/old-files"
     (cd "$stage/new" && find files -type f -print | LC_ALL=C sort) > "$stage/new-files"
     cmp -s "$stage/old-files" "$stage/new-files" &&
@@ -180,6 +236,10 @@ if [ "$action" = refresh ]; then
     chmod u+w -- "$stage/version"
     printf '%s\n' "$version" > "$stage/version"
     chmod --reference="$profile/.suite-version" -- "$stage/version"
+    if [ "$stored_baseline" -eq 1 ]; then
+        mv -T -- "$profile/.baseline" "$stage/previous-baseline"
+    fi
+    mv -T -- "$stage/baseline" "$profile/.baseline"
     mv -Tf -- "$stage/version" "$profile/.suite-version"
     printf 'Refreshed defaults from %s to %s: %s updated, %s preserved.\n' "$previous" "$version" "$updated" "$preserved"
     printf 'Existing mappings, deployment backups and personal additions were preserved.\n'
