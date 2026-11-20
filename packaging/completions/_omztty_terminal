@@ -26,7 +26,7 @@ while (( index < CURRENT )); do
 done
 local action=$words[2]
 case $action in
-    attach|detach|close|rename|list|action|move|control|commands|command-output|shell-integration|plugin|save-layout|restore-layout|mcp)
+    attach|detach|close|rename|list|action|move|control|commands|command-output|shell-integration|plugin|save-layout|restore-layout|reload|mcp)
         if (( CURRENT > 2 )); then
             shift words
             (( --CURRENT ))
@@ -43,6 +43,14 @@ case $action in
                 shell-integration) _arguments '1:shell:(bash zsh fish nu)' ;;
                 plugin) _arguments '1:operation:(check run)' '2:plugin library:_files' ;;
                 restore-layout) _arguments '1:layout file:_files' ;;
+                reload)
+                    _arguments -C '--binary[Use an absolute reload executable]:executable:->reload-binary'
+                    if [[ $state == reload-binary ]]; then
+                        if [[ $PREFIX == /* ]]; then _files -S '' -g "*(*)"
+                        else _message '/absolute/path/to/ztty'
+                        fi
+                    fi
+                    ;;
                 mcp) _arguments \
                     '--transport[MCP transport]:transport:(stdio http)' \
                     '--host[HTTP bind address]:host:' '--port[HTTP bind port]:port:' \
@@ -71,7 +79,7 @@ _arguments -C \
     '(-h --help)'{-h,--help}'[Show help]' \
     '(-V --version)'{-V,--version}'[Show version]' \
     '-e[Execute a command]:command:_command_names' \
-    '1:command:(attach detach close rename list action move control commands command-output shell-integration plugin save-layout restore-layout mcp)'
+    '1:command:(attach detach close rename list action move control commands command-output shell-integration plugin save-layout restore-layout reload mcp)'
 if [[ $state == text-plugin ]]; then
     if compset -P '*='; then _files -S ''
     else _message 'NAME=/absolute/path/to/library.so'

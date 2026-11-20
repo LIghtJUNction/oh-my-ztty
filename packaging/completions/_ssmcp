@@ -1,5 +1,5 @@
 #compdef ssmcp
-# Native grammar follows the suite's pinned ssmcp 0.10.10.
+# Native grammar follows the suite's pinned ssmcp release.
 # Tab never runs ssmcp, reads account/session manifests or contacts a relay.
 
 _ssmcp_directories() {
@@ -31,12 +31,22 @@ _ssmcp_connection() {
         '--timestamps[Show timestamps on event headings]'
         '--max-inline-output[Limit inline output]:lines (1-10000):'
         '--no-color[Disable ANSI colors]'
-        '--no-browser[Print the authorization link without opening a browser]'
     )
+    if [[ $mode == local ]]; then
+        options+=(
+            '--name[Display name]:name:'
+            '--listen[Select the loopback listener]:IP\:port:'
+            '--public-url[Use an existing local HTTPS proxy]:HTTPS NAME.local origin:'
+        )
+        _arguments "$options[@]"
+        return
+    fi
     options+=(
+        '--no-browser[Print the authorization link without opening a browser]'
         '--server[Select the HTTPS relay]:HTTPS origin:'
-        '--username[Use a named relay account]:username:'
-        '*--allow[Allow specified accounts]:account principal:'
+        '(--account-compat)--username[Use a named relay account]:username:'
+        '*--allow[Allow registered accounts on this relay]:username@relay-server:'
+        '(--username --list-tools)--account-compat[Use the verified saved self account on an older relay]'
         '--session-control[Enable local saved-session management]'
     )
     case $mode in
@@ -51,15 +61,11 @@ _ssmcp_connection() {
             [[ $state == session-name && $PREFIX != -* ]] && _message 'new session name'
             [[ $state == account && $PREFIX != -* ]] && _message 'account@relay-server'
             ;;
-        join)
-            _arguments "$options[@]" '--name[Display name]:name:' \
-                '--token[One-use invitation]:invitation:'
-            ;;
         *)
             options+=(
                 '--name[Display name]:name:'
                 '--daemon[Start a user-owned background session]'
-                '--list-tools[Print local tool schemas and exit]'
+                '(--account-compat)--list-tools[Print local tool schemas and exit]'
                 '(-i --interactive)'{-i,--interactive}'[Select a remote terminal]'
                 '--client[Select a remote client]:client identifier:'
                 '--terminal[Select a remote terminal]:terminal identifier:'
@@ -72,7 +78,6 @@ _ssmcp_connection() {
                     local -a account_actions=(
                         'login:Sign in' 'logout:Remove the selected login'
                         'whoami:Show account identity' 'list:List remote clients'
-                        'invite:Create a device invitation' 'join:Connect with a device invitation'
                     )
                     _describe 'account command' account_actions
                 else
@@ -100,15 +105,6 @@ _ssmcp_account() {
                 '(--json -i --interactive)'{-i,--interactive}'[Open a remote terminal]'
                 '--client[Select a remote client]:client identifier:'
                 '--terminal[Select a remote terminal]:terminal identifier:'
-            )
-            ;;
-        invite)
-            options+=(
-                '--ttl[Invitation lifetime]:seconds (30-3600):'
-                '--session-ttl[Session lifetime]:seconds (60-86400):'
-                '--shell[Bootstrap command syntax]:shell:(sh powershell)'
-                '--no-bootstrap[Use an already installed client]'
-                '--json[Emit JSON]'
             )
             ;;
     esac
@@ -159,7 +155,7 @@ _ssmcp() {
     local -a actions=(
         'list:List remote clients'
         'login:Sign in' 'whoami:Show account identity' 'logout:Remove the selected login'
-        'invite:Create a temporary device invitation' 'join:Connect with a device invitation'
+        'local:Run a local MCP session on Linux'
         'config:Manage client settings' 'trust:Manage relay trust pins'
         'setup:Configure account or browser access' 'ui:Configure and preview the interface'
         'sessions:Manage saved local sessions' 'attach:Attach to a saved session'
@@ -168,17 +164,17 @@ _ssmcp() {
     )
     # Only this global prefix is normalized ahead of account subcommands by
     # ssmcp itself. An option value named "sessions" is never a subcommand.
-    if (( CURRENT > 4 )) && [[ $words[2] == --server && $words[4] == (login|logout|whoami|list|ls|invite|join) ]]; then
+    if (( CURRENT > 4 )) && [[ $words[2] == --server && $words[4] == (login|logout|whoami|list|ls) ]]; then
         words=("$words[1]" "$words[4]" "$words[2]" "$words[3]" "${words[@]:4}")
     fi
     # A consumed value beginning with '-' must not become an option to zsh.
     while (( index < CURRENT )); do
         case $words[index] in
-            --name|--title|--server|--username|--allow|--context-root|\
+            --name|--title|--server|--username|--allow|--context-root|--listen|--public-url|\
             --shell|--tty|--reconnect-delay|--log-format|--ui-config|\
             --theme|--max-inline-output|--client|--terminal|--state-dir|\
             --user|--cwd|--public-key|--pin|--playwright-mcp|--lines|\
-            --rows|--cols|--token|--ttl|--session-ttl)
+            --rows|--cols)
                 if (( index + 1 < CURRENT )) && [[ $words[index+1] == -* ]]; then
                     words[index+1]=__ssmcp_option_value__
                 fi
@@ -190,7 +186,8 @@ _ssmcp() {
     action=$words[2]
     if (( CURRENT > 2 )); then
         case $action in
-            login|whoami|logout|list|ls|config|trust|setup|ui|sessions|attach|service|007|update|invite|join)
+            invite|join) return 1 ;;
+            login|whoami|logout|list|ls|local|config|trust|setup|ui|sessions|attach|service|007|update)
                 shift words
                 (( --CURRENT ))
                 ;;
@@ -201,8 +198,8 @@ _ssmcp() {
         return
     fi
     case $action in
-        login|whoami|logout|list|ls|invite) _ssmcp_account "$action" ;;
-        join) _ssmcp_connection join ;;
+        login|whoami|logout|list|ls) _ssmcp_account "$action" ;;
+        local) _ssmcp_connection local ;;
         config)
             case $words[2] in
                 set|get)
@@ -288,9 +285,9 @@ _ssmcp() {
                 return
             fi
             local -a options=('(-h --help)'{-h,--help}'[Show help]'
-                              '1:recovery action:(install run start stop status uninstall sessions)')
+                              '1:recovery action:(install upgrade run start stop status uninstall sessions)')
             [[ $words[2] != run ]] && options+=('--json[Emit JSON]')
-            [[ $words[2] == install ]] && options+=('--dry-run[Preview changes]')
+            [[ $words[2] == (install|upgrade) ]] && options+=('--dry-run[Preview changes]')
             [[ $words[2] == install ]] && options+=(
                 '--server[Select the HTTPS relay]:HTTPS origin:' '--name[Recovery client name]:name:'
                 '--cwd[Recovery working directory]:directory:_ssmcp_directories'

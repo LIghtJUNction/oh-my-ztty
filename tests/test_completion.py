@@ -217,6 +217,9 @@ class InteractiveCompletion(unittest.TestCase):
             "zdot --root . sync pul": "zdot --root . sync pull",
             "zdot plan --b": "zdot plan --backup",
             "zfetch --no": "zfetch --no-color",
+            "zfetch --fo": "zfetch --format",
+            "zfetch --format js": "zfetch --format json",
+            "zfetch --json --fo": "zfetch --json --fo",
             "ztty --cwd file": "ztty --cwd file",
             "omztty terminal --cwd file": "omztty terminal --cwd file",
             "zdot --root file": "zdot --root file",
@@ -228,13 +231,13 @@ class InteractiveCompletion(unittest.TestCase):
         self.start()
         self.cases({
             "ssmcp sess": "ssmcp sessions",
-            "ssmcp inv": "ssmcp invite",
-            "ssmcp invite --shell pow": "ssmcp invite --shell powershell",
-            "ssmcp joi": "ssmcp join",
-            "ssmcp loc": "ssmcp loc",
-            "ssmcp --account-co": "ssmcp --account-co",
+            "ssmcp inv": "ssmcp inv",
+            "ssmcp invite --shell pow": "ssmcp invite --shell pow",
+            "ssmcp joi": "ssmcp joi",
+            "ssmcp loc": "ssmcp local",
+            "ssmcp --account-co": "ssmcp --account-compat",
             "ssmcp config set git-fetch": "ssmcp config set git-fetch",
-            "ssmcp 007 upg": "ssmcp 007 upg",
+            "ssmcp 007 upg": "ssmcp 007 upgrade",
             "ssmcp sessions create fixture --the": "ssmcp sessions create fixture --theme",
             "ssmcp sessions create fixture --json --the":
                 "ssmcp sessions create fixture --json --theme",
@@ -262,6 +265,36 @@ class InteractiveCompletion(unittest.TestCase):
             "ssmcp update --ch": "ssmcp update --check",
         })
         self.assertEqual(self.report()[2], "yes")
+
+    def test_relay_allow_local_mode_and_recovery_upgrade(self):
+        self.start()
+        self.cases({
+            "ssmcp --allow alice@relay.example --account-co":
+                "ssmcp --allow alice@relay.example --account-compat",
+            "ssmcp --allow file": "ssmcp --allow file",
+            "ssmcp --account-compat --user": "ssmcp --account-compat --user",
+            "ssmcp --server https://relay.example inv": "ssmcp --server https://relay.example inv",
+            "ssmcp local --lis": "ssmcp local --listen",
+            "ssmcp local --public-u": "ssmcp local --public-url",
+            "ssmcp local --theme nor": "ssmcp local --theme nord",
+            "ssmcp local --ser": "ssmcp local --ser",
+            "ssmcp local --allo": "ssmcp local --allo",
+            "ssmcp local --account-co": "ssmcp local --account-co",
+            "ssmcp 007 upgrade --dry": "ssmcp 007 upgrade --dry-run",
+            "ssmcp 007 upgrade --ser": "ssmcp 007 upgrade --ser",
+        })
+
+    def test_reload_executable_paths_are_absolute_and_never_executed(self):
+        self.start()
+        for prefix in ("ztty", "omztty terminal", "omztty ztty"):
+            with self.subTest(prefix=prefix):
+                self.assertEqual(self.complete(prefix + " rel"), shlex.split(prefix + " reload"))
+                self.assertEqual(self.complete(prefix + " reload --bin"),
+                                 shlex.split(prefix + " reload --binary"))
+                self.assertEqual(self.complete(prefix + " reload --binary file"),
+                                 shlex.split(prefix + " reload --binary file"))
+                line = prefix + " reload --binary " + shlex.quote(str(self.runtime / "bin/ztt"))
+                self.assertEqual(self.complete(line)[-1], str(self.runtime / "bin/ztty"))
 
     def test_ssmcp_files_directories_and_free_text(self):
         self.start()
@@ -291,6 +324,8 @@ class InteractiveCompletion(unittest.TestCase):
                                  shlex.split(prefix + " --theme nord"))
                 self.assertEqual(self.complete(prefix + " sessions lo"),
                                  shlex.split(prefix + " sessions logs"))
+                self.assertEqual(self.complete(prefix + " --account-co"),
+                                 shlex.split(prefix + " --account-compat"))
 
     def test_framework_nested_arguments(self):
         plugins = Path(self.env["XDG_DATA_HOME"]) / "zshard/plugins"
