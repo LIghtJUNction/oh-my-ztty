@@ -148,6 +148,25 @@ Personal `_command` files in `${XDG_CONFIG_HOME:-$HOME/.config}/oh-my-ztty/compl
 
 The per-user installer prepares an audited completion cache. The default lazy mode loads it on the first Tab; adding or changing completion inputs triggers normal revalidation. Use `ZSHARD_COMPLETION=eager` in `options.zsh` to initialize at startup, or `off` to disable completion.
 
+### AI, development and author tools
+
+The suite also ships these native definitions. Completion definitions do not install the external applications.
+
+| Family | Commands |
+| --- | --- |
+| AI clients | `codex`, `claude`, `gemini`, `opencode`, `pi`, `amp` |
+| Developer tools | `go`, `npx`, `yarn`, `rustc`, `rustup`, `node`, `cmake` |
+| Project Z services and input | `zcalld`, `ssmcpd`, `ztype`, `zuse` |
+| Project Z desktop and game tools | `zmcl`, `onim`, `lmm`, `mechrevo-console` |
+| Other author tools | `wgt`, `douyin`, `lightjunction`, `coolapk`, `binance-cli` |
+
+Try `codex exec --sandbox work<Tab>`, `claude mcp add demo --transport ht<Tab>`, `go mod ti<Tab>`, `rustc -C panic=ab<Tab>`, or `zcalld library mcp apply --agent gem<Tab>`. Prompt text and remote identifiers stay free text. Options that require directories exclude ordinary files, including when paths contain spaces or non-ASCII characters.
+
+Git, uv, Cargo, npm, pnpm, Bun, Python/pip, container tools and ordinary shell utilities retain their installed system completion definitions. Coverage depends on the corresponding completion package being installed. Rust uses the commands `rustc`, `cargo` and `rustup`; there is no generic `rust` command to register. Distribution definitions and commands delegated after `--` may perform their own local discovery.
+
+The bundled definitions read local paths and static command grammar. They do not query AI accounts, relays, cloud APIs, game services or hardware for candidates. Personal definitions still take priority. Version targets and extension instructions are in the [completion reference](https://github.com/LIghtJUNction/oh-my-ztty/blob/main/docs/completions.md).
+
+
 ## Aliases and plugins
 
 Put aliases and plugin loading in `local.zsh`:
@@ -191,4 +210,4 @@ The terminal launcher uses a suite-specific broker socket, `@oh-my-ztty-<uid>-<s
 
 The default terminal configuration requests a 13 pt font and 28 px padding. Fontconfig chooses among installed font families; personal Fontconfig rules can change the resolved font. The prompt does not require private-use icon glyphs.
 
-See the [full zshard option reference](https://github.com/LIghtJUNction/zshard/blob/v0.2.0/docs/plugins.md) and [AI provider configuration](ai.md#use-a-provider).
+See the [full zshard option reference](https://github.com/LIghtJUNction/zshard/blob/v0.2.1/docs/plugins.md) and [AI provider configuration](ai.md#use-a-provider).

@@ -1,0 +1,122 @@
+#compdef zuse
+# Grammar: zuse 0.2.2 src/main.rs. The binary need not be installed.
+# Never execute the client or read authentication/session configuration on Tab.
+
+_zuse_input_file() {
+    if [[ $PREFIX == - ]]; then
+        compadd -- -
+    else
+        _files
+    fi
+}
+
+_zuse_specs() {
+    specs=("${common_specs[@]}")
+    subcommands=()
+    positionals=('*:argument:->text')
+    case $1 in
+        '')
+            subcommands=(
+                'eval:Evaluate source text' 'run:Run a source file'
+                'check:Check a source file' 'shell:Open the interactive shell'
+                'doctor:Report desktop capabilities' 'schema:Print the action schema'
+                'resume:Resume a pending request' 'human:Manage human requests'
+                'mcp:Run an MCP endpoint' 'help:Show help'
+            )
+            ;;
+        eval) positionals=('1:source code:->text') ;;
+        run|check) positionals=('1:source file:_zuse_input_file' '*:argument:->text') ;;
+        resume) positionals=('1:request ID:->text') ;;
+        human)
+            subcommands=(
+                'list:List pending requests' 'assist:Assist with a request'
+                'approve:Approve a request' 'deny:Deny a request'
+            )
+            ;;
+        'human assist'|'human approve'|'human deny')
+            positionals=('1:request ID:->text')
+            ;;
+        mcp)
+            specs+=(
+                '(--host --port --socket)--stdio[Use stdin and stdout]'
+                '(--stdio --socket)--host[Bind to a host]:host:->text'
+                '(--stdio --socket)--port[Bind to a port]:port:->text'
+                '(--stdio --host --port)--socket[Listen on a Unix socket]:socket path:_files'
+            )
+            ;;
+
+    esac
+}
+
+_zuse() {
+    local context state state_descr line command_path='' token flag tail item candidate
+    local -a words=("$words[@]") specs subcommands positionals
+    local -a common_specs=(
+        '(-h --help)-h[Show help]'
+        '(-h --help)--help[Show help]'
+        '(-V --version)-V[Show version]'
+        '(-V --version)--version[Show version]'
+        '--read-only[Allow read-only actions]'
+        '--dry-run[Validate actions without executing them]'
+        '--max-steps[Limit action count]:steps:->text'
+        '--max-wait-ms[Limit waiting time]:milliseconds:->text'
+    )
+    local -A aliases=(
+
+    )
+    typeset -A opt_args
+    local -i CURRENT=$CURRENT index consumed descended
+    while true; do
+        _zuse_specs "$command_path"
+        index=2
+        descended=0
+        while (( index < CURRENT )); do
+            token=$words[index]
+            [[ $token == -- ]] && break
+            if [[ $token == -* ]]; then
+                consumed=1
+                for item in "${specs[@]}"; do
+                    flag=${item%%\[*}
+                    flag=${flag##*\)}
+                    flag=${flag#\*}
+                    flag=${flag%[+=]}
+                    [[ $token == "$flag" ]] || continue
+                    tail=${item#*\]}
+                    if [[ $tail == ::* ]]; then
+                        if (( index + 1 < CURRENT )) && [[ $words[index+1] != -* ]]; then consumed=2; fi
+                    elif [[ $tail == :* ]]; then
+                        consumed=2
+                        if (( index + 1 < CURRENT )) && [[ $words[index+1] == -* ]]; then
+                            words[index+1]=__zuse_option_value__
+                        fi
+                    fi
+                    break
+                done
+                (( index += consumed ))
+                continue
+            fi
+            for item in "${subcommands[@]}"; do
+                candidate=${item%%:*}
+                [[ $token == "$candidate" ]] || continue
+                command_path="${command_path:+$command_path }$token"
+                command_path=${aliases[$command_path]-$command_path}
+                shift $(( index - 1 )) words
+                (( CURRENT -= index - 1 ))
+                descended=1
+                break
+            done
+            break
+        done
+        (( descended )) || break
+    done
+    if (( ${#subcommands} )); then
+        positionals=('1:command:->command' '*:argument:->text')
+    fi
+    _arguments -s -S -C "${specs[@]}" "${positionals[@]}"
+    case $state in
+        command) _describe 'command' subcommands || _message 'command text' ;;
+        text) _message 'argument text' ;;
+    esac
+}
+
+_zuse "$@"

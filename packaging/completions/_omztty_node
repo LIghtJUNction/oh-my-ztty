@@ -1,0 +1,48 @@
+#compdef node
+# Common Node.js 26 options. Scripts and modules are completed from local files.
+local context state state_descr line
+typeset -A opt_args
+local -a words=("$words[@]")
+local -i CURRENT=$CURRENT index=2
+while (( index < CURRENT )); do
+    case $words[index] in
+        -e|--eval|-p|--print|-r|--require|--import|--input-type|-C|--conditions|--env-file|--env-file-if-exists|--run|--test-name-pattern|--test-skip-pattern|--test-reporter|--test-reporter-destination|--test-concurrency|--test-timeout|--test-shard|--watch-path|--inspect-port|--debug-port)
+            if (( index + 1 < CURRENT )) && [[ $words[index+1] == -* ]]; then
+                words[index+1]=__node_option_value__
+            fi
+            (( index += 2 )) ;;
+        --) _files; return ;;
+        -*) (( ++index )) ;;
+        *) _files; return ;;
+    esac
+done
+_arguments -s -S \
+    '(-h --help)'{-h,--help}'[Show help]' \
+    '(-v --version)'{-v,--version}'[Show Node version]' \
+    '(-e --eval)'{-e+,--eval=}'[Evaluate JavaScript]:JavaScript:' \
+    '(-p --print)'{-p+,--print=}'[Evaluate and print JavaScript]:JavaScript:' \
+    '(-c --check)'{-c,--check}'[Check syntax without executing]' \
+    '*'{-r+,--require=}'[Preload a CommonJS module]:module:_files' \
+    '*--import=[Preload an ES module]:module:_files' \
+    '*'{-C+,--conditions=}'[Add a module resolution condition]:condition:' \
+    '--input-type=[Select the type of string input]:input type:(commonjs module)' \
+    '--env-file=[Read environment assignments]:environment file:_files' \
+    '--env-file-if-exists=[Read an optional environment file]:environment file:_files' \
+    '--run=[Run a package.json script]:script name:' \
+    '--inspect[Enable the inspector]' '--inspect-brk[Pause when the inspector starts]' \
+    '--inspect-wait[Wait for an inspector connection]' \
+    '--inspect-port=[Set inspector address]:host and port:' \
+    '--test[Run the test runner]' '--test-only[Run tests marked only]' \
+    '--test-name-pattern=[Select tests by name]:regular expression:' \
+    '--test-skip-pattern=[Exclude tests by name]:regular expression:' \
+    '--test-reporter=[Select the test reporter]:reporter:(spec tap dot junit lcov)' \
+    '--test-reporter-destination=[Write reporter output]:destination:_files' \
+    '--test-concurrency=[Set parallel test count]:count:' \
+    '--test-timeout=[Set test timeout]:milliseconds:' \
+    '--test-shard=[Select a test shard]:index/count:' \
+    '--test-update-snapshots[Update test snapshots]' \
+    '--watch[Restart when files change]' \
+    '--watch-path=[Watch a path]:path:_files' \
+    '--watch-preserve-output[Retain output when restarting]' \
+    '1:script file:_files -g "*.(js|cjs|mjs|ts|cts|mts)(-.)"' \
+    '*:script argument:_files'

@@ -1,0 +1,729 @@
+#compdef douyin
+# Native douyin 2026.11.18 grammar, verified from installed --help.
+# Only static choices and local paths; no CLI, account or network access.
+autoload -Uz _omztty_directories
+_douyin_json_argument() {
+    if compset -P '@'; then _files; else _message 'JSON text or @file'; fi
+}
+local context state state_descr line node=root token
+typeset -A opt_args
+local -a words=("$words[@]")
+local -i CURRENT=$CURRENT index selected help_only=0
+local -a specs positional value_options subcommands names
+local -a common=(
+    '(-h --help)-h[Print help]'
+    '(-h --help)--help[Print help]'
+)
+while true; do
+    specs=("$common[@]")
+    positional=()
+    value_options=()
+    subcommands=()
+    case $node in
+        root)
+            specs+=(
+                '(-u --urls)-u+[作品、账号、音乐、话题、合集 ID 或 URL，搜索词，或批量目标文件]:urls:_files'
+                '(-u --urls)--urls=[作品、账号、音乐、话题、合集 ID 或 URL，搜索词，或批量目标文件]:urls:_files'
+                '(-l --limit)-l+[最多采集记录数，0 为不限]:limit:()'
+                '(-l --limit)--limit=[最多采集记录数，0 为不限]:limit:()'
+                '(-t --type)-t+[]:crawl type:('\''post'\'' '\''favorite'\'' '\''music'\'' '\''hashtag'\'' '\''search'\'' '\''following'\'' '\''follower'\'' '\''collection'\'' '\''mix'\'' '\''aweme'\'' '\''feed'\'')'
+                '(-t --type)--type=[]:crawl type:('\''post'\'' '\''favorite'\'' '\''music'\'' '\''hashtag'\'' '\''search'\'' '\''following'\'' '\''follower'\'' '\''collection'\'' '\''mix'\'' '\''aweme'\'' '\''feed'\'')'
+                '(-p --path)-p+[输出目录；数据写入目标对应的 JSON 文件]:output path:_omztty_directories'
+                '(-p --path)--path=[输出目录；数据写入目标对应的 JSON 文件]:output path:_omztty_directories'
+                '(--no-download)--no-download[]'
+                '(--download-title)--download-title[]'
+                '(--download-cover)--download-cover[]'
+                '(--sort-type)--sort-type=[]:sort type:('\''0'\'' '\''1'\'' '\''2'\'')'
+                '(--publish-time)--publish-time=[]:publish time:('\''0'\'' '\''1'\'' '\''7'\'' '\''180'\'' '\''182'\'')'
+                '(--filter-duration)--filter-duration=[]:filter duration:('\''0-1'\'' '\''1-5'\'' '\''5-10000'\'')'
+                '(-V --version)-V[Print version]'
+                '(-V --version)--version[Print version]'
+            )
+            value_options=('-u' '--urls' '-l' '--limit' '-t' '--type' '-p' '--path' '--sort-type' '--publish-time' '--filter-duration')
+            subcommands=(
+                'live:直播权限、房间管理、主播状态上报与 OBS 推流'
+                'comment:采集作品评论与楼中楼回复'
+                'social:安卓账号写操作：赞、关、评、藏（需 --yes）'
+                'im:私信：Aweme REST 辅助接口 + imapi protobuf 收发'
+                'mcp:通过 stdio 或 Streamable HTTP 启动 MCP，支持事件 Webhook'
+                'api:调用官方 OpenAPI，需要开放平台应用授权'
+                'publish:使用官方 OAuth 上传并发布视频'
+                'download:下载抖音 CDN 媒体 URL，不向媒体主机发送登录凭据'
+                'me:读取当前登录账号的完整个人资料'
+                'insights:离线分析热词、热梗候选与需求线索'
+                'stats:离线统计作品元数据'
+                'auth:从已连接手机导入登录态，或检查、清除本地登录态'
+                'device:检查 ADB 设备与抖音安装状态'
+            )
+            ;;
+        root/live)
+            subcommands=(
+                'permissions:独立查询当前安卓账号的直播权限配置，不创建直播间'
+                'create-info:查询开播预览配置（GET /webcast/room/create_info/，platform 固定为 APK 证实值 2）'
+                'create-check:开播前权限检查（GET /webcast/room/create_check/）'
+                'info:使用当前采集传输查询公开直播间'
+                'create:用 APK 证实的 FieldMap 键创建直播间（POST /webcast/room/create/）；值来自 JSON 文件，不猜填'
+                'leave:观众离开直播间（POST /webcast/room/leave/）'
+                'continue:恢复当前账号直播间，并保存新的私密会话'
+                'anchor-status:上报主播 prepare/play/pause/finish 状态'
+                'finish:上报结束状态并回读房间状态'
+                'heartbeat:有限次上报 play；Ctrl-C 停止后续心跳，失败立即停止'
+                'obs:通过本机 OBS WebSocket 联动直播'
+            )
+            ;;
+        root/comment)
+            specs+=(
+                '(-l --limit)-l+[]:limit:()'
+                '(-l --limit)--limit=[]:limit:()'
+                '(--count)--count=[]:count:()'
+                '(--with-replies)--with-replies[]'
+                '(--reply-limit)--reply-limit=[]:reply limit:()'
+                '(--sleep)--sleep=[\[alias\: --sleep-seconds\]]:sleep seconds:()'
+                '(-o --output)-o+[]:output:_files'
+                '(-o --output)--output=[]:output:_files'
+                '(--format)--format=[]:format:('\''raw'\'' '\''chatml-json'\'' '\''chatml-jsonl'\'')'
+                '(--comment-role)--comment-role=[]:comment role:()'
+                '(--reply-role)--reply-role=[]:reply role:()'
+                '(--min-comment-digg)--min-comment-digg=[]:min comment digg:()'
+                '(--min-reply-digg)--min-reply-digg=[]:min reply digg:()'
+                '(--include-single-comments)--include-single-comments[]'
+            )
+            value_options=('-l' '--limit' '--count' '--reply-limit' '--sleep' '-o' '--output' '--format' '--comment-role' '--reply-role' '--min-comment-digg' '--min-reply-digg')
+            positional=(
+                '1:target:_guard "[^-]*" '\''target'\'''
+            )
+            ;;
+        root/social)
+            subcommands=(
+                'digg:对作品点赞或取消点赞（GET /aweme/v1/commit/item/digg/）'
+                'follow:关注或取消关注用户（GET /aweme/v1/commit/follow/user/）'
+                'comment:发布作品评论（POST /aweme/v1/comment/publish/）'
+                'comment-digg:点赞或取消点赞评论（GET /aweme/v1/comment/digg/）'
+                'comment-dislike:点踩或取消点踩评论（GET /aweme/v1/comment/digg/）'
+                'share:读取作品的分享链接，不发送给联系人'
+                'collect:收藏或取消收藏作品（POST /aweme/v1/aweme/collect/）'
+            )
+            ;;
+        root/im)
+            subcommands=(
+                'config:GET /aweme/v1/im/config/（ImApi.getResourceInfo）'
+                'cloud-token:GET /aweme/v1/im/cloud/token/（IM SDK 独立 token，供 imapi Request.token）'
+                'stranger-priv:GET /aweme/v1/im/get/stranger_priv/'
+                'can-send:GET im/spotlight/multi_relation/?sec_to_user_id=…（能否私信）'
+                'enter-chat:POST /aweme/v1/im/service/enter_chat/（Body = LX/0UGy Gson 字段）'
+                'ticket:imapi protobuf：GET_TICKET（cmd=2005）'
+                'create-conversation:imapi protobuf：CREATE_CONVERSATION_V2（cmd=609）'
+                'conversation-info:imapi protobuf：GET_CONVERSATION_INFO_V2（cmd=608）'
+                'pull:imapi protobuf：GET_MESSAGES_BY_USER（cmd=200）拉会话消息增量'
+                'send:imapi protobuf：SEND_MESSAGE（cmd=100）发文本私信'
+            )
+            ;;
+        root/mcp)
+            specs+=(
+                '(--listen)--listen=[Streamable HTTP 监听地址，仅允许回环地址；省略时使用 stdio]:listen:()'
+                '(--webhook)--webhook=[事件转发 Webhook；远程地址必须使用 HTTPS]:webhook:()'
+                '(--event-token)--event-token=[事件入口 Bearer 令牌，设置后拒绝未认证事件]:event token:()'
+                '(--webhook-token)--webhook-token=[转发 Webhook 时携带的 Bearer 令牌]:webhook token:()'
+            )
+            value_options=('--listen' '--webhook' '--event-token' '--webhook-token')
+            ;;
+        root/api)
+            subcommands=(
+                'client-token:获取官方 client_token'
+                'authorize-url:生成官方授权链接'
+                'access-token:使用 code 交换官方 access_token；使用 auth code 可安全保存'
+                'refresh-token:刷新官方 access_token'
+                'renew-refresh-token:续期官方 refresh_token'
+                'userinfo:获取官方授权用户信息'
+                'comment-list:获取官方视频评论列表'
+                'comment-replies:获取官方评论回复列表'
+                'comment-reply:通过官方接口发送评论或回复'
+                'im-message-send:通过官方接口发送文字、图片或视频私信'
+                'request:同源通用 OpenAPI 请求；写请求需要确认或 --yes'
+            )
+            ;;
+        root/publish)
+            subcommands=(
+                'video:上传并投稿；自动保存进度，可先用 --dry-run 检查'
+                'resume:使用已上传的视频继续创建作品，不重新上传'
+                'status:只读查看本地投稿记录，不访问网络'
+            )
+            ;;
+        root/download)
+            specs+=(
+                '(-o --output)-o+[]:output:_files'
+                '(-o --output)--output=[]:output:_files'
+            )
+            value_options=('-o' '--output')
+            positional=(
+                '1:url:_guard "[^-]*" '\''url'\'''
+            )
+            ;;
+        root/me)
+            ;;
+        root/insights)
+            specs+=(
+                '(--top)--top=[]:top:()'
+                '(--min-count)--min-count=[]:min count:()'
+                '(--format)--format=[]:format:('\''json'\'' '\''markdown'\'')'
+                '(-o --output)-o+[]:output:_files'
+                '(-o --output)--output=[]:output:_files'
+            )
+            value_options=('--top' '--min-count' '--format' '-o' '--output')
+            positional=(
+                '1:input:_files'
+            )
+            ;;
+        root/stats)
+            specs+=(
+                '(--author)--author=[]:author:()'
+                '(--sort)--sort=[]:sort:('\''score'\'' '\''interactions'\'' '\''likes'\'' '\''comments'\'' '\''collects'\'' '\''shares'\'' '\''duration'\'' '\''latest'\'')'
+                '(--top)--top=[]:top:()'
+                '(--format)--format=[]:format:('\''json'\'' '\''markdown'\'')'
+                '(-o --output)-o+[]:output:_files'
+                '(-o --output)--output=[]:output:_files'
+            )
+            value_options=('--author' '--sort' '--top' '--format' '-o' '--output')
+            positional=(
+                '1:input:_files'
+            )
+            ;;
+        root/auth)
+            specs+=(
+                '(--adb)--adb[]'
+                '(--serial)--serial=[]:serial:()'
+            )
+            value_options=('--serial')
+            subcommands=(
+                'cookie-login:保存独立的网页 Cookie，仅校验格式'
+                'cookie-status:检查网页 Cookie；--offline 不访问服务端'
+                'cookie-logout:清除网页 Cookie，保留设备登录和 OAuth'
+                'login:通过官方 OAuth 授权接入账号'
+                'code:使用官方授权 code 换取并保存 token'
+                'refresh:刷新官方 access_token'
+                'status:重新向服务端验证当前账号；--offline 仅检查本地配置'
+                'logout:删除本地设备登录态'
+            )
+            ;;
+        root/device)
+            specs+=(
+                '(--serial)--serial=[多设备时指定序列号]:serial:()'
+            )
+            value_options=('--serial')
+            ;;
+        root/live/permissions)
+            ;;
+        root/live/create-info)
+            specs+=(
+                '(--platform)--platform=[]:platform:()'
+            )
+            value_options=('--platform')
+            ;;
+        root/live/create-check)
+            specs+=(
+                '(--live-room-mode)--live-room-mode=[]:live room mode:()'
+                '(--check-scene)--check-scene=[]:check scene:()'
+                '(--chat-auth)--chat-auth=[]:chat auth:()'
+                '(--share-auth)--share-auth=[]:share auth:()'
+                '(--digg-auth)--digg-auth=[]:digg auth:()'
+                '(--deliver)--deliver=[]:deliver:()'
+                '(--introduction)--introduction=[]:introduction:()'
+            )
+            value_options=('--live-room-mode' '--check-scene' '--chat-auth' '--share-auth' '--digg-auth' '--deliver' '--introduction')
+            ;;
+        root/live/info)
+            positional=(
+                '1:room id:_guard "[^-]*" '\''room id'\'''
+            )
+            ;;
+        root/live/create)
+            specs+=(
+                '(--params-file)--params-file=[]:params file:_files'
+                '(--output)--output=[保存账号绑定的私密直播会话和 OBS 推流配置]:output:_files'
+                '(--yes)--yes[]'
+            )
+            value_options=('--params-file' '--output')
+            ;;
+        root/live/leave)
+            specs+=(
+                '(--room-id)--room-id=[]:room id:()'
+                '(--yes)--yes[]'
+            )
+            value_options=('--room-id')
+            ;;
+        root/live/continue)
+            specs+=(
+                '(--resolution-key)--resolution-key=[]:resolution key:()'
+                '(--output)--output=[]:output:_files'
+                '(--yes)--yes[]'
+            )
+            value_options=('--resolution-key' '--output')
+            ;;
+        root/live/anchor-status)
+            specs+=(
+                '(--session-file)--session-file=[]:session file:_files'
+                '(--status)--status=[]:status:('\''prepare'\'' '\''play'\'' '\''pause'\'' '\''finish'\'')'
+                '(--reason-no)--reason-no=[]:reason no:()'
+                '(--source)--source=[]:source:()'
+                '(--yes)--yes[]'
+            )
+            value_options=('--session-file' '--status' '--reason-no' '--source')
+            ;;
+        root/live/finish)
+            specs+=(
+                '(--session-file)--session-file=[]:session file:_files'
+                '(--reason-no)--reason-no=[]:reason no:()'
+                '(--source)--source=[]:source:()'
+                '(--yes)--yes[]'
+            )
+            value_options=('--session-file' '--reason-no' '--source')
+            ;;
+        root/live/heartbeat)
+            specs+=(
+                '(--session-file)--session-file=[]:session file:_files'
+                '(--interval)--interval=[每次成功响应到下次请求的秒数，必须明确指定]:interval:()'
+                '(--count)--count=[]:count:()'
+                '(--yes)--yes[]'
+            )
+            value_options=('--session-file' '--interval' '--count')
+            ;;
+        root/live/obs)
+            specs+=(
+                '(--port)--port=[]:port:()'
+                '(--password)--password=[]:password:()'
+            )
+            value_options=('--port' '--password')
+            subcommands=(
+                'status:查询 OBS 推流状态，不读取推流密钥'
+                'source-status:查询媒体源播放状态，不读取拉流地址'
+                'configure-push:将已有直播间的推流 JSON 配置到 OBS；默认不开始推流'
+                'add-source:将 URL 文件中的直播拉流地址作为媒体源加入指定场景'
+                'stop:停止 OBS 推流；抖音直播间生命周期另行处理'
+            )
+            ;;
+        root/social/digg)
+            specs+=(
+                '(--action)--action=[1 点赞，0 取消；与 APK diggItem type 一致]:action:()'
+                '(--channel-id)--channel-id=[]:channel id:()'
+                '(--yes)--yes[]'
+            )
+            value_options=('--action' '--channel-id')
+            positional=(
+                '1:aweme id:_guard "[^-]*" '\''aweme id'\'''
+            )
+            ;;
+        root/social/follow)
+            specs+=(
+                '(--user-id)--user-id=[目标用户 ID；可与 --sec-user-id 同时提供]:user id:()'
+                '(--sec-user-id)--sec-user-id=[]:sec user id:()'
+                '(--action)--action=[1 关注，0 取消；与 APK follow type 一致]:action:()'
+                '(--from)--from=[默认取自 40.8.0 RedPacketFollowViewModel 调用点]:from:()'
+                '(--from-pre)--from-pre=[]:from pre:()'
+                '(--from-action)--from-action=[]:from action:()'
+                '(--channel-id)--channel-id=[默认取自同一调用点的 channel_id 常量 0x00049446]:channel id:()'
+                '(--yes)--yes[]'
+            )
+            value_options=('--user-id' '--sec-user-id' '--action' '--from' '--from-pre' '--from-action' '--channel-id')
+            ;;
+        root/social/comment)
+            specs+=(
+                '(--text)--text=[]:text:()'
+                '(--reply-id)--reply-id=[]:reply id:()'
+                '(--channel-id)--channel-id=[]:channel id:()'
+                '(--adb-guard)--adb-guard[通过已连接的 rooted 手机为此路径生成 TicketGuard 请求头]'
+                '(--yes)--yes[]'
+            )
+            value_options=('--text' '--reply-id' '--channel-id')
+            positional=(
+                '1:aweme id:_guard "[^-]*" '\''aweme id'\'''
+            )
+            ;;
+        root/social/comment-digg)
+            specs+=(
+                '(--action)--action=[1 点赞，0 取消点赞]:action:()'
+                '(--channel-id)--channel-id=[]:channel id:()'
+                '(--yes)--yes[]'
+            )
+            value_options=('--action' '--channel-id')
+            positional=(
+                '1:comment id:_guard "[^-]*" '\''comment id'\'''
+                '2:aweme id:_guard "[^-]*" '\''aweme id'\'''
+            )
+            ;;
+        root/social/comment-dislike)
+            specs+=(
+                '(--action)--action=[1 点踩，0 取消点踩]:action:()'
+                '(--channel-id)--channel-id=[]:channel id:()'
+                '(--yes)--yes[]'
+            )
+            value_options=('--action' '--channel-id')
+            positional=(
+                '1:comment id:_guard "[^-]*" '\''comment id'\'''
+                '2:aweme id:_guard "[^-]*" '\''aweme id'\'''
+            )
+            ;;
+        root/social/share)
+            positional=(
+                '1:aweme id:_guard "[^-]*" '\''aweme id'\'''
+            )
+            ;;
+        root/social/collect)
+            specs+=(
+                '(--action)--action=[1 收藏，0 取消；与 APK collect action 一致]:action:()'
+                '(--yes)--yes[]'
+            )
+            value_options=('--action')
+            positional=(
+                '1:aweme id:_guard "[^-]*" '\''aweme id'\'''
+            )
+            ;;
+        root/im/config)
+            ;;
+        root/im/cloud-token)
+            ;;
+        root/im/stranger-priv)
+            ;;
+        root/im/can-send)
+            specs+=(
+                '(--sec-user-id)--sec-user-id=[]:sec user id:()'
+            )
+            value_options=('--sec-user-id')
+            ;;
+        root/im/enter-chat)
+            specs+=(
+                '(--conversation-id)--conversation-id=[]:conversation id:()'
+                '(--conversation-short-id)--conversation-short-id=[]:conversation short id:()'
+                '(--conversation-type)--conversation-type=[]:conversation type:()'
+                '(--source)--source=[]:source:()'
+            )
+            value_options=('--conversation-id' '--conversation-short-id' '--conversation-type' '--source')
+            ;;
+        root/im/ticket)
+            specs+=(
+                '(--to-user-id)--to-user-id=[]:to user id:()'
+                '(--conversation-short-id)--conversation-short-id=[]:conversation short id:()'
+                '(--yes)--yes[]'
+            )
+            value_options=('--to-user-id' '--conversation-short-id')
+            ;;
+        root/im/create-conversation)
+            specs+=(
+                '(--user-id)--user-id=[]:user id:()'
+                '(--yes)--yes[]'
+            )
+            value_options=('--user-id')
+            ;;
+        root/im/conversation-info)
+            specs+=(
+                '(--conversation-id)--conversation-id=[]:conversation id:()'
+                '(--conversation-short-id)--conversation-short-id=[]:conversation short id:()'
+                '(--conversation-type)--conversation-type=[]:conversation type:()'
+                '(--yes)--yes[]'
+            )
+            value_options=('--conversation-id' '--conversation-short-id' '--conversation-type')
+            ;;
+        root/im/pull)
+            specs+=(
+                '(--cursor)--cursor=[]:cursor:()'
+                '(--limit)--limit=[]:limit:()'
+                '(--yes)--yes[]'
+            )
+            value_options=('--cursor' '--limit')
+            ;;
+        root/im/send)
+            specs+=(
+                '(--conversation-id)--conversation-id=[]:conversation id:()'
+                '(--conversation-short-id)--conversation-short-id=[]:conversation short id:()'
+                '(--text)--text=[]:text:()'
+                '(--ticket)--ticket=[会话 ticket；可先用 `im ticket` / 进会话后从 SDK 响应取]:ticket:()'
+                '(--to-user-id)--to-user-id=[]:to user id:()'
+                '(--conversation-type)--conversation-type=[]:conversation type:()'
+                '(--yes)--yes[]'
+            )
+            value_options=('--conversation-id' '--conversation-short-id' '--text' '--ticket' '--to-user-id' '--conversation-type')
+            ;;
+        root/api/client-token)
+            specs+=(
+                '(--client-key)--client-key=[]:client key:()'
+                '(--client-secret)--client-secret=[]:client secret:()'
+            )
+            value_options=('--client-key' '--client-secret')
+            ;;
+        root/api/authorize-url)
+            specs+=(
+                '(--client-key)--client-key=[]:client key:()'
+                '(--redirect-uri)--redirect-uri=[]:redirect uri:()'
+                '(--scope)--scope=[]:scope:()'
+                '(--state)--state=[]:state:()'
+            )
+            value_options=('--client-key' '--redirect-uri' '--scope' '--state')
+            ;;
+        root/api/access-token)
+            specs+=(
+                '(--client-key)--client-key=[]:client key:()'
+                '(--client-secret)--client-secret=[]:client secret:()'
+                '(--code)--code=[]:code:()'
+            )
+            value_options=('--client-key' '--client-secret' '--code')
+            ;;
+        root/api/refresh-token)
+            specs+=(
+                '(--client-key)--client-key=[]:client key:()'
+                '(--refresh-token)--refresh-token=[]:refresh token:()'
+            )
+            value_options=('--client-key' '--refresh-token')
+            ;;
+        root/api/renew-refresh-token)
+            specs+=(
+                '(--client-key)--client-key=[]:client key:()'
+                '(--refresh-token)--refresh-token=[]:refresh token:()'
+            )
+            value_options=('--client-key' '--refresh-token')
+            ;;
+        root/api/userinfo)
+            specs+=(
+                '(--token)--token=[]:token:()'
+                '(--open-id)--open-id=[]:open id:()'
+            )
+            value_options=('--token' '--open-id')
+            ;;
+        root/api/comment-list)
+            specs+=(
+                '(--token)--token=[]:token:()'
+                '(--open-id)--open-id=[]:open id:()'
+                '(--item-id)--item-id=[]:item id:()'
+                '(--cursor)--cursor=[]:cursor:()'
+                '(--count)--count=[]:count:()'
+                '(--sort-type)--sort-type=[]:sort type:()'
+            )
+            value_options=('--token' '--open-id' '--item-id' '--cursor' '--count' '--sort-type')
+            ;;
+        root/api/comment-replies)
+            specs+=(
+                '(--token)--token=[]:token:()'
+                '(--open-id)--open-id=[]:open id:()'
+                '(--item-id)--item-id=[]:item id:()'
+                '(--cursor)--cursor=[]:cursor:()'
+                '(--count)--count=[]:count:()'
+                '(--sort-type)--sort-type=[]:sort type:()'
+                '(--comment-id)--comment-id=[]:comment id:()'
+            )
+            value_options=('--token' '--open-id' '--item-id' '--cursor' '--count' '--sort-type' '--comment-id')
+            ;;
+        root/api/comment-reply)
+            specs+=(
+                '(--token)--token=[]:token:()'
+                '(--open-id)--open-id=[]:open id:()'
+                '(--item-id)--item-id=[]:item id:()'
+                '(--comment-id)--comment-id=[]:comment id:()'
+                '(--content)--content=[]:content:()'
+                '(--yes)--yes[]'
+            )
+            value_options=('--token' '--open-id' '--item-id' '--comment-id' '--content')
+            ;;
+        root/api/im-message-send)
+            specs+=(
+                '(--token)--token=[]:token:()'
+                '(--open-id)--open-id=[]:open id:()'
+                '(--to-user-id)--to-user-id=[]:to user id:()'
+                '(--scene)--scene=[]:scene:('\''im-reply-msg'\'' '\''im-enter-direct-msg'\'')'
+                '(--msg-id)--msg-id=[]:msg id:()'
+                '(--conversation-id)--conversation-id=[]:conversation id:()'
+                '(--message-type)--message-type=[]:message type:('\''text'\'' '\''image'\'' '\''video'\'')'
+                '(--text)--text=[]:text:()'
+                '(--media-id)--media-id=[]:media id:()'
+                '(--item-id)--item-id=[]:item id:()'
+                '(--yes)--yes[]'
+            )
+            value_options=('--token' '--open-id' '--to-user-id' '--scene' '--msg-id' '--conversation-id' '--message-type' '--text' '--media-id' '--item-id')
+            ;;
+        root/api/request)
+            specs+=(
+                '(--token)--token=[]:token:()'
+                '(--param)--param=[]:params:()'
+                '(--json)--json=[JSON 字符串，@文件路径，或 @- 读取 stdin]:body:_douyin_json_argument'
+                '(--form)--form=[]:forms:()'
+                '(--header)--header=[]:headers:()'
+                '(--yes)--yes[]'
+            )
+            value_options=('--token' '--param' '--json' '--form' '--header')
+            positional=(
+                '1:method:_guard "[^-]*" '\''method'\'''
+                '2:path:_guard "[^-]*" '\''path'\'''
+            )
+            ;;
+        root/publish/video)
+            specs+=(
+                '(-t --title)-t+[视频标题，可包含话题；真正 @ 用户还需要平台用户标识]:title:()'
+                '(-t --title)--title=[视频标题，可包含话题；真正 @ 用户还需要平台用户标识]:title:()'
+                '(--visibility)--visibility=[发布可见范围]:visibility:('\''public'\'' '\''private'\'' '\''friends'\'')'
+                '(--cover-tsp)--cover-tsp=[从视频指定秒数截取封面，必须是有限非负数]:cover tsp:()'
+                '(--open-id)--open-id=[授权用户 open_id；必须与当前 OAuth 账号一致]:open id:()'
+                '(--upload-timeout)--upload-timeout=[单次文件或每片上传超时（秒），普通 API 仍使用 30 秒]:upload timeout:()'
+                '(--receipt)--receipt=[自定义进度文件；默认保存到本机配置目录，拒绝覆盖已有文件]:receipt:_files'
+                '(--upload-only)--upload-only[仅上传并保存记录，之后用 publish resume 创建作品]'
+                '(--dry-run)--dry-run[只验证文件、参数与本地 OAuth 权限，不上传、不创建文件]'
+                '(--yes)--yes[确认上传和创建作品]'
+            )
+            value_options=('-t' '--title' '--visibility' '--cover-tsp' '--open-id' '--upload-timeout' '--receipt')
+            positional=(
+                '1:file:_files'
+            )
+            ;;
+        root/publish/resume)
+            specs+=(
+                '(--retry-create)--retry-create[创建结果未知时，仅在核实账号没有重复作品后显式重试]'
+                '(--yes)--yes[]'
+            )
+            positional=(
+                '1:receipt:_files'
+            )
+            ;;
+        root/publish/status)
+            positional=(
+                '1:receipt:_files'
+            )
+            ;;
+        root/auth/cookie-login)
+            specs+=(
+                '(--cookie)--cookie=[]:cookie:()'
+                '(--cookie-file)--cookie-file=[从私有文件读取 Cookie，- 表示标准输入]:cookie file:_files'
+            )
+            value_options=('--cookie' '--cookie-file')
+            ;;
+        root/auth/cookie-status)
+            specs+=(
+                '(--offline)--offline[]'
+            )
+            ;;
+        root/auth/cookie-logout)
+            ;;
+        root/auth/login)
+            specs+=(
+                '(--client-key)--client-key=[]:client key:()'
+                '(--client-secret)--client-secret=[]:client secret:()'
+                '(--redirect-uri)--redirect-uri=[]:redirect uri:()'
+                '(--scope)--scope=[]:scope:()'
+                '(--code)--code=[]:code:()'
+                '(--qr)--qr[]'
+                '(--no-qr)--no-qr[]'
+                '(--listen)--listen[]'
+                '(--callback-host)--callback-host=[]:callback host:()'
+                '(--callback-port)--callback-port=[]:callback port:()'
+                '(--timeout)--timeout=[]:timeout:()'
+            )
+            value_options=('--client-key' '--client-secret' '--redirect-uri' '--scope' '--code' '--callback-host' '--callback-port' '--timeout')
+            ;;
+        root/auth/code)
+            specs+=(
+                '(--code)--code=[]:code:()'
+                '(--client-secret)--client-secret=[]:client secret:()'
+            )
+            value_options=('--code' '--client-secret')
+            ;;
+        root/auth/refresh)
+            ;;
+        root/auth/status)
+            specs+=(
+                '(--offline)--offline[]'
+                '(--json)--json[]'
+                '(--oauth)--oauth[检查官方 OAuth，默认检查 ADB 导入的登录态]'
+            )
+            ;;
+        root/auth/logout)
+            ;;
+        root/live/obs/status)
+            specs+=(
+                '(--port)--port=[]:port:()'
+                '(--password)--password=[]:password:()'
+            )
+            value_options=('--port' '--password')
+            ;;
+        root/live/obs/source-status)
+            specs+=(
+                '(--name)--name=[]:name:()'
+                '(--port)--port=[]:port:()'
+                '(--password)--password=[]:password:()'
+            )
+            value_options=('--name' '--port' '--password')
+            ;;
+        root/live/obs/configure-push)
+            specs+=(
+                '(--port)--port=[]:port:()'
+                '(--stream-file)--stream-file=[]:stream file:_files'
+                '(--password)--password=[]:password:()'
+                '(--start)--start[配置后启动 OBS 推流]'
+                '(--yes)--yes[]'
+            )
+            value_options=('--port' '--stream-file' '--password')
+            ;;
+        root/live/obs/add-source)
+            specs+=(
+                '(--port)--port=[]:port:()'
+                '(--url-file)--url-file=[]:url file:_files'
+                '(--password)--password=[]:password:()'
+                '(--scene)--scene=[]:scene:()'
+                '(--name)--name=[]:name:()'
+                '(--yes)--yes[]'
+            )
+            value_options=('--port' '--url-file' '--password' '--scene' '--name')
+            ;;
+        root/live/obs/stop)
+            specs+=(
+                '(--port)--port=[]:port:()'
+                '(--yes)--yes[]'
+                '(--password)--password=[]:password:()'
+            )
+            value_options=('--port' '--password')
+            ;;
+        *) return 1 ;;
+    esac
+
+    if (( help_only )); then
+        specs=()
+        positional=()
+    fi
+    selected=0
+    if (( ${#subcommands} )); then
+        names=("${subcommands[@]%%:*}")
+        index=2
+        while (( index < CURRENT )); do
+            token=${(Q)words[index]}
+            case $token in
+                --) break ;;
+                -*)
+                    if (( ${value_options[(Ie)$token]} )); then
+                        if (( index + 1 < CURRENT )) && [[ $words[index+1] == -* ]]; then
+                            words[index+1]=__native_option_value__
+                        fi
+                        (( index += 2 ))
+                    else
+                        (( ++index ))
+                    fi
+                    ;;
+                *)
+                    if [[ $token == help && $help_only == 0 ]]; then
+                        help_only=1
+                        selected=1
+                    elif (( ${names[(Ie)$token]} )); then
+                        node+=/$token
+                        selected=1
+                    fi
+                    if (( selected )); then
+                        shift $(( index - 1 )) words
+                        (( CURRENT -= index - 1 ))
+                    fi
+                    break
+                    ;;
+            esac
+        done
+        (( selected )) && continue
+        positional=('1:command:->subcommand')
+        (( help_only )) || subcommands+=('help:Show command help')
+    fi
+    state=''
+    _arguments -s -S -C "$specs[@]" "$positional[@]"
+    [[ $state == subcommand ]] && _describe 'command' subcommands
+    return
+done
+

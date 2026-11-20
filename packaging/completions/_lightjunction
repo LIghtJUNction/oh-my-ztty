@@ -1,0 +1,50 @@
+#compdef lightjunction
+# Native lightjunction 0.3.0 grammar from installed --help.
+# File and key-format completion never exports a key or invokes encryption.
+local context state state_descr line action=''
+typeset -A opt_args
+local -a words=("$words[@]")
+local -i CURRENT=$CURRENT index=2
+local -a commands=(
+    'play:Open the interactive 3D avatar'
+    'avatar:Open the 3D ASCII avatar'
+    'keys:Show or export bundled public keys'
+    'encrypt:Encrypt to a bundled public key'
+)
+local -a options=(
+    '(-h --help)'{-h,--help}'[Show help]'
+    '(-V --version)'{-V,--version}'[Show version]'
+    '--lang=[Select interface language]:language:(en zh)'
+    '--no-timing[Hide command timing]'
+    '--frames=[Render a limited number of frames]:frame count:'
+    '--plain[Disable colors]'
+)
+while (( index < CURRENT )); do
+    case $words[index] in
+        --lang|--frames|--input|-o|--output) (( index += 2 )) ;;
+        --) break ;;
+        -*) (( ++index )) ;;
+        *) action=$words[index]; break ;;
+    esac
+done
+case $action in
+    keys)
+        _arguments -s -S "$options[@]" '--json[Write public keys as JSON]' \
+            '1:command:(keys)' '2:key format:(age gpg ssh)'
+        ;;
+    encrypt)
+        _arguments -s -S "$options[@]" \
+            '--input=[Read plaintext, or - for standard input]:input file:_files' \
+            '(-o --output)'{-o+,--output=}'[Write a new ciphertext file, or - for standard output]:output file:_files' \
+            '(-a --armor)'{-a,--armor}'[Write text-armored ciphertext]' \
+            '1:command:(encrypt)' '2:encryption format:(age gpg)'
+        ;;
+    play|avatar)
+        _arguments -s -S "$options[@]" '1:command:(play avatar)'
+        ;;
+    *)
+        _arguments -s -S -C "$options[@]" \
+            '1:command:->command'
+        [[ $state == command ]] && _describe 'lightjunction command' commands
+        ;;
+esac

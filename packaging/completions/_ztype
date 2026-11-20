@@ -1,0 +1,47 @@
+#compdef ztype
+# Grammar: project_z/ztype 0.1.0 src/main.rs. No process or engine is run on Tab.
+
+_ztype() {
+    local context state state_descr line
+    local -a words=("$words[@]") commands
+    local -i CURRENT=$CURRENT
+    typeset -A opt_args
+    commands=(
+        'panel:Open the input panel'
+        'candidates:List input candidates'
+        'convert:Convert input text'
+        'commit:Commit a selected candidate'
+        'windows:List desktop windows'
+        'doctor:Check desktop support'
+        'help:Show help'
+        'version:Show version'
+    )
+    if (( CURRENT == 2 )); then
+        _arguments -C \
+            '(-h --help)-h[Show help]' \
+            '(-h --help)--help[Show help]' \
+            '--version[Show version]' \
+            '1:command:->command'
+        [[ $state == command ]] && _describe command commands
+        return 0
+    fi
+    case $words[2] in
+        panel|candidates|convert|commit|windows|doctor)
+            shift words
+            (( CURRENT-- ))
+            _arguments -C \
+                '--engine[Select input engine]:engine:(pinyin kana unicode literal table)' \
+                '--text[Input text; use - for stdin]:text:->text' \
+                '(--plugin)--dict[Read a UTF-8 TSV dictionary]:dictionary file:_files' \
+                '--window[Target desktop window]:window ID:->text' \
+                '--candidate[Select candidate number]:candidate:(1 2 3 4 5 6 7 8 9)' \
+                '(--dict)--plugin[Load a trusted engine library]:plugin file:_files' \
+                '*:argument:->text'
+            ;;
+        *) state=text ;;
+    esac
+    [[ $state == text ]] && _message 'argument text'
+    return 0
+}
+
+_ztype "$@"

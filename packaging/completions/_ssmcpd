@@ -1,0 +1,61 @@
+#compdef ssmcpd
+# Grammar: installed ssmcpd 0.10.15 and src/server_main.rs.
+# Completion never starts the server or reads its configuration.
+
+_ssmcpd_directories() {
+    local expl
+    _wanted directories expl directory _path_files -/ "$@"
+}
+
+_ssmcpd() {
+    local context state state_descr line
+    local -a words=("$words[@]") commands
+    local -i CURRENT=$CURRENT
+    typeset -A opt_args
+    commands=('serve:Run the MCP server' 'check-runtime:Check the JavaScript runtime')
+    if (( CURRENT == 2 )); then
+        _arguments -C \
+            '(-h --help)-h[Show help]' \
+            '(-h --help)--help[Show help]' \
+            '(-V --version)-V[Show version]' \
+            '(-V --version)--version[Show version]' \
+            '1:command:->command'
+        [[ $state == command ]] && _describe command commands
+        return 0
+    fi
+    local command=$words[2]
+    shift words
+    (( CURRENT-- ))
+    case $command in
+        serve)
+            _arguments -C \
+                '(-h --help)-h[Show help]' \
+                '(-h --help)--help[Show help]' \
+                '--config[Read server configuration]:configuration file:_files' \
+                '--public-url[Set the public HTTPS origin]:URL:->text' \
+                '--listen[Bind to a loopback address and port]:address:->text' \
+                '--socket[Set the local server socket]:socket path:_files' \
+                '--portal-only[Run only the portal]' \
+                '--portal-state-dir[Store portal state]:directory:_ssmcpd_directories' \
+                '--gateway-socket[Use a portal gateway socket]:socket path:_files' \
+                '--client-download-dir[Serve client downloads]:directory:_ssmcpd_directories' \
+                '--client-registry[Use a persistent client registry]:registry file:_files' \
+                '--access-token-ttl[Access token lifetime in seconds]:seconds:->text' \
+                '--refresh-token-idle-ttl[Refresh token idle lifetime]:seconds:->text' \
+                '--refresh-token-max-ttl[Refresh token maximum lifetime]:seconds:->text' \
+                '--client-registration-ttl[Client registration lifetime]:seconds:->text' \
+                '*:argument:->text'
+            ;;
+        check-runtime)
+            _arguments -C \
+                '(-h --help)-h[Show help]' \
+                '(-h --help)--help[Show help]' \
+                '*:argument:->text'
+            ;;
+        *) state=text ;;
+    esac
+    [[ $state == text ]] && _message 'argument text'
+    return 0
+}
+
+_ssmcpd "$@"

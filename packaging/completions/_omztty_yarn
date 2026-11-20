@@ -1,0 +1,94 @@
+#compdef yarn
+autoload -Uz _omztty_directories
+# Yarn Classic 1.22 native grammar. No package registry or script execution.
+local context state state_descr line action=''
+typeset -A opt_args
+local -a words=("$words[@]")
+local -i CURRENT=$CURRENT index=2
+local -a commands=(
+    'add:Add package dependencies' 'remove:Remove dependencies' 'install:Install dependencies'
+    'run:Run a package script' 'exec:Run a local executable' 'node:Run Node with Yarn settings'
+    'init:Create a package' 'import:Import an existing lockfile' 'upgrade:Upgrade dependencies'
+    'upgrade-interactive:Select dependency upgrades' 'outdated:List outdated dependencies'
+    'list:List installed packages' 'info:Inspect package metadata' 'why:Explain a dependency'
+    'cache:Manage cached packages' 'config:Manage Yarn settings' 'global:Manage global packages'
+    'workspace:Run a workspace command' 'workspaces:Inspect or run all workspaces'
+    'pack:Create a package archive' 'publish:Publish a package' 'version:Update package version'
+    'versions:Show package versions' 'link:Link a package' 'unlink:Remove a package link'
+    'licenses:Inspect licenses' 'audit:Audit dependencies' 'check:Check installed dependencies'
+    'autoclean:Clean unused package files' 'bin:Show the executable directory'
+    'create:Run a project generator' 'login:Sign in to the registry' 'logout:Sign out'
+    'owner:Manage package owners' 'tag:Manage package tags' 'team:Manage registry teams'
+    'access:Manage registry access' 'policies:Select the Yarn version'
+    'unplug:Unpack a Plug and Play package' 'help:Show help'
+)
+local -a options=(
+    '(-h --help)'{-h,--help}'[Show help]' '(-v --version)'{-v,--version}'[Show Yarn version]'
+    '--cwd=[Use another working directory]:directory:_omztty_directories'
+    '--cache-folder=[Use a cache directory]:directory:_omztty_directories'
+    '--global-folder=[Use a global package directory]:directory:_omztty_directories'
+    '--link-folder=[Use a link directory]:directory:_omztty_directories'
+    '--modules-folder=[Use a dependency directory]:directory:_omztty_directories'
+    '--preferred-cache-folder=[Prefer a cache directory]:directory:_omztty_directories'
+    '--use-yarnrc=[Read an explicit configuration]:file:_files'
+    '--registry=[Select a registry]:URL:' '--proxy=[Set HTTP proxy]:URL:'
+    '--https-proxy=[Set HTTPS proxy]:URL:' '--otp=[Supply a one-time password]:code:'
+    '--network-timeout=[Set network timeout]:milliseconds:'
+    '--network-concurrency=[Set concurrent requests]:count:'
+    '--mutex=[Select concurrency protection]:mutex:(file network)'
+    '--offline[Use the local cache]' '--prefer-offline[Prefer cached packages]'
+    '--frozen-lockfile[Require an up-to-date lockfile]' '--pure-lockfile[Do not write a lockfile]'
+    '--no-lockfile[Do not read or write a lockfile]' '--ignore-scripts[Skip lifecycle scripts]'
+    '--ignore-engines[Skip engine checks]' '--ignore-optional[Skip optional packages]'
+    '--ignore-platform[Skip platform checks]' '--force[Reinstall dependencies]'
+    '--check-files[Check installed files]' '--flat[Require one version of each package]'
+    '--focus[Install the current workspace]' '--no-bin-links[Do not create executable links]'
+    '--no-default-rc[Skip default configuration]' '--non-interactive[Do not ask questions]'
+    '--no-progress[Hide progress]' '--json[Emit JSON]' '--verbose[Show verbose diagnostics]'
+    '(-s --silent)'{-s,--silent}'[Hide Yarn log output]'
+)
+while (( index < CURRENT )); do
+    case $words[index] in
+        --cwd|--cache-folder|--global-folder|--link-folder|--modules-folder|--preferred-cache-folder|--use-yarnrc|--registry|--proxy|--https-proxy|--otp|--network-timeout|--network-concurrency|--mutex)
+            if (( index + 1 < CURRENT )) && [[ $words[index+1] == -* ]]; then
+                words[index+1]=__yarn_option_value__
+            fi
+            (( index += 2 )) ;;
+        -*) (( ++index )) ;;
+        *) action=$words[index]; break ;;
+    esac
+done
+case $action in
+    add)
+        _arguments "$options[@]" \
+            '(-D --dev)'{-D,--dev}'[Save a development dependency]' \
+            '(-P --peer)'{-P,--peer}'[Save a peer dependency]' \
+            '(-O --optional)'{-O,--optional}'[Save an optional dependency]' \
+            '(-E --exact)'{-E,--exact}'[Save an exact version]' \
+            '(-T --tilde)'{-T,--tilde}'[Save a minor-version range]' \
+            '(-W --ignore-workspace-root-check)'{-W,--ignore-workspace-root-check}'[Allow adding to the workspace root]' \
+            '1:command:(add)' '*:package specification:_guard "[^-]*" "package specification"'
+        ;;
+    cache) _arguments "$options[@]" '--pattern=[Filter cached packages]:pattern:' \
+        '1:command:(cache)' '2:cache operation:(list ls clean dir)' '*:package:' ;;
+    config) _arguments "$options[@]" '1:command:(config)' '2:configuration operation:(get set delete list)' \
+        '3:configuration key:(registry cache-folder ignore-scripts init-license init-version save-prefix)' '4:value:' ;;
+    global) _arguments "$options[@]" '--prefix=[Set executable prefix]:directory:_omztty_directories' \
+        '--latest[Use latest package versions]' '1:command:(global)' \
+        '2:global operation:(add bin dir list ls remove upgrade upgrade-interactive)' '*:package:' ;;
+    workspaces) _arguments "$options[@]" '1:command:(workspaces)' '2:operation:(info run)' '3:script name:' '*:script argument:_files' ;;
+    workspace) _arguments -C "$options[@]" '1:command:(workspace)' '2:workspace name:' \
+        '3:workspace command:->command' '*:command argument:_files'
+        [[ $state == command ]] && _describe 'workspace command' commands ;;
+    policies) _arguments "$options[@]" '1:command:(policies)' '2:operation:(set-version)' '3:version:' ;;
+    licenses) _arguments "$options[@]" '1:command:(licenses)' '2:operation:(list generate-disclaimer)' ;;
+    pack) _arguments "$options[@]" '(-f --filename)'{-f+,--filename=}'[Write package archive]:archive:_files' '1:command:(pack)' ;;
+    init) _arguments "$options[@]" '(-y --yes)'{-y,--yes}'[Use defaults]' \
+        '(-p --private)'{-p,--private}'[Create a private package]' '1:command:(init)' ;;
+    upgrade|upgrade-interactive) _arguments "$options[@]" '--latest[Use latest versions]' \
+        '--scope=[Filter a package scope]:scope:' '--pattern=[Filter package names]:pattern:' \
+        '1:command:(upgrade upgrade-interactive)' '*:package:' ;;
+    run|exec|node) _arguments "$options[@]" '1:command:(run exec node)' '2:script or executable:' '*:program argument:_files' ;;
+    *) _arguments -C "$options[@]" '1:command:->command' '*:package or command argument:'
+        [[ $state == command ]] && _describe 'Yarn command' commands ;;
+esac

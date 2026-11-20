@@ -1,0 +1,360 @@
+#compdef zcalld
+# Grammar: installed zcalld 0.2.5 and its v0.2.5 source tag.
+# Extension grammar follows that tag's compat commit fefb7a4ced278498524658f1953140e94e6c72a0.
+# Never execute the client or read authentication/session configuration on Tab.
+
+_zcalld_directories() {
+    local expl
+    _wanted directories expl directory _path_files -/ "$@"
+}
+
+_zcalld_source() {
+    if [[ $PREFIX == (https://*|github:*|npm:*) ]]; then
+        _message 'repository or package source'
+    else
+        _files
+    fi
+}
+
+_zcalld_protocol() {
+    local -a protocols=(
+        chat openai openai-chat chat-completions responses openai-responses
+        anthropic messages anthropic-messages gemini generate-content gemini-generate-content
+        completions openai-completions interactions gemini-interactions
+    )
+    compadd -- "${protocols[@]}"
+}
+
+_zcalld_target() {
+    local -a targets=(
+        claude codex gemini qwen agy antigravity opencode copilot cursor crush grok
+        pi omp omo zed vscode claude-desktop kiro-cli dsh shared
+    )
+    compadd -- "${targets[@]}"
+}
+
+_zcalld_targets() {
+    compset -P '*,'
+    _zcalld_target
+}
+
+_zcalld_specs() {
+    specs=("${common_specs[@]}")
+    subcommands=()
+    positionals=('*:argument:->text')
+    case $1 in
+        '')
+            specs+=('-V[Show version]' '--version[Show version]')
+            subcommands=(
+                'init:Create gateway configuration' 'serve:Run the gateway'
+                'check:Validate configuration' 'health:Check gateway health'
+                'status:Show gateway status' 'models:List model routes'
+                'env:Print client environment' 'service:Control the service'
+                'providers:Manage providers' 'routes:Manage model routes'
+                'groups:Manage routing groups' 'agents:Manage client adapters'
+                'privacy:Manage privacy filtering' 'plugins:Manage extensions'
+                'accounts:Manage extension accounts' 'profiles:Manage configuration profiles'
+                'library:Manage shared agent resources' 'usage:Inspect gateway usage'
+                'migrate:Import an existing setup' 'update:Check or apply an update'
+                'help:Show help' 'version:Show version'
+            )
+            ;;
+        env) positionals=('1:client protocol:(openai anthropic gemini)') ;;
+        service)
+            subcommands=(
+                'start:Start the service' 'stop:Stop the service'
+                'restart:Restart the service' 'enable:Enable the service'
+                'disable:Disable the service' 'status:Show service status'
+            )
+            ;;
+        'service '*)
+            specs+=('--system[Use the system service on Linux]')
+            ;;
+        providers)
+            subcommands=(
+                'list:List providers' 'add:Add a provider' 'edit:Edit a provider'
+                'remove:Remove a provider' 'test:Test a provider' 'models:List provider models'
+            )
+            ;;
+        'providers add'|'providers edit')
+            specs+=(
+                '--base-url[Set the provider HTTP endpoint]:URL:->text'
+                '--protocol[Set the upstream protocol]:protocol:_zcalld_protocol'
+                '--api-key-env[Use an environment variable for credentials]:variable name:->text'
+                '--api-key-stdin[Read the provider credential from stdin]'
+                '--model[Create a model route]:model ID:->text'
+                '--route[Name the model route]:route name:->text'
+            )
+            positionals=('1:provider name:->text')
+            ;;
+        routes)
+            subcommands=('list:List routes' 'set:Set a route' 'remove:Remove a route')
+            ;;
+        'routes set')
+            specs+=(
+                '--provider[Select the configured provider]:provider name:->text'
+                '--model[Select the upstream model]:model ID:->text'
+            )
+            positionals=('1:route name:->text')
+            ;;
+        groups)
+            subcommands=('list:List groups' 'set:Set a routing group' 'remove:Remove a group')
+            ;;
+        'groups set')
+            specs+=(
+                '--file[Read a group definition]:JSON file:_files'
+                '--mode[Select routing policy]:mode:(smart order rotate usage pace weight drain)'
+                '--members[Set comma-separated route names]:routes:->text'
+            )
+            positionals=('1:group name:->text')
+            ;;
+        agents)
+            subcommands=(
+                'list:List client adapters' 'detect:Detect client adapters'
+                'apply:Configure a client adapter' 'revert:Restore a client adapter'
+                'catalog:Import a community adapter definition'
+            )
+            ;;
+        'agents apply') specs+=('--route[Select a model route]:route name:->text') ;;
+        'agents revert') specs+=('--force[Restore despite local changes]') ;;
+        'agents catalog') specs+=('--file[Read a community adapter]:JSON file:_files') ;;
+        privacy)
+            subcommands=('show:Show privacy settings' 'set:Set privacy mode')
+            ;;
+        'privacy set') positionals=('1:privacy mode:(off secrets personal)') ;;
+        profiles)
+            subcommands=('list:List profiles' 'save:Save a named profile' 'use:Use a named profile')
+            ;;
+        plugins)
+            subcommands=(
+                'list:List extensions' 'inspect:Inspect an extension'
+                'install:Install an extension' 'enable:Enable an extension'
+                'disable:Disable an extension' 'remove:Remove an extension'
+                'update:Update an extension' 'config:Configure an extension'
+                'providers:List extension providers'
+            )
+            ;;
+        'plugins install'|'plugins update')
+            specs+=(
+                '--revision[Use an immutable Git commit]:commit hash:->text'
+                '--sha256[Check the source SHA-256]:SHA-256:->text'
+                '--version[Select an exact package version]:version:->text'
+            )
+            if [[ $1 == 'plugins install' ]]; then
+                specs+=('--name[Set the extension name]:name:->text')
+                positionals=('1:extension source:_zcalld_source')
+            fi
+            ;;
+        'plugins config')
+            specs+=(
+                '(--input-file)--file[Read extension settings]:JSON file:_files'
+                '(--file)--input-file[Read extension settings]:JSON file:_files'
+            )
+            ;;
+        accounts)
+            subcommands=(
+                'list:List accounts' 'import:Import account credentials'
+                'use:Select an account' 'enable:Enable an account'
+                'disable:Disable an account' 'remove:Remove an account'
+                'session:Open an account session'
+            )
+            ;;
+        'accounts import')
+            specs+=(
+                '--provider[Select the extension provider]:provider ID:->text'
+                '(--input-file)--file[Read an account import file]:file:_files'
+                '(--file)--input-file[Read an account import file]:file:_files'
+                '--label[Set the account label]:label:->text'
+                '--account[Set the account ID]:account ID:->text'
+            )
+            ;;
+        'accounts use')
+            specs+=('--local-provider[Update one local provider]:provider name:->text')
+            ;;
+        library)
+            subcommands=(
+                'list:List shared resources' 'targets:List supported clients'
+                'import:Import shared resources' 'export:Export shared resources'
+                'mcp:Manage MCP definitions' 'add-mcp:Add an MCP definition'
+                'instructions:Manage instruction sets' 'skills:Manage skills'
+                'apply:Apply resources to a client' 'revert:Restore a client'
+            )
+            ;;
+        'library import'|'library export')
+            specs+=(
+                '--file[Read or write the resource manifest]:JSON file:_files'
+                '--assets[Read or write resource assets]:directory:_zcalld_directories'
+            )
+            ;;
+        'library mcp')
+            subcommands=(
+                'list:List MCP definitions' 'show:Show an MCP definition'
+                'set:Set an MCP definition' 'add:Add an MCP definition'
+                'update:Update an MCP definition' 'remove:Remove an MCP definition'
+                'enable:Enable an MCP definition' 'disable:Disable an MCP definition'
+                'assign:Assign clients' 'apply:Apply MCP definitions' 'revert:Restore MCP settings'
+            )
+            ;;
+        'library mcp set'|'library mcp add'|'library mcp update')
+            specs+=(
+                '--file[Read the MCP definition]:JSON file:_files'
+                '--agents[Assign comma-separated client IDs]:clients:_zcalld_targets'
+            )
+            ;;
+        'library mcp show') specs+=('--file[Export the definition]:JSON file:_files') ;;
+        'library mcp assign') specs+=('--agents[Assign comma-separated client IDs]:clients:_zcalld_targets') ;;
+        'library instructions')
+            subcommands=(
+                'list:List instruction sets' 'show:Show instructions'
+                'create:Create instructions' 'set:Set instructions' 'link:Link an instruction file'
+                'rename:Rename an instruction set' 'use:Activate an instruction set'
+                'remove:Remove instructions' 'extra:Set client-specific instructions'
+                'assign:Assign clients' 'enable:Enable a client' 'disable:Disable a client'
+                'apply:Apply instructions' 'revert:Restore instructions'
+            )
+            ;;
+        'library instructions set'|'library instructions create'|'library instructions link')
+            specs+=(
+                '--file[Read an instruction file]:file:_files'
+                '--name[Set the display name]:name:->text'
+                '--agents[Assign comma-separated client IDs]:clients:_zcalld_targets'
+            )
+            ;;
+        'library instructions rename') specs+=('--name[Set the display name]:name:->text') ;;
+        'library instructions assign') specs+=('--agents[Assign comma-separated client IDs]:clients:_zcalld_targets') ;;
+        'library instructions show'|'library instructions enable'|'library instructions disable')
+            specs+=('--agent[Select a client]:client:_zcalld_target')
+            ;;
+        'library instructions extra')
+            specs+=(
+                '--agent[Select a client]:client:_zcalld_target'
+                '--file[Read client-specific instructions]:file:_files'
+            )
+            ;;
+        'library skills')
+            subcommands=(
+                'list:List skills' 'show:Show a skill' 'create:Create a skill'
+                'install:Install a local skill' 'update:Update a local skill'
+                'read:Read a skill resource' 'write:Write a skill resource'
+                'remove:Remove a skill' 'enable:Enable a skill' 'disable:Disable a skill'
+                'assign:Assign clients' 'apply:Apply skills' 'revert:Restore skills'
+            )
+            ;;
+        'library skills install'|'library skills update')
+            specs+=(
+                '--dir[Read a local skill tree]:directory:_zcalld_directories'
+                '--agents[Assign comma-separated client IDs]:clients:_zcalld_targets'
+            )
+            ;;
+        'library skills create')
+            specs+=(
+                '--file[Read the SKILL.md source]:file:_files'
+                '--agents[Assign comma-separated client IDs]:clients:_zcalld_targets'
+            )
+            ;;
+        'library skills read'|'library skills write')
+            specs+=('--file[Select a path inside the managed skill]:relative resource path:->text')
+            [[ $1 == 'library skills write' ]] &&
+                specs+=('--input[Read the replacement content]:input file:_files')
+            ;;
+        'library skills assign') specs+=('--agents[Assign comma-separated client IDs]:clients:_zcalld_targets') ;;
+        'library apply'|'library revert'|'library '*apply|'library '*revert)
+            specs+=(
+                '--agent[Select a client]:client:_zcalld_target'
+                '--dry-run[Show planned changes]'
+            )
+            [[ $1 == 'library apply' || $1 == 'library revert' ]] &&
+                specs+=('--kind[Select resource kinds]:kind:(all mcp skills instructions)')
+            [[ $1 == *apply ]] && specs+=('--adopt-existing[Adopt matching existing resources]')
+            ;;
+        usage) subcommands=('summary:Summarize usage' 'export:Export usage records') ;;
+        'usage export') specs+=('--file[Write usage records]:output file:_files') ;;
+        migrate)
+            subcommands=('magpie:Import a Magpie setup' 'status:Show migration status' 'verify:Verify migration')
+            ;;
+        'migrate magpie')
+            specs+=(
+                '--source[Read the Magpie configuration]:directory:_zcalld_directories'
+                '--catalog[Read the model catalog]:JSON file:_files'
+                '--builtin-catalog[Read builtin provider definitions]:JSON file:_files'
+                '--model-root[Read cached models]:directory:_zcalld_directories'
+                '--oauth-clients[Read OAuth client definitions]:JSON file:_files'
+                '--port[Set the gateway port]:port:->text'
+                '--apply[Apply the migration plan]'
+                '--skip-extensions[Skip extension migration]'
+            )
+            ;;
+        update) subcommands=('check:Check published updates' 'apply:Apply a published update') ;;
+
+    esac
+}
+
+_zcalld() {
+    local context state state_descr line command_path='' token flag tail item candidate
+    local -a words=("$words[@]") specs subcommands positionals
+    local -a common_specs=(
+        '(-h --help)-h[Show help]'
+        '(-h --help)--help[Show help]'
+        '(-c --config)-c[Read gateway configuration]:configuration file:_files'
+        '(-c --config)--config[Read gateway configuration]:configuration file:_files'
+        '--json[Print JSON output]'
+    )
+    local -A aliases=(
+        'library add-mcp' 'library mcp set'
+    )
+    typeset -A opt_args
+    local -i CURRENT=$CURRENT index consumed descended
+    while true; do
+        _zcalld_specs "$command_path"
+        index=2
+        descended=0
+        while (( index < CURRENT )); do
+            token=$words[index]
+            [[ $token == -- ]] && break
+            if [[ $token == -* ]]; then
+                consumed=1
+                for item in "${specs[@]}"; do
+                    flag=${item%%\[*}
+                    flag=${flag##*\)}
+                    flag=${flag#\*}
+                    flag=${flag%[+=]}
+                    [[ $token == "$flag" ]] || continue
+                    tail=${item#*\]}
+                    if [[ $tail == ::* ]]; then
+                        if (( index + 1 < CURRENT )) && [[ $words[index+1] != -* ]]; then consumed=2; fi
+                    elif [[ $tail == :* ]]; then
+                        consumed=2
+                        if (( index + 1 < CURRENT )) && [[ $words[index+1] == -* ]]; then
+                            words[index+1]=__zcalld_option_value__
+                        fi
+                    fi
+                    break
+                done
+                (( index += consumed ))
+                continue
+            fi
+            for item in "${subcommands[@]}"; do
+                candidate=${item%%:*}
+                [[ $token == "$candidate" ]] || continue
+                command_path="${command_path:+$command_path }$token"
+                command_path=${aliases[$command_path]-$command_path}
+                shift $(( index - 1 )) words
+                (( CURRENT -= index - 1 ))
+                descended=1
+                break
+            done
+            break
+        done
+        (( descended )) || break
+    done
+    if (( ${#subcommands} )); then
+        positionals=('1:command:->command' '*:argument:->text')
+    fi
+    _arguments -s -S -C "${specs[@]}" "${positionals[@]}"
+    case $state in
+        command) _describe 'command' subcommands || _message 'command text' ;;
+        text) _message 'argument text' ;;
+    esac
+}
+
+_zcalld "$@"

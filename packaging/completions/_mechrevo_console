@@ -1,0 +1,70 @@
+#compdef mechrevo-console
+
+# Public mechrevo-console 0.1.0 grammar, checked against console CLI 4599a38.
+# Do not probe hardware, enumerate OEM controls or invoke privilege helpers on Tab.
+local context state state_descr line curcontext="$curcontext"
+local -a words=("$words[@]") options arguments commands
+local -i CURRENT=$CURRENT index
+local route=''
+typeset -A opt_args
+commands=(status capabilities models profile brightness oem export)
+if (( CURRENT > 2 )) && (( ${commands[(Ie)$words[2]]} )); then
+    route=$words[2]
+    shift words
+    (( --CURRENT ))
+    if [[ $route == oem ]] && (( CURRENT > 2 )) && [[ $words[2] == (list|set) ]]; then
+        route+="/$words[2]"
+        shift words
+        (( --CURRENT ))
+    fi
+fi
+case $route in
+    '')
+        options=('(-h --help -V --version)'{-h,--help}'[Show help]'
+            '(-V --version -h --help)'{-V,--version}'[Show version]')
+        arguments=('1:command:->command') ;;
+    status) options=('--json[Emit JSON]') ;;
+    models) arguments=('1:model search query:->text') ;;
+    profile)
+        options=('--dry-run[Preview the profile change]')
+        arguments=('1:power profile:(balanced performance power-saver)') ;;
+    brightness)
+        options=('--device[Enumerated display device ID]:device ID:' '--dry-run[Preview a brightness change]')
+        arguments=('1:brightness percent from 0 through 100:->text') ;;
+    oem)
+        commands=(list set)
+        arguments=('1:OEM action:->command') ;;
+    oem/set)
+        options=('--dry-run[Preview the OEM change]')
+        arguments=('1:enumerated control ID:->text' '2:value accepted by that control:->text') ;;
+    export) options=('--output[New evidence JSON path]:file:_files') ;;
+esac
+
+# _arguments treats a prior literal -- as a separator even when it is an
+# option value. Preserve the real parser's required-value boundaries.
+local -a value_options
+local specification option_name
+for specification in "$options[@]"; do
+    if [[ $specification == *']:'* && $specification != *']::'* ]]; then
+        option_name=${specification%%\[*}
+        option_name=${option_name##*\)}
+        value_options+=("${option_name#\*}")
+    fi
+done
+index=2
+while (( index < CURRENT )); do
+    [[ $words[index] == -- ]] && break
+    if (( ${value_options[(Ie)$words[index]]} )); then
+        if (( index + 1 < CURRENT )) && [[ $words[index+1] == -* ]]; then
+            words[index+1]=__omztty_option_value__
+        fi
+        (( index += 2 ))
+    else
+        (( ++index ))
+    fi
+done
+_arguments -C -S "$options[@]" "$arguments[@]"
+case $state in
+    command) _describe 'command' commands ;;
+    text) _message "$state_descr" ;;
+esac

@@ -1,0 +1,84 @@
+#compdef cmake
+autoload -Uz _omztty_directories
+# Native CMake 3.31 configure, build, install and command-mode completion.
+local context state state_descr line mode
+typeset -A opt_args
+local -a common=(
+    '(-h --help)'{-h,--help}'[Show help]' '--version[Show CMake version]'
+)
+local -a configurations=(Debug Release RelWithDebInfo MinSizeRel)
+mode=$words[2]
+case $mode in
+    --build)
+        _arguments "$common[@]" \
+            '--build[Build a generated tree]:build directory:_omztty_directories' \
+            '--preset=[Select a build preset]:preset:' \
+            '--list-presets[List build presets]' \
+            '(-j --parallel)'{-j+,--parallel=}'[Set parallel build jobs]::jobs:' \
+            '*'{-t+,--target=}'[Build a target]:target:(all clean install test)' \
+            '--config=[Select a configuration]:configuration:($configurations)' \
+            '--clean-first[Clean before building]' \
+            '--resolve-package-references=[Resolve package references]:mode:(on only off)' \
+            '(-v --verbose)'{-v,--verbose}'[Show underlying build commands]' \
+            '*:native build argument:'
+        ;;
+    --install)
+        _arguments "$common[@]" \
+            '--install[Install a generated tree]:build directory:_omztty_directories' \
+            '--prefix=[Set installation prefix]:directory:_omztty_directories' \
+            '--component=[Select an install component]:component:' \
+            '--config=[Select a configuration]:configuration:($configurations)' \
+            '--default-directory-permissions=[Set directory permissions]:permissions:' \
+            '(-j --parallel)'{-j+,--parallel=}'[Set parallel install jobs]:jobs:' \
+            '--strip[Strip installed files]' \
+            '(-v --verbose)'{-v,--verbose}'[Show installation details]'
+        ;;
+    -E)
+        local -a commands=(cat chdir copy copy_directory copy_directory_if_different
+            copy_if_different create_hardlink create_symlink echo echo_append env false
+            make_directory rename rm tar time touch touch_nocreate true)
+        if (( CURRENT == 3 )); then _describe 'CMake command' commands; return; fi
+        case $words[3] in
+            copy_directory|copy_directory_if_different|make_directory) _omztty_directories ;;
+            cat|copy|copy_if_different|create_hardlink|create_symlink|rename|rm|tar|touch|touch_nocreate) _files ;;
+            chdir)
+                if (( CURRENT == 4 )); then _omztty_directories
+                elif (( CURRENT == 5 )); then _command_names
+                else _files
+                fi ;;
+            env|time) _command_names ;;
+            *) _message 'command argument' ;;
+        esac
+        ;;
+    --workflow)
+        _arguments '--workflow[Run a workflow preset]' '--preset=[Choose a workflow preset]:preset:' \
+            '--list-presets[List workflow presets]' '--fresh[Configure from a fresh tree]'
+        ;;
+    *)
+        _arguments -s -S "$common[@]" \
+            '-S+[Select source directory]:source directory:_omztty_directories' \
+            '-B+[Select build directory]:build directory:_omztty_directories' \
+            '-C+[Preload a CMake cache script]:CMake script:_files -g "*.cmake(-.)"' \
+            '*-D+[Set a cache entry]:NAME=value:' '-U+[Remove matching cache entries]:pattern:' \
+            '-G+[Select a generator]:generator:("Unix Makefiles" Ninja "Ninja Multi-Config")' \
+            '-T+[Select a toolset]:toolset:' '-A+[Select a platform]:platform:' \
+            '--toolchain=[Read a toolchain file]:file:_files' \
+            '--install-prefix=[Set install directory]:directory:_omztty_directories' \
+            '--preset=[Select a configure preset]:preset:' '--list-presets[List configure presets]' \
+            '--fresh[Remove the old cache before configuring]' \
+            '--build[Build a generated tree]:build directory:_omztty_directories' \
+            '--install[Install a generated tree]:build directory:_omztty_directories' \
+            '--open[Open a generated project]:build directory:_omztty_directories' \
+            '-E[Run a portable CMake command]' '-P+[Run a CMake script]:script:_files -g "*.cmake(-.)"' \
+            '-N[Inspect the cache without configuring]' \
+            '--log-level=[Set log verbosity]:level:(ERROR WARNING NOTICE STATUS VERBOSE DEBUG TRACE)' \
+            '--log-context[Include message context]' '--debug-output[Show debug messages]' \
+            '--debug-find[Show dependency discovery]' '--trace[Trace CMake commands]' \
+            '--trace-expand[Trace expanded commands]' \
+            '--trace-format=[Select trace format]:format:(human json-v1)' \
+            '*--trace-source=[Trace a CMake file]:file:_files' \
+            '--trace-redirect=[Write trace output]:file:_files' \
+            '--graphviz=[Write a dependency graph]:file:_files' \
+            '*:source or build directory:_omztty_directories'
+        ;;
+esac

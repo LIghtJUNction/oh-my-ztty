@@ -62,6 +62,25 @@ Personal `_command` files in `${XDG_CONFIG_HOME:-$HOME/.config}/oh-my-ztty/compl
 
 The per-user installer prepares an audited completion cache. The default lazy mode loads it on the first Tab; adding or changing completion inputs triggers normal revalidation. Use `ZSHARD_COMPLETION=eager` in `options.zsh` to initialize at startup, or `off` to disable completion.
 
+### AI, development and author tools
+
+The suite also ships these native definitions. Completion definitions do not install the external applications.
+
+| Family | Commands |
+| --- | --- |
+| AI clients | `codex`, `claude`, `gemini`, `opencode`, `pi`, `amp` |
+| Developer tools | `go`, `npx`, `yarn`, `rustc`, `rustup`, `node`, `cmake` |
+| Project Z services and input | `zcalld`, `ssmcpd`, `ztype`, `zuse` |
+| Project Z desktop and game tools | `zmcl`, `onim`, `lmm`, `mechrevo-console` |
+| Other author tools | `wgt`, `douyin`, `lightjunction`, `coolapk`, `binance-cli` |
+
+Try `codex exec --sandbox work<Tab>`, `claude mcp add demo --transport ht<Tab>`, `go mod ti<Tab>`, `rustc -C panic=ab<Tab>`, or `zcalld library mcp apply --agent gem<Tab>`. Prompt text and remote identifiers stay free text. Options that require directories exclude ordinary files, including when paths contain spaces or non-ASCII characters.
+
+Git, uv, Cargo, npm, pnpm, Bun, Python/pip, container tools and ordinary shell utilities retain their installed system completion definitions. Coverage depends on the corresponding completion package being installed. Rust uses the commands `rustc`, `cargo` and `rustup`; there is no generic `rust` command to register. Distribution definitions and commands delegated after `--` may perform their own local discovery.
+
+The bundled definitions read local paths and static command grammar. They do not query AI accounts, relays, cloud APIs, game services or hardware for candidates. Personal definitions still take priority. Version targets and extension instructions are in the [completion reference](completions.md).
+
+
 ## Neovim
 
 Neovim 0.11 or newer is required for this profile. Run `nvim` for the Ink welcome page, or open a file normally. The editor has a native status line, diagnostics, a project picker and a searchable shortcut panel. It needs no plugin bootstrap, download or patched icon font.

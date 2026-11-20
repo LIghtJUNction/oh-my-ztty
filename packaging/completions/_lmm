@@ -1,0 +1,121 @@
+#compdef lmm
+
+# lmm-cli 0.1.0 source grammar: apps/cli/src/{main,applications_cli,catalog}.rs,
+# lmm-api-source c21b8b6. Catalog IDs do not imply a qualified write adapter.
+# Completion never invokes lmm, reads account state or queries the API.
+autoload -Uz _omztty_directories
+_lmm_software() {
+    local -a targets=(
+        'astrbot:AstrBot' 'cc-switch:CC Switch' 'claude-code:Claude Code CLI'
+        'codex:OpenAI Codex CLI' 'gemini-cli:Gemini CLI' 'pi:Pi coding agent'
+    )
+    _describe 'software' targets
+}
+local context state state_descr line curcontext="$curcontext"
+local -a words=("$words[@]") options arguments commands
+local -i CURRENT=$CURRENT index=2
+local route=''
+typeset -A opt_args
+commands=(presets catalog setup authorize receipt install login logout models balance status sync update doctor restore disconnect uninstall run help)
+while (( index < CURRENT )); do
+    case $words[index] in
+        --) break ;;
+        -*) (( ++index )) ;;
+        *)
+            if (( ${commands[(Ie)$words[index]]} )); then
+                route=$words[index]
+                shift $(( index - 1 )) words
+                (( CURRENT -= index - 1 ))
+            fi
+            break ;;
+    esac
+done
+options=(
+    '(-h --help)'{-h,--help}'[Show help]'
+    '--json[Emit structured JSON]'
+    '--non-interactive[Do not prompt]'
+)
+case $route in
+    '')
+        options+=('(-V --version)'{-V,--version}'[Show version]')
+        arguments=('1:command:->command') ;;
+    help)
+        options=()
+        arguments=('1:command:->command') ;;
+    presets|catalog) arguments=('1:search query:->text') ;;
+    login|logout|models|balance)
+        options+=('--issuer[Trusted HTTPS issuer]:HTTPS origin:')
+        if [[ $route == login ]]; then
+            options+=('--no-browser[Print the login link]' '--timeout[Callback wait limit]:seconds:')
+        fi ;;
+    authorize)
+        options+=('--installation-id[Independent application instance]:installation ID:'
+            '--issuer[Trusted HTTPS issuer]:HTTPS origin:' '--display-name[Application label]:name:'
+            '--no-browser[Print the authorization link]' '--timeout[Callback wait limit]:seconds:')
+        arguments=('1:software:(cc-switch)') ;;
+    receipt)
+        options+=('--instance[Explicit application data root]:directory:_omztty_directories'
+            '--installation-id[Independent application instance]:installation ID:'
+            '--issuer[Trusted HTTPS issuer]:HTTPS origin:' '--change[Immutable change ID]:change ID:')
+        arguments=('1:software:(cc-switch)') ;;
+    status|doctor|setup|install|sync|update|restore|uninstall|disconnect|run)
+        options+=('(--all)--instance[Explicit application data root]:directory:_omztty_directories'
+            '(--all)--managed-root[Managed program directory]:directory:_omztty_directories'
+            '--node[Explicit Node executable]:file:_files'
+            '--pi-package[Installed Pi package root]:directory:_omztty_directories'
+            '--agent-dir[Explicit Pi agent directory]:directory:_omztty_directories')
+        arguments=('(--all)1:software:_lmm_software')
+        case $route in
+            doctor)
+                options+=('--fix[Request an adapter-supported repair]' '--report[Shareable diagnostic summary]') ;;
+            setup|install|sync|update|restore|uninstall|disconnect|run)
+                options+=('--installation-id[Independent application instance]:installation ID:'
+                    '--issuer[Trusted HTTPS issuer]:HTTPS origin:'
+                    '--dry-run[Preview the operation]' '--yes[Confirm the displayed scope]')
+                case $route in
+                    setup|install|sync|update|restore|uninstall)
+                        options+=('--configuration[Restore native provider configuration]'
+                            '(1 --instance --managed-root)--all[Select installed supported targets]'
+                            '--plan-id[Confirm an exact preview]:plan ID:'
+                            '--change[Change ID to restore]:change ID:'
+                            '(--dry-run)--cancel-pending[Cancel a pending operation]')
+                        if [[ $route == setup ]]; then
+                            options+=('--model-id[Exact catalog model ID]:model ID:'
+                                '--display-name[Provider display name]:name:'
+                                '--no-browser[Print the authorization link]'
+                                '--timeout[Callback wait limit]:seconds:'
+                                '(--activate)--add-only[Keep the current provider]'
+                                '(--add-only)--activate[Request switching to LMM]')
+                        fi ;;
+                esac ;;
+        esac ;;
+esac
+
+# _arguments treats a prior literal -- as a separator even when it is an
+# option value. Preserve the real parser's required-value boundaries.
+local -a value_options
+local specification option_name
+for specification in "$options[@]"; do
+    if [[ $specification == *']:'* && $specification != *']::'* ]]; then
+        option_name=${specification%%\[*}
+        option_name=${option_name##*\)}
+        value_options+=("${option_name#\*}")
+    fi
+done
+index=2
+while (( index < CURRENT )); do
+    [[ $words[index] == -- ]] && break
+    if (( ${value_options[(Ie)$words[index]]} )); then
+        if (( index + 1 < CURRENT )) && [[ $words[index+1] == -* ]]; then
+            words[index+1]=__omztty_option_value__
+        fi
+        (( index += 2 ))
+    else
+        (( ++index ))
+    fi
+done
+_arguments -C -S "$options[@]" "$arguments[@]"
+case $state in
+    command) _describe 'command' commands ;;
+    text) _message "$state_descr" ;;
+esac

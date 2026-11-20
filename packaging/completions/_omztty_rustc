@@ -1,0 +1,63 @@
+#compdef rustc
+autoload -Uz _omztty_directories
+# Static rustc 1.100 option grammar; completion never invokes the compiler.
+local context state state_descr line key
+typeset -A opt_args
+_arguments -s -S -C \
+    '(-h --help)'{-h,--help}'[Show compiler help]' \
+    '(-V --version)'{-V,--version}'[Show compiler version]' \
+    '(-v --verbose)'{-v,--verbose}'[Show verbose output]' \
+    '*--cfg=[Configure a compilation condition]:condition:' \
+    '*--check-cfg=[Declare expected conditions]:condition specification:' \
+    '*-L+[Add a library search directory]:kind=directory:->library' \
+    '*-l+[Link a native library]:library specification:' \
+    '--crate-type=[Select emitted crate types]:crate type:_values -s , "crate type" bin lib rlib dylib cdylib staticlib proc-macro' \
+    '--crate-name=[Name the compiled crate]:crate name:' \
+    '--edition=[Select the Rust edition]:edition:(2015 2018 2021 2024 future)' \
+    '--emit=[Select compiler outputs]:output:->emit' \
+    '--print=[Print compiler information]:information:(all-target-specs-json calling-conventions cfg check-cfg code-models crate-name deployment-target file-names host-tuple link-args native-static-libs relocation-models split-debuginfo supported-crate-types sysroot target-cpus target-features target-libdir target-list target-spec-json tls-models)' \
+    '-g[Include debug information]' '-O[Optimize the program]' \
+    '-o+[Write output to a file]:output file:_files' \
+    '--out-dir=[Write outputs in a directory]:output directory:_omztty_directories' \
+    '--explain=[Explain a compiler diagnostic]:diagnostic code:' \
+    '--test[Build a test harness]' '--target=[Select a target triple or JSON file]:target:_files -g "*.json(-.)"' \
+    '*'{-A+,--allow=}'[Allow a lint]:lint:' \
+    '*'{-W+,--warn=}'[Warn for a lint]:lint:' \
+    '*--force-warn=[Always warn for a lint]:lint:' \
+    '*'{-D+,--deny=}'[Deny a lint]:lint:' \
+    '*'{-F+,--forbid=}'[Forbid a lint]:lint:' \
+    '--cap-lints=[Limit lint severity]:lint level:(allow warn deny forbid)' \
+    '*'{-C+,--codegen=}'[Set a code generation option]:option:->codegen' \
+    '1:Rust source:_files -g "*.rs(-.)"'
+case $state in
+    library)
+        compset -P '*='
+        _omztty_directories
+        ;;
+    emit)
+        if compset -P '*='; then _files
+        else _values -s , 'output type' asm llvm-bc dep-info link llvm-ir metadata mir obj thin-link-bitcode
+        fi
+        ;;
+    codegen)
+        if [[ $PREFIX == *=* ]]; then
+            key=${PREFIX%%=*}
+            compset -P '*='
+            case $key in
+                opt-level) _values 'optimization level' 0 1 2 3 s z ;;
+                debuginfo) _values 'debug information' 0 1 2 none limited full line-tables-only line-directives-only ;;
+                panic) _values 'panic strategy' abort unwind ;;
+                lto) _values 'link time optimization' off thin fat ;;
+                strip) _values 'stripping' none debuginfo symbols ;;
+                debug-assertions|overflow-checks|embed-bitcode) _values 'enabled' yes no ;;
+                incremental) _omztty_directories ;;
+                linker) _command_names ;;
+                *) _message 'code generation value' ;;
+            esac
+        else
+            _values -S '=' 'code generation option' opt-level debuginfo panic lto strip \
+                incremental linker link-arg codegen-units target-cpu embed-bitcode \
+                debug-assertions overflow-checks
+        fi
+        ;;
+esac

@@ -1,0 +1,157 @@
+#compdef zmcl
+
+# zmcl 0.1.0 public CLI; grammar checked against src/main.rs at 35eb8a3.
+# No game, Java, account, instance or network lookup runs during completion.
+autoload -Uz _omztty_directories
+_zmcl_commands() {
+    case $1 in
+        '') commands=(gui versions instance install launch auth account mods pack resources storage world horizon backup server java doctor) ;;
+        instance) commands=(list create clone trash trash-list restore show set) ;;
+        auth) commands=(login refresh logout) ;;
+        account) commands=(list) ;;
+        mods) commands=(search add list enable disable update remove recover) ;;
+        pack) commands=(search install import export) ;;
+        resources) commands=(search add list update remove enable disable history restore recover) ;;
+        storage) commands=(stats) ;;
+        world) commands=(list info import export clone path) ;;
+        horizon) commands=(versions install list launch) ;;
+        backup) commands=(create list restore) ;;
+        server) commands=(create install start stop status list ping) ;;
+        java) commands=(list install) ;;
+        *) commands=() ;;
+    esac
+}
+local context state state_descr line curcontext="$curcontext"
+local -a words=("$words[@]") commands options arguments
+local -i CURRENT=$CURRENT index found
+local route='' candidate
+typeset -A opt_args
+while true; do
+    _zmcl_commands "$route"
+    (( $#commands )) || break
+    index=2 found=0
+    while (( index < CURRENT )); do
+        case $words[index] in
+            --root|--version|--loader|--loader-version|--pack-version|--name|--memory|--java|--offline|--account|--client-id|--jobs|--smoke-seconds)
+                (( index += 2 )) ;;
+            --) break ;;
+            --*=*|-*) (( ++index )) ;;
+            *)
+                candidate=$words[index]
+                if (( ${commands[(Ie)$candidate]} )); then
+                    [[ -n $route ]] && route+="/"
+                    route+=$candidate
+                    shift $(( index - 1 )) words
+                    (( CURRENT -= index - 1 ))
+                    found=1
+                fi
+                break ;;
+        esac
+    done
+    (( found )) || break
+done
+options=(
+    '(-h --help)'{-h,--help}'[Show help]'
+    '--root[Launcher data directory]:directory:_omztty_directories'
+    '--json[Emit JSON]'
+)
+if (( $#commands )); then arguments=('1:command:->command'); fi
+case $route in
+    '') options+=('--version[Launcher version alone; game version with a command]::Minecraft version:') ;;
+    gui) options+=('--exit-after-launch[Exit after launching the game]') ;;
+    instance/create|instance/set)
+        options+=('--version[Minecraft version]:version:'
+            '--loader[Mod loader]:loader:(vanilla fabric quilt forge neoforge)'
+            '--loader-version[Loader version]:version:')
+        arguments=('1:instance ID:->text')
+        if [[ $route == instance/set ]]; then
+            options+=('--memory[Game memory in MiB]:MiB:' '--java[Java executable]:file:_files'
+                '--name[Instance display name]:name:')
+        fi ;;
+    instance/clone) arguments=('1:source instance ID:->text' '2:new instance ID:->text') ;;
+    instance/trash|instance/show) arguments=('1:instance ID:->text') ;;
+    instance/restore) arguments=('1:trash ID:->text' '2:new instance ID:->text') ;;
+    install)
+        options+=('--jobs[Concurrent downloads]:count:')
+        arguments=('1:instance ID:->text') ;;
+    launch)
+        options+=('--account[Microsoft account UUID]:UUID:' '--offline[Offline player name]:name:'
+            '--dry-run[Preview launch]' '--wait[Wait for the game]')
+        arguments=('1:instance ID:->text') ;;
+    auth/login) options+=('--client-id[Registered Microsoft application]:client ID:') ;;
+    auth/refresh|auth/logout) arguments=('1:account UUID:->text') ;;
+    mods/search)
+        options+=('--version[Minecraft version]:version:' '--loader[Mod loader]:loader:(vanilla fabric quilt forge neoforge)')
+        arguments=('1:search query:->text') ;;
+    mods/add|mods/enable|mods/disable|mods/update|mods/remove)
+        arguments=('1:instance ID:->text' '2:project ID:->text') ;;
+    mods/list|mods/recover) arguments=('1:instance ID:->text') ;;
+    pack/search)
+        options+=('--version[Minecraft version]:version:')
+        arguments=('1:search query:->text') ;;
+    pack/install)
+        options+=('--pack-version[Modrinth pack version ID]:version ID:' '--jobs[Concurrent downloads]:count:')
+        arguments=('1:project ID:->text' '2:instance ID:->text') ;;
+    pack/import) arguments=('1:modpack archive:_files' '2:instance ID:->text') ;;
+    pack/export) arguments=('1:instance ID:->text' '2:output archive:_files') ;;
+    resources/search)
+        options+=('--version[Minecraft version]:version:')
+        arguments=('1:resource type:(resourcepack shader)' '2:search query:->text') ;;
+    resources/add|resources/update|resources/remove|resources/enable|resources/disable)
+        arguments=('1:instance ID:->text' '2:resource type:(resourcepack shader)' '3:project ID:->text') ;;
+    resources/list)
+        arguments=('1:instance ID:->text' '2:resource type:(resourcepack shader)') ;;
+    resources/history|resources/recover) arguments=('1:instance ID:->text') ;;
+    resources/restore) arguments=('1:instance ID:->text' '2:revision:->text') ;;
+    world/list) arguments=('1:instance ID:->text') ;;
+    world/info|world/path) arguments=('1:instance ID:->text' '2:world name:->text') ;;
+    world/import)
+        arguments=('1:instance ID:->text' '2:world source:_files' '3:world name:->text') ;;
+    world/export)
+        arguments=('1:instance ID:->text' '2:world name:->text' '3:output ZIP:_files') ;;
+    world/clone)
+        arguments=('1:source instance ID:->text' '2:world name:->text'
+            '3:target instance ID:->text' '4:new world name:->text') ;;
+    horizon/install) arguments=('1:release tag:->text') ;;
+    horizon/launch)
+        options+=('--dry-run[Preview launch]' '--wait[Wait for the game]')
+        arguments=('1:installation ID:->text') ;;
+    backup/create) arguments=('1:instance ID:->text' '2:backup label:->text') ;;
+    backup/list) arguments=('1:instance ID:->text') ;;
+    backup/restore) arguments=('1:instance ID:->text' '2:backup ID:->text') ;;
+    server/create)
+        options+=('--version[Minecraft version]:version:')
+        arguments=('1:server ID:->text') ;;
+    server/install|server/start|server/stop|server/status) arguments=('1:server ID:->text') ;;
+    server/ping) arguments=('1:host:->text' '2:port:->text') ;;
+    java/install) arguments=('1:Java major version:->text') ;;
+esac
+
+# _arguments treats a prior literal -- as a separator even when it is an
+# option value. Preserve the real parser's required-value boundaries.
+local -a value_options
+local specification option_name
+for specification in "$options[@]"; do
+    if [[ $specification == *']:'* && $specification != *']::'* ]]; then
+        option_name=${specification%%\[*}
+        option_name=${option_name##*\)}
+        value_options+=("${option_name#\*}")
+    fi
+done
+index=2
+while (( index < CURRENT )); do
+    [[ $words[index] == -- ]] && break
+    if (( ${value_options[(Ie)$words[index]]} )); then
+        if (( index + 1 < CURRENT )) && [[ $words[index+1] == -* ]]; then
+            words[index+1]=__omztty_option_value__
+        fi
+        (( index += 2 ))
+    else
+        (( ++index ))
+    fi
+done
+_arguments -C -S "$options[@]" "$arguments[@]"
+case $state in
+    command) _describe 'command' commands ;;
+    text) _message "$state_descr" ;;
+esac

@@ -1,0 +1,229 @@
+#compdef codex
+# Native completion verified against codex 0.170.0 --help and subcommand help.
+# Never execute the client or read authentication/session configuration on Tab.
+
+_codex_directories() {
+    local expl
+    _wanted directories expl directory _path_files -/ "$@"
+}
+
+_codex_source() {
+    if [[ $PREFIX == (https://*|http://*|git@*) ]]; then
+        _message 'repository URL'
+    else
+        _files
+    fi
+}
+
+_codex_specs() {
+    specs=("${common_specs[@]}")
+    subcommands=()
+    positionals=('*:prompt or argument:->text')
+    case $1 in
+        ''|exec|resume|fork)
+            specs+=(
+                '--strict-config[Reject unknown configuration keys]'
+                '*-i[Attach an image]:image file:_files'
+                '*--image=[Attach an image]:image file:_files'
+                '-m[Select a model]:model:->text' '--model=[Select a model]:model:->text'
+                '--oss[Use an open-source provider]'
+                '--local-provider=[Select the local provider]:provider:(lmstudio ollama)'
+                '-p[Select a configuration profile]:profile:->text'
+                '--profile=[Select a configuration profile]:profile:->text'
+                '-s[Select the sandbox policy]:policy:(read-only workspace-write danger-full-access)'
+                '--sandbox=[Select the sandbox policy]:policy:(read-only workspace-write danger-full-access)'
+                '--approve-for-me[Use automatic approval review]'
+                '--dangerously-bypass-approvals-and-sandbox[Disable approval and sandbox checks]'
+                '--dangerously-bypass-hook-trust[Run enabled hooks without persisted trust]'
+                '-C[Set the working directory]:directory:_codex_directories'
+                '--cd=[Set the working directory]:directory:_codex_directories'
+                '--worktree[Create a managed worktree]'
+                '*--add-dir=[Add a writable directory]:directory:_codex_directories'
+                '(-V --version)'{-V,--version}'[Show version]'
+            )
+            if [[ $1 != exec ]]; then
+                specs+=(
+                    '--remote=[Connect to an app server]:address:->text'
+                    '--remote-auth-token-env=[Name a token environment variable]:variable:->text'
+                    '-a[Select the approval policy]:policy:(on-request never)'
+                    '--ask-for-approval=[Select the approval policy]:policy:(on-request never)'
+                    '--search[Enable web search]' '--no-alt-screen[Keep terminal scrollback]'
+                    '--no-daemon[Run without the shared background server]'
+                )
+            fi
+            if [[ $1 == exec ]]; then
+                subcommands=('resume:Resume a session' 'fork:Fork a session' 'review:Review this repository')
+                specs+=(
+                    '--thread-source=[Classify new threads]:source:->text'
+                    '--cyber-access-program=[Select a program]:program:(standard daybreak_blue daybreak_red)'
+                    '--skip-git-repo-check[Allow a directory outside Git]'
+                    '--trust[Persist project trust]' '--ephemeral[Do not save this session]'
+                    '--ignore-user-config[Skip the user configuration]' '--ignore-rules[Skip execpolicy rules]'
+                    '--output-schema=[Read a JSON response schema]:schema file:_files'
+                    '--color=[Select output colors]:color:(always never auto)'
+                    '--json[Print JSONL events]'
+                    '-o[Write the final message]:output file:_files'
+                    '--output-last-message=[Write the final message]:output file:_files'
+                )
+            elif [[ $1 == (resume|fork) ]]; then
+                specs+=('--last[Select the most recent session]' '--all[Include sessions outside this directory]')
+                [[ $1 == resume ]] && specs+=('--include-non-interactive[Include non-interactive sessions]')
+            else
+                subcommands=(
+                    'agents:Browse agent sessions' 'exec:Run non-interactively' 'e:Run non-interactively'
+                    'review:Review code' 'login:Manage login' 'logout:Remove saved authentication'
+                    'mcp:Manage MCP servers' 'plugin:Manage plugins' 'app-server:Run app-server tooling'
+                    'remote-control:Manage remote control' 'completion:Generate shell completions'
+                    'update:Update Codex' 'doctor:Diagnose the installation' 'sandbox:Run a sandboxed command'
+                    'debug:Inspect debugging tools' 'apply:Apply an agent diff' 'a:Apply an agent diff'
+                    'resume:Resume a session' 'queue:Queue a session message' 'archive:Archive a session'
+                    'delete:Delete a session' 'migrate-rollouts:Migrate legacy history'
+                    'migrate-nfs-db:Migrate SQLite databases' 'unarchive:Restore an archived session'
+                    'fork:Fork a session' 'cloud:Browse cloud tasks' 'exec-server:Run the exec server'
+                    'features:Inspect feature flags' 'help:Show command help'
+                )
+            fi
+            ;;
+        'exec resume'|'exec fork')
+            specs+=(
+                '--strict-config[Reject unknown configuration keys]'
+                '-i[Attach an image]:image file:_files' '--image=[Attach an image]:image file:_files'
+                '-m[Select a model]:model:->text' '--model=[Select a model]:model:->text'
+                '--dangerously-bypass-approvals-and-sandbox[Disable approval and sandbox checks]'
+                '--dangerously-bypass-hook-trust[Run enabled hooks without persisted trust]'
+                '--worktree[Create a managed worktree]' '--thread-source=[Classify the thread]:source:->text'
+                '--cyber-access-program=[Select a program]:program:(standard daybreak_blue daybreak_red)'
+                '--skip-git-repo-check[Allow a directory outside Git]'
+                '--trust[Persist project trust]' '--ephemeral[Do not save this session]'
+                '--ignore-user-config[Skip user configuration]' '--ignore-rules[Skip execpolicy rules]'
+                '--output-schema=[Read a JSON response schema]:schema file:_files'
+                '--json[Print JSONL events]' '-o[Write the final message]:output file:_files'
+                '--output-last-message=[Write the final message]:output file:_files'
+            )
+            [[ $1 == 'exec resume' ]] && specs+=('--last[Use the latest session]' '--all[Search every directory]')
+            ;;
+        review|'exec review')
+            specs+=(
+                '--strict-config[Reject unknown configuration keys]' '--trust[Persist project trust]'
+                '--uncommitted[Review uncommitted changes]' '--base=[Select a base branch]:branch:->text'
+                '--commit=[Review a commit]:commit:->text' '--title=[Set the review title]:title:->text'
+            )
+            ;;
+        mcp)
+            subcommands=('list:List servers' 'get:Show a server' 'add:Add a server' 'remove:Remove a server'
+                         'login:Authenticate a server' 'logout:Remove server authentication' 'help:Show help')
+            ;;
+        'mcp list') specs+=('--json[Emit JSON]') ;;
+        'mcp get') specs+=('--json[Emit JSON]') ;;
+        'mcp add')
+            specs+=(
+                '*--env=[Set a server environment variable]:KEY=VALUE:->text'
+                '--url=[Use a streamable HTTP server]:URL:->text'
+                '--bearer-token-env-var=[Name a token environment variable]:variable:->text'
+                '--oauth-client-id=[Set the OAuth client identifier]:identifier:->text'
+                '--oauth-client-secret=[Set the OAuth client secret]:secret:->text'
+                '--oauth-client-registration=[Select OAuth registration]:strategy:(auto cimd dcr)'
+                '--oauth-resource=[Set the OAuth resource]:resource:->text'
+            )
+            positionals=('1:server name:->text' '2:server executable:_command_names -e' '*:server argument:->text')
+            ;;
+        'mcp login')
+            specs+=('--no-browser[Print the authorization URL]' '--scopes=[Request OAuth scopes]:scopes:->text'
+                    '--oauth-client-registration=[Select OAuth registration]:strategy:(auto cimd dcr)')
+            ;;
+        login)
+            subcommands=('status:Show login status' 'help:Show help')
+            specs+=('--with-api-key[Read the API key from stdin]' '--with-access-token[Read a token from stdin]'
+                    '--device-auth[Use device authentication]')
+            ;;
+        plugin)
+            subcommands=('add:Install a plugin' 'list:List plugins' 'marketplace:Manage marketplaces'
+                         'remove:Remove a plugin' 'help:Show help')
+            ;;
+        'plugin marketplace')
+            subcommands=('add:Add a marketplace' 'list:List marketplaces' 'upgrade:Upgrade a marketplace'
+                         'remove:Remove a marketplace')
+            ;;
+        completion)
+            positionals=('1:shell:(bash elvish fish powershell zsh)')
+            ;;
+        help)
+            subcommands=(agents exec review login logout mcp plugin app-server remote-control completion update
+                         doctor sandbox debug apply resume queue archive delete migrate-rollouts migrate-nfs-db
+                         unarchive fork cloud exec-server features)
+            ;;
+
+    esac
+}
+
+_codex() {
+    local context state state_descr line command_path='' token flag tail item candidate
+    local -a words=("$words[@]") specs subcommands positionals
+    local -a common_specs=(
+        '*-c[Override a configuration value]:key=value:->text'
+        '*--config=[Override a configuration value]:key=value:->text'
+        '*--enable=[Enable a feature]:feature:->text'
+        '*--disable=[Disable a feature]:feature:->text'
+        '(-h --help)-h[Show help]'
+        '(-h --help)--help[Show help]'
+    )
+    local -A aliases=(
+        'e' 'exec'
+        'a' 'apply'
+    )
+    typeset -A opt_args
+    local -i CURRENT=$CURRENT index consumed descended
+    while true; do
+        _codex_specs "$command_path"
+        index=2
+        descended=0
+        while (( index < CURRENT )); do
+            token=$words[index]
+            [[ $token == -- ]] && break
+            if [[ $token == -* ]]; then
+                consumed=1
+                for item in "${specs[@]}"; do
+                    flag=${item%%\[*}
+                    flag=${flag##*\)}
+                    flag=${flag#\*}
+                    flag=${flag%[+=]}
+                    [[ $token == "$flag" ]] || continue
+                    tail=${item#*\]}
+                    if [[ $tail == ::* ]]; then
+                        if (( index + 1 < CURRENT )) && [[ $words[index+1] != -* ]]; then consumed=2; fi
+                    elif [[ $tail == :* ]]; then
+                        consumed=2
+                        if (( index + 1 < CURRENT )) && [[ $words[index+1] == -* ]]; then
+                            words[index+1]=__codex_option_value__
+                        fi
+                    fi
+                    break
+                done
+                (( index += consumed ))
+                continue
+            fi
+            for item in "${subcommands[@]}"; do
+                candidate=${item%%:*}
+                [[ $token == "$candidate" ]] || continue
+                command_path="${command_path:+$command_path }$token"
+                command_path=${aliases[$command_path]-$command_path}
+                shift $(( index - 1 )) words
+                (( CURRENT -= index - 1 ))
+                descended=1
+                break
+            done
+            break
+        done
+        (( descended )) || break
+    done
+    if (( ${#subcommands} )); then
+        positionals=('1:command or prompt:->command' '*:prompt or argument:->text')
+    fi
+    _arguments -s -S -C "${specs[@]}" "${positionals[@]}"
+    case $state in
+        command) _describe 'command' subcommands || _message 'command or prompt text' ;;
+        text) _message 'prompt or argument text' ;;
+    esac
+}
+
+_codex "$@"

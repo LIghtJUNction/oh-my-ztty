@@ -34,7 +34,10 @@ class InteractiveCompletion(unittest.TestCase):
                         ignore=shutil.ignore_patterns(".git", ".github", "tests", "scripts", "docs"))
         (self.runtime / "bin").mkdir()
         shutil.copy2(ROOT / "bin/omztty", self.runtime / "bin/omztty")
-        for name in ("ztty", "ssmcp", "zdot", "zfetch"):
+        for name in ("ztty", "ssmcp", "zdot", "zfetch", "codex", "claude", "gemini",
+                     "opencode", "pi", "amp", "go", "npx", "yarn", "rustc", "rustup", "node", "cmake",
+                     "zcalld", "ztype", "zuse", "ssmcpd", "zmcl", "onim", "lmm", "mechrevo-console",
+                     "wgt", "douyin", "lightjunction", "coolapk", "binance-cli"):
             path = self.runtime / "bin" / name
             path.write_text('#!/bin/sh\nprintf "%s\\n" "$0" >> "$PROBE_EXECUTED"\nexit 99\n')
             path.chmod(0o755)
@@ -356,6 +359,189 @@ class InteractiveCompletion(unittest.TestCase):
         ]:
             with self.subTest(line=line):
                 self.assertEqual(self.complete(line)[-1], expected)
+
+
+    def test_native_codex_claude_and_gemini(self):
+        self.start()
+        self.cases({
+            "codex exec --sand": "codex exec --sandbox=",
+            "codex exec --sandbox work": "codex exec --sandbox workspace-write",
+            "codex --model mcp --cd direc":
+                "codex --model mcp --cd 'directory with spaces 中文/'",
+            "codex exec check file": "codex exec check file",
+            "claude mcp add demo --transport ht": "claude mcp add demo --transport http",
+            "claude --output-format str": "claude --output-format stream-json",
+            "claude --add-dir . direc": "claude --add-dir . 'directory with spaces 中文/'",
+            "claude -p file": "claude -p file",
+            "gemini extensions up": "gemini extensions update",
+            "gemini --output-format str": "gemini --output-format stream-json",
+            "gemini extensions link direc": "gemini extensions link 'directory with spaces 中文/'",
+            "gemini -p file": "gemini -p file",
+            "codex exec --cd file": "codex exec --cd file",
+            "claude --add-dir file": "claude --add-dir file",
+            "gemini --include-directories file": "gemini --include-directories file",
+        })
+
+    def test_native_opencode_pi_and_amp(self):
+        self.start()
+        self.cases({
+            "opencode auth logi": "opencode auth login",
+            "opencode session list --format j": "opencode session list --format json",
+            "opencode --server https://example.invalid run --format j":
+                "opencode --server https://example.invalid run --format json",
+            "opencode session import --directory direc":
+                "opencode session import --directory 'directory with spaces 中文/'",
+            "pi --thinking x": "pi --thinking xhigh",
+            "pi auth print-bear": "pi auth print-bearer-token",
+            "pi mcp add demo --oauth-client-registration c":
+                "pi mcp add demo --oauth-client-registration cimd",
+            "pi @file": "pi '@file with spaces 中文.txt'",
+            "amp t li": "amp t list",
+            "amp plugins add --target w": "amp plugins add --target workspace",
+            "amp config model-providers add-github":
+                "amp config model-providers add-github-copilot-subscription",
+            "amp runner dirs add direc": "amp runner dirs add 'directory with spaces 中文/'",
+            "opencode session import --directory file": "opencode session import --directory file",
+            "pi --session-dir file": "pi --session-dir file",
+            "amp runner dirs add file": "amp runner dirs add file",
+        })
+        for command in ("opencode", "pi", "amp"):
+            self.assertEqual(self.complete(command + " mcp add demo -- git checko"),
+                             [command, "mcp", "add", "demo", "--", "git", "checkout"])
+
+    def test_native_developer_options_and_boundaries(self):
+        self.start()
+        self.cases({
+            "go mod ti": "go mod tidy",
+            "npx fixture --offl": "npx fixture --offl",
+            "yarn cache cl": "yarn cache clean",
+            "yarn --cwd . cache cl": "yarn --cwd . cache clean",
+            "rustc -C panic=ab": "rustc -C panic=abort",
+            "node --input-type mod": "node --input-type module",
+            "node fixture.js --wat": "node fixture.js --wat",
+            "cmake --build . --config Deb": "cmake --build . --config Debug",
+        })
+
+    def test_native_developer_paths_and_quoting(self):
+        (self.project / "directory with spaces 中文/nested.go").write_text("package fixture\n")
+        self.start()
+        self.cases({
+            'go -C "directory with spaces 中文" build nest':
+                'go -C "directory with spaces 中文" build nested.go',
+            "npx --cache direc": "npx --cache 'directory with spaces 中文/'",
+            "rustc -L native=direc": "rustc -L 'native=directory with spaces 中文/'",
+            "cmake --install . --prefix direc":
+                "cmake --install . --prefix 'directory with spaces 中文/'",
+            "npx --cache file": "npx --cache file",
+            "cmake --install . --prefix file": "cmake --install . --prefix file",
+        })
+
+    def test_personal_ai_and_developer_completion_priority(self):
+        for name in ("codex", "go"):
+            (self.personal / ("_" + name)).write_text(
+                f"#compdef {name}\ncompadd -- personal-{name}\n")
+        self.start()
+        self.cases({"codex personal": "codex personal-codex", "go personal": "go personal-go"})
+
+
+
+    def test_native_project_z_service_and_input_commands(self):
+        self.start()
+        self.cases({
+            "zcalld library mcp apply --agent gem": "zcalld library mcp apply --agent gemini",
+            "ztype candidates --engine kan": "ztype candidates --engine kana",
+            "zuse --max-steps 10 human ass": "zuse --max-steps 10 human assist",
+            "ssmcpd serve --portal-state-dir direc":
+                "ssmcpd serve --portal-state-dir 'directory with spaces 中文/'",
+            "zcalld library skills install demo --dir file":
+                "zcalld library skills install demo --dir file",
+            "ssmcpd serve --client-download-dir file":
+                "ssmcpd serve --client-download-dir file",
+        })
+
+    def test_native_project_z_game_and_desktop_commands(self):
+        self.start()
+        self.cases({
+            "zmcl --root . instance cr": "zmcl --root . instance create",
+            "zmcl instance create demo --loader neo": "zmcl instance create demo --loader neoforge",
+            "zmcl resources search sha": "zmcl resources search shader",
+            "zmcl --root direc": "zmcl --root 'directory with spaces 中文/'",
+            "onim help workshop pa": "onim help workshop page",
+            "onim publish --visibility fr": "onim publish --visibility friends-only",
+            "onim workshop page set 123 --visibility fr":
+                "onim workshop page set 123 --visibility friends",
+            "onim workshop page set 123 --description-file file":
+                "onim workshop page set 123 --description-file 'file with spaces 中文.txt'",
+            "lmm --json set": "lmm --json setup",
+            "lmm setup cla": "lmm setup claude-code",
+            "lmm authorize cc": "lmm authorize cc-switch",
+            "lmm setup pi --agent-dir direc": "lmm setup pi --agent-dir 'directory with spaces 中文/'",
+            "mechrevo-console prof": "mechrevo-console profile",
+            "mechrevo-console profile pow": "mechrevo-console profile power-saver",
+            "mechrevo-console oem se": "mechrevo-console oem set",
+            "mechrevo-console export --output file":
+                "mechrevo-console export --output 'file with spaces 中文.txt'",
+            "zmcl --root file": "zmcl --root file",
+            "lmm setup pi --agent-dir file": "lmm setup pi --agent-dir file",
+            "lmm setup --all cla": "lmm setup --all cla",
+            "onim publish --gui --pre": "onim publish --gui --pre",
+            "mechrevo-console status --he": "mechrevo-console status --he",
+        })
+
+
+
+    def test_native_author_tools(self):
+        self.start()
+        self.cases({
+            "wgt self up": "wgt self update",
+            'wgt -C "directory with spaces 中文" graph file --format mer':
+                'wgt -C "directory with spaces 中文" graph file --format mermaid',
+            "wgt graph file --format js": "wgt graph file --format json",
+            "wgt --directory file": "wgt --directory file",
+            "douyin live obs conf": "douyin live obs configure-push",
+            "douyin api im-message-send --message-type im":
+                "douyin api im-message-send --message-type image",
+            "douyin --path file": "douyin --path file",
+            "coolapk message re": "coolapk message read",
+            "coolapk home --tab lat": "coolapk home --tab latest",
+            "coolapk --config-dir file": "coolapk --config-dir file",
+            "lightjunction keys ag": "lightjunction keys age",
+            "lightjunction encrypt gp": "lightjunction encrypt gpg",
+            "lightjunction encrypt age --input file":
+                "lightjunction encrypt age --input 'file with spaces 中文.txt'",
+        })
+
+
+
+    def test_native_rustup_hierarchy_and_directory_values(self):
+        self.start()
+        self.cases({
+            "rustup toolch": "rustup toolchain",
+            "rustup target ad": "rustup target add",
+            "rustup toolchain install --profile mi": "rustup toolchain install --profile minimal",
+            "rustup --verbose +stable target ad": "rustup --verbose +stable target add",
+            "rustup toolchain link fixture file": "rustup toolchain link fixture file",
+            "rustup override set --path direc":
+                "rustup override set --path 'directory with spaces 中文/'",
+        })
+
+
+
+    def test_native_binance_cli_public_grammar(self):
+        self.start()
+        self.cases({
+            "binance-cli help spot kl": "binance-cli help spot klines",
+            "binance-cli spot klines --interval 15": "binance-cli spot klines --interval 15m",
+            "binance-cli profile create --env te": "binance-cli profile create --env testnet",
+            "binance-cli profile create --api-secret ./file":
+                "binance-cli profile create --api-secret './file with spaces 中文.txt'",
+            "binance-cli spot klines --json file": "binance-cli spot klines --json file",
+            "binance-cli profile create --select f": "binance-cli profile create --select false",
+            "binance-cli spot klines --interval=15": "binance-cli spot klines --interval=15m",
+            "binance-cli request GET https://example.invalid --symbol BTCUSD --time-unit=MICR":
+                "binance-cli request GET https://example.invalid --symbol BTCUSD --time-unit=MICR",
+        })
+
 
     def personal_component_completions(self):
         for name in ("zshard", "zai", "ssmcp"):

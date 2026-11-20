@@ -4,7 +4,7 @@ oh-my-ztty gives Linux developers a configured zsh shell and a terminal to run i
 
 Use the shell in your current terminal or open the included ztty window. An optional application profile adds matching Neovim and terminal-tool settings, which you can edit as ordinary configuration files.
 
-The current suite release is **0.2.4**, available for Linux x86_64 and ARM64.
+The current suite release is **0.2.5**, available for Linux x86_64 and ARM64.
 
 ## Quick start
 

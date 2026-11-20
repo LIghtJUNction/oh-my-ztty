@@ -1,0 +1,128 @@
+#compdef onim
+
+# Public onim 0.1.13 grammar, checked against OniMods 3f10bc79 and installed help.
+# Hidden worker commands and private project/account data are not enumerated.
+_onim_commands() {
+    case $1 in
+        '') commands=(setup init build dev install uninstall info publish list doctor workshop help) ;;
+        workshop) commands=(search install uninstall page) ;;
+        workshop/page) commands=(show set) ;;
+        *) commands=() ;;
+    esac
+}
+local context state state_descr line curcontext="$curcontext"
+local -a words=("$words[@]") commands options arguments
+local -i CURRENT=$CURRENT index found help_mode=0
+local route='' candidate
+typeset -A opt_args
+while true; do
+    _onim_commands "$route"
+    (( $#commands )) || break
+    index=2 found=0
+    while (( index < CURRENT )); do
+        case $words[index] in
+            --config|-c|--mod|-m) (( index += 2 )) ;;
+            --) break ;;
+            --*=*|-*) (( ++index )) ;;
+            *)
+                candidate=$words[index]
+                if (( ${commands[(Ie)$candidate]} )); then
+                    if [[ $candidate == help && -z $route ]]; then
+                        help_mode=1
+                    else
+                        [[ -n $route ]] && route+="/"
+                        route+=$candidate
+                    fi
+                    shift $(( index - 1 )) words
+                    (( CURRENT -= index - 1 ))
+                    found=1
+                fi
+                break ;;
+        esac
+    done
+    (( found )) || break
+done
+options=(
+    '(-h --help)'{-h,--help}'[Show help]'
+    '(-c --config)'{-c,--config}'[Project configuration file]:file:_files'
+    '(-m --mod)'{-m,--mod}'[Select a configured mod]:mod name:'
+)
+if (( $#commands )); then arguments=('1:command:->command'); fi
+case $route in
+    '') options+=('(-V --version)'{-V,--version}'[Show version]') ;;
+    init)
+        options+=('(-a --author)'{-a,--author}'[Mod author]:author:'
+            '(-d --desc)'{-d,--desc}'[Mod description]:description:'
+            '--mod-version[Initial mod version]:version:')
+        arguments=('1:new mod name:->text') ;;
+    build)
+        options+=('(-r --release)'{-r,--release}'[Build a release artifact]'
+            '--all[Build every configured mod]') ;;
+    dev) options+=('--all[Build and install every configured mod]') ;;
+    install)
+        options+=('(--repo --ref)--release[GitHub release repository]:owner/repository:'
+            '(--release)--repo[GitHub source repository]:owner/repository:'
+            '(--release)--ref[Source branch tag or commit]:ref:') ;;
+    uninstall)
+        options+=('(-s --scope)'{-s,--scope}'[Removal scope]:scope:(dev local all)') ;;
+    publish)
+        options+=(
+            '(--non-interactive --yes --dry-run --create --visibility --update-preview --expected-owner --resume --preflight)--gui[Use the GUI uploader]'
+            '--auto-note[Use the latest change note]'
+            '(--gui --yes)--non-interactive[Publish without prompts]'
+            '(--gui --non-interactive)--yes[Alias for non-interactive mode]'
+            '(--gui --resume --preflight)--dry-run[Build a publication plan without upload]'
+            '(--gui --resume --preflight)--create[Create a new private item first]'
+            '(--gui)--visibility[Final workshop visibility]:visibility:(public friends-only private unlisted)'
+            '(--gui)--update-preview[Update the preview image]'
+            '(--gui)--expected-owner[Expected Steam owner]:Steam ID:'
+            '(--gui --dry-run --create --preflight)--resume[Resume an immutable plan]:plan file:_files'
+            '(--gui --dry-run --create --resume)--preflight[Check account and item without writing]'
+        ) ;;
+    workshop/search) arguments=('1:workshop search query:->text') ;;
+    workshop/install|workshop/uninstall|workshop/page/show)
+        arguments=('1:workshop item ID:->text') ;;
+    workshop/page/set)
+        options+=('--title[English title]:title:'
+            '--description-file[English description file]:file:_files'
+            '--chinese-title[Chinese title]:title:'
+            '--chinese-description-file[Chinese description file]:file:_files'
+            '--tags[Replacement tags]:comma-separated tags:'
+            '--visibility[Page visibility]:visibility:(public friends private unlisted)'
+            '--preview[Preview image]:file:_files'
+            '--change-note[Change note]:note:')
+        arguments=('1:workshop item ID:->text') ;;
+esac
+if (( help_mode )); then
+    options=()
+    arguments=()
+    (( $#commands )) && arguments=('1:command:->command')
+fi
+# _arguments treats a prior literal -- as a separator even when it is an
+# option value. Preserve the real parser's required-value boundaries.
+local -a value_options
+local specification option_name
+for specification in "$options[@]"; do
+    if [[ $specification == *']:'* && $specification != *']::'* ]]; then
+        option_name=${specification%%\[*}
+        option_name=${option_name##*\)}
+        value_options+=("${option_name#\*}")
+    fi
+done
+index=2
+while (( index < CURRENT )); do
+    [[ $words[index] == -- ]] && break
+    if (( ${value_options[(Ie)$words[index]]} )); then
+        if (( index + 1 < CURRENT )) && [[ $words[index+1] == -* ]]; then
+            words[index+1]=__omztty_option_value__
+        fi
+        (( index += 2 ))
+    else
+        (( ++index ))
+    fi
+done
+_arguments -C -S "$options[@]" "$arguments[@]"
+case $state in
+    command) _describe 'command' commands ;;
+    text) _message "$state_descr" ;;
+esac
