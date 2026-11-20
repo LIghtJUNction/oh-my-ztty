@@ -132,7 +132,7 @@ Press Tab to complete `omztty` subcommands, options and paths. Completion follow
 
 Put personal `_command` completion files in `${XDG_CONFIG_HOME:-$HOME/.config}/oh-my-ztty/completions/`, then open a new suite shell. This directory stays outside the runtime and survives updates. A registered component completion takes precedence over the suite's fallback.
 
-The installer prepares a completion cache. The shell initializes completion on the first Tab by default and validates the cache against the current inputs. See [startup options](#startup-options) to select eager loading or disable completion.
+The per-user installer prepares a completion cache. With the default lazy setting, the shell initializes completion on the first Tab and checks any existing cache against its current inputs. See [startup options](#startup-options) to select eager loading or disable completion.
 
 ## Aliases and plugins
 

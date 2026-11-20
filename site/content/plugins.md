@@ -73,7 +73,7 @@ Removing an installed checkout does not undo code already loaded in the current 
 
 ## Completions and themes
 
-Register a directory of standard zsh `_command` completion files with `zshard completions DIRECTORY` before the first Tab. Late registration returns an error.
+Register a directory of standard zsh `_command` completion files with `zshard completions DIRECTORY` before completion initializes. With the default lazy setting, that means before the first Tab. With eager loading, initialization has already happened by the time `local.zsh` runs. Registration after initialization returns an error.
 
 Register a prompt callback with `zshard theme FUNCTION`. It receives the last exit status and elapsed whole seconds and assigns `PROMPT` and `RPROMPT`. Keep external commands out of the callback to retain the default prompt's process behavior.
 

@@ -50,7 +50,7 @@ Personal `options.zsh`, `local.zsh` and completion files live under `${XDG_CONFI
 
 For a per-user installation, uninstallation restores the adopted profile first. A restoration failure or inconsistent deployment record preserves the runtime for recovery. For the AUR package, restore the profile with `omztty config remove` before removing the package. Independent `omztty dot` deployments remain separate. See [configuration](configuration.md).
 
-Before activation, the installer prepares the audited completion cache. Native zsh auditing and input validation remain part of reuse; it is not a bypass of completion security checks.
+Before activation, the per-user installer prepares the audited completion cache. Native zsh auditing and input validation remain part of reuse; it is not a bypass of completion security checks.
 
 ## Extension boundaries
 
