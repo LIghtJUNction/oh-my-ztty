@@ -1,0 +1,275 @@
+{
+  "schema": "oh-my-ztty.source-acceptance.v1",
+  "recorded_utc": "2026-11-20T18:59:04.140593+00:00",
+  "source_commit": "d63e5e0eff460851656419c23309f573f6e49098",
+  "original_source_commit": "9cb751aa2853ca55d9c18c38d9543f6553c33dcc",
+  "suite_version": "0.2.6",
+  "release_status": "Development candidate; existing published installation archives were not replaced.",
+  "platform": "linux-x86_64",
+  "source_lock": {
+    "schema": 2,
+    "updated_at": "2026-11-20T18:33:44+00:00",
+    "components": {
+      "ztty": {
+        "repository": "https://github.com/LIghtJUNction/ztty.git",
+        "branch": "main",
+        "commit": "a43aebb17a11b8c25f2c970d0d36a43f67082f9f",
+        "observed_at": "2026-11-20T18:33:32+00:00"
+      },
+      "ssmcp": {
+        "repository": "https://github.com/LIghtJUNction/ssmcp.git",
+        "branch": "main",
+        "commit": "cace37c7f7c8c2ad60c9ec712d39f77bc172b88b",
+        "observed_at": "2026-11-20T18:33:33+00:00"
+      },
+      "zshard": {
+        "repository": "https://github.com/LIghtJUNction/zshard.git",
+        "branch": "main",
+        "commit": "f7842f70e439c4abda2a46698f0ebe067d38b297",
+        "observed_at": "2026-11-20T18:33:35+00:00"
+      },
+      "zdot": {
+        "repository": "https://github.com/LIghtJUNction/zdot.git",
+        "branch": "main",
+        "commit": "a3c6a75b1e66747822b9b69d9e046d2aac249210",
+        "observed_at": "2026-11-20T18:33:36+00:00"
+      },
+      "zrc": {
+        "repository": "https://github.com/LIghtJUNction/zrc.git",
+        "branch": "main",
+        "commit": "2f10ea8dcfbef2db1204ed46dd21ff98c61ed8ee",
+        "observed_at": "2026-11-20T18:33:39+00:00"
+      },
+      "zfetch": {
+        "repository": "https://github.com/LIghtJUNction/zfetch.git",
+        "branch": "main",
+        "commit": "f0614f3b76eca222f4b3880f8dd1707d1308f098",
+        "observed_at": "2026-11-20T18:33:40+00:00"
+      }
+    }
+  },
+  "bundle": {
+    "file": "oh-my-ztty-0.2.6-linux-x86_64.tar.gz",
+    "bytes": 7992238,
+    "sha256": "0c896068515104fc0f8045d150488845bfb29f52534ca5603f0622742de2b36c"
+  },
+  "validation": {
+    "suite": {
+      "exit_code": 0,
+      "elapsed_seconds": 50.14,
+      "finished_at": "2026-11-20T18:45:43.161395+00:00",
+      "tests": 112
+    },
+    "source_build": {
+      "exit_code": 0,
+      "elapsed_seconds": 264.43,
+      "finished_at": "2026-11-20T18:46:58.568014+00:00"
+    },
+    "installed_smoke": {
+      "exit_code": 0,
+      "elapsed_seconds": 2.27,
+      "finished_at": "2026-11-20T18:48:12.926990+00:00",
+      "checks": [
+        "install",
+        "repeat install",
+        "doctor",
+        "zsh",
+        "local AI context",
+        "native component commands",
+        "two boot-chain entrypoints",
+        "configuration adoption and restore",
+        "custom XDG configuration path",
+        "uninstall"
+      ]
+    },
+    "graphical": {
+      "exit_code": 0,
+      "elapsed_seconds": 3.41,
+      "finished_at": "2026-11-20T18:48:16.335585+00:00"
+    }
+  },
+  "graphical_report": {
+    "after_completion": {
+      "waiting_launcher": {
+        "Private_Clean_KiB": 344,
+        "Private_Dirty_KiB": 228,
+        "Pss_KiB": 1770,
+        "Rss_KiB": 6440,
+        "Shared_Clean_KiB": 4528,
+        "Shared_Dirty_KiB": 1340
+      },
+      "zsh": {
+        "Private_Clean_KiB": 1692,
+        "Private_Dirty_KiB": 2148,
+        "Pss_KiB": 3976,
+        "Rss_KiB": 7320,
+        "Shared_Clean_KiB": 3480,
+        "Shared_Dirty_KiB": 0
+      },
+      "ztty_broker": {
+        "Private_Clean_KiB": 72228,
+        "Private_Dirty_KiB": 34696,
+        "Pss_KiB": 119083,
+        "Rss_KiB": 139532,
+        "Shared_Clean_KiB": 31268,
+        "Shared_Dirty_KiB": 1340
+      }
+    },
+    "architecture": "x86_64",
+    "archive": "oh-my-ztty-0.2.6-linux-x86_64.tar.gz",
+    "archive_sha256": "0c896068515104fc0f8045d150488845bfb29f52534ca5603f0622742de2b36c",
+    "before_completion": {
+      "waiting_launcher": {
+        "Private_Clean_KiB": 344,
+        "Private_Dirty_KiB": 228,
+        "Pss_KiB": 1770,
+        "Rss_KiB": 6440,
+        "Shared_Clean_KiB": 4528,
+        "Shared_Dirty_KiB": 1340
+      },
+      "zsh": {
+        "Private_Clean_KiB": 1444,
+        "Private_Dirty_KiB": 1428,
+        "Pss_KiB": 2996,
+        "Rss_KiB": 6324,
+        "Shared_Clean_KiB": 3452,
+        "Shared_Dirty_KiB": 0
+      },
+      "ztty_broker": {
+        "Private_Clean_KiB": 72292,
+        "Private_Dirty_KiB": 34696,
+        "Pss_KiB": 119147,
+        "Rss_KiB": 139596,
+        "Shared_Clean_KiB": 31268,
+        "Shared_Dirty_KiB": 1340
+      }
+    },
+    "boot": {
+      "schema": "zfetch.boot.v1",
+      "screenshot": "linux-x86_64-boot.png",
+      "stages": 9
+    },
+    "build": {
+      "platform": "linux-x86_64",
+      "schema": 2,
+      "source_branches": {
+        "ssmcp": "main",
+        "zdot": "main",
+        "zfetch": "main",
+        "zrc": "main",
+        "zshard": "main",
+        "ztty": "main"
+      },
+      "source_commits": {
+        "ssmcp": "cace37c7f7c8c2ad60c9ec712d39f77bc172b88b",
+        "zdot": "a3c6a75b1e66747822b9b69d9e046d2aac249210",
+        "zfetch": "f0614f3b76eca222f4b3880f8dd1707d1308f098",
+        "zrc": "2f10ea8dcfbef2db1204ed46dd21ff98c61ed8ee",
+        "zshard": "f7842f70e439c4abda2a46698f0ebe067d38b297",
+        "ztty": "a43aebb17a11b8c25f2c970d0d36a43f67082f9f"
+      },
+      "sources_updated_at": "2026-11-20T18:33:44+00:00",
+      "suite_version": "0.2.6"
+    },
+    "cleanup": "All owned application processes and Xvfb stopped; temporary HOME removed.",
+    "completion_cache": {
+      "after_first_tab": {
+        "zcompdump-5.9.2": {
+          "mtime_ns": 1795200493773307804,
+          "sha256": "d09393cf58cbc6f9f51887ffe706acb01c9de4e465d00377aa67053866aa2cbf"
+        }
+      },
+      "prepared": {
+        "zcompdump-5.9.2": {
+          "mtime_ns": 1795200493773307804,
+          "sha256": "d09393cf58cbc6f9f51887ffe706acb01c9de4e465d00377aa67053866aa2cbf"
+        }
+      },
+      "reused": true
+    },
+    "component_versions": [
+      "ztty 0.5.2",
+      "zdot 0.2.0",
+      "ssmcp 0.10.21",
+      "zfetch 0.1.1"
+    ],
+    "geometry": {
+      "cols": 100,
+      "rows": 28
+    },
+    "graphical_checks": [
+      "visible window",
+      "keyboard command executed in preset zsh",
+      "first completion returned to a usable shell",
+      "actual component versions verified",
+      "boot-chain command executed in the preset zsh"
+    ],
+    "kernel": "7.3.4-arch1-1",
+    "preset": {
+      "font_pattern": "JetBrains Mono,JetBrainsMono Nerd Font,Caskaydia Mono,Cascadia Mono,monospace:size=13",
+      "padding_px": 28,
+      "resolved_font_family": "JetBrainsMono Nerd Font,JetBrainsMono NF"
+    },
+    "recorded_utc": "2026-11-20T18:48:13.153580+00:00",
+    "schema": "oh-my-ztty.graphical.v1",
+    "scope": "One actual suite window on an isolated Xvfb display, 100x28 cells, preset font and padding, temporary Git checkout. X server excluded from application memory. No AI connection.",
+    "screenshot": "linux-x86_64-terminal.png",
+    "startup": {
+      "definition": "Warm process wall time for an interactive zsh -c exit. Suite includes launcher and preset initialization; no prompt, Tab, model or network call. Vanilla disables user/global rc and is a minimum-feature baseline.",
+      "results": {
+        "suite_shell": {
+          "median_ms": 8.0809635,
+          "min_ms": 6.785937,
+          "p95_ms": 9.18532,
+          "raw_ms": [
+            8.812584,
+            8.755922,
+            9.18532,
+            9.186424,
+            8.577119,
+            6.785937,
+            6.792141,
+            7.482876,
+            7.584808,
+            7.405606
+          ]
+        },
+        "vanilla_zsh": {
+          "median_ms": 2.0785004999999996,
+          "min_ms": 1.626097,
+          "p95_ms": 2.209533,
+          "raw_ms": [
+            2.233784,
+            2.180541,
+            2.12063,
+            2.032849,
+            2.059516,
+            1.631247,
+            1.626097,
+            2.097485,
+            2.209533,
+            1.686365
+          ]
+        }
+      },
+      "samples_per_case": 10
+    },
+    "window_visible_ms": 84.82325
+  },
+  "graphical_evidence": {
+    "url": "https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.6/oh-my-ztty-source-acceptance-20261121.tar.gz",
+    "sha256": "038f6ba8b7e7588f215b86bf6e1676089723ffbc79ff072ac5fbf5f5e7bc2c23",
+    "bytes": 86055,
+    "members": {
+      "linux-x86_64-terminal.png": "230249a91c78678b012d7a60a74f578989294ce3664a04af3a459a9bc6344883",
+      "linux-x86_64-boot.png": "9300aca87e55dbbfd9e97500a3c66e98c9b7e63f5c2cc150872f82c04af26a17",
+      "linux-x86_64-suite.json": "517613e0b094807f3301d5d4c5403435c20359eff7d7b3f68e4817056c641275"
+    }
+  },
+  "limits": [
+    "Graphical checks ran on Xvfb with an isolated temporary HOME.",
+    "The sanitized environment intentionally does not identify an actual desktop session.",
+    "Only Linux x86_64 was built and executed in this iteration; ARM64 was not revalidated.",
+    "Startup timings are 10 warm local samples, not a cold-start or cross-machine benchmark."
+  ]
+}

@@ -1,0 +1,268 @@
+{
+  "schema": "oh-my-ztty.history-cleanup.v1",
+  "recorded_utc": "2026-11-20T18:59:04.235104+00:00",
+  "scope": {
+    "paths": [
+      "docs/reports/0.2.5/ssmcp-native-completion.png",
+      "docs/reports/0.2.6/linux-aarch64-terminal.png",
+      "docs/reports/0.2.6/linux-x86_64-terminal.png",
+      "docs/reports/linux-x86_64-terminal.png",
+      "docs/reports/website-2026-11-20.jpg",
+      "docs/reports/workspace-0.2.0/nvim-home.jpg",
+      "docs/reports/workspace-0.2.0/nvim-shortcuts.jpg",
+      "docs/reports/workspace-0.2.1/nvim-code.jpg",
+      "docs/reports/workspace-0.2.1/nvim-home.jpg",
+      "docs/reports/workspace-0.2.1/terminal-zfetch.jpg",
+      "docs/reports/workspace-0.2.3/terminal.png",
+      "docs/reports/workspace-0.2.3/website-narrow.jpg",
+      "docs/reports/workspace-0.2.3/website.jpg",
+      "docs/reports/ztty-0.5.0-consumer-20261120/linux-x86_64-terminal.png"
+    ],
+    "branches": 13,
+    "tags": 10,
+    "changed_refs": 23,
+    "commits_verified": 74
+  },
+  "refs": {
+    "refs/heads/consumer/ztty-0.5.0-20261120": {
+      "new": "2621bdf19395c733f140f5ba9f7bfdbacfe13e79",
+      "old": "0fdc87873c53e7c87d18952f83a7b94fc4149de5"
+    },
+    "refs/heads/coord/z-library-propagation-20261120": {
+      "new": "9dc920ce73d6d51fe5df9c7f54a457ca4200dbcb",
+      "old": "0b60eb7d6e35d06a137278ffe0b3f1139c722fe6"
+    },
+    "refs/heads/coord/ztype-native-services-20261120": {
+      "new": "e6d0b8b966e9c388543ac31cc0dc34953bacf2c5",
+      "old": "a16ba860108921b81f5fb4424d648bbd83f11415"
+    },
+    "refs/heads/docs/markdown-site": {
+      "new": "b821d3e16a494e45559ceb6a19b3d7e9c9b011d3",
+      "old": "c1d2c85645ef79e9800df6e26fb1ea99396c647c"
+    },
+    "refs/heads/feat/unified-workspace-20261120": {
+      "new": "70e5fd6a58417d922c0ee0771368737c3c8443a5",
+      "old": "d7f52ed74940280912f05e4ab0cec909acfc10b4"
+    },
+    "refs/heads/fix/desktop-preference-20261120": {
+      "new": "8e92cac6348e50290690fdbbdf07b00ed1a93516",
+      "old": "5baa78aa81dd735209f572708c3c82d10850cbed"
+    },
+    "refs/heads/fix/recursive-pin-20261120": {
+      "new": "a1cfbe7c018c4ff6f18e9ab46e286e685b87b085",
+      "old": "beb6997f764462ec00c72ed4befd7848c1d7fee0"
+    },
+    "refs/heads/iter/aur-install-docs-20261120": {
+      "new": "16ec15d3d4c88f0778b3e809cb5da83da32f96da",
+      "old": "ad443e5e26bb061a4a64349317929cd91ce2b331"
+    },
+    "refs/heads/iter/completion-20261120": {
+      "new": "f26a85629ea9200fe5b271d4f91b15bda665caaa",
+      "old": "ac3fb092ed408a2164334784fc492eca8b7560d4"
+    },
+    "refs/heads/iter/profile-refresh-20261120": {
+      "new": "a2bc2bf1a8f37fb98e60a891f04290d4247066ea",
+      "old": "fd40779d1dc7de5de5b647e076c6ce38ca162b9e"
+    },
+    "refs/heads/iter/runtime-20261120": {
+      "new": "6c66a9d5bd8e477adfef6dd753dc990b0cc4a939",
+      "old": "8f86baa04b49ea507f74b55439b1557d571d80e7"
+    },
+    "refs/heads/iter/site-copy-20261120": {
+      "new": "346f9e0a256a2c37f56ecb8a66d45ea480cb1e6c",
+      "old": "d5baff8ffd7f903492a13407661a9613b582869b"
+    },
+    "refs/heads/main": {
+      "new": "d63e5e0eff460851656419c23309f573f6e49098",
+      "old": "0b60eb7d6e35d06a137278ffe0b3f1139c722fe6"
+    },
+    "refs/tags/v0.1.0": {
+      "new": "6831eb1d024c1a6dad4ab867e867aa343a21c2c9",
+      "old": "8d69b4c22fc4e4668bd1da71fb0ce3fb45c376e3"
+    },
+    "refs/tags/v0.1.1": {
+      "new": "31932ece89068aca855ba061e9184aef5b87e665",
+      "old": "f51c965861367181227e721dd5b16ee9e23c0100"
+    },
+    "refs/tags/v0.1.2": {
+      "new": "f716261691c03039eb4fc4894dbe54c5a4156797",
+      "old": "b52662ce19c6af00f8a51bed56edaeaef66e1ace"
+    },
+    "refs/tags/v0.2.0": {
+      "new": "99a6f3d6db0ee594fb84e2a0ae46ccb25e1f592b",
+      "old": "ff45df352966217a6cc6241182d1945c4603da2d"
+    },
+    "refs/tags/v0.2.1": {
+      "new": "e62bf69b62cf580fe0fdceec675c31a72a79283b",
+      "old": "89640846e1a7341714f4f5a9cc4642cf5b1aa8a9"
+    },
+    "refs/tags/v0.2.2": {
+      "new": "0bcba1715cee021535fec44091f0a9a81c1b21e7",
+      "old": "2b3af86e7915760179db0cde51476f5b66e3e56b"
+    },
+    "refs/tags/v0.2.3": {
+      "new": "0afb1771a051b2b357e2a08cecc2e2254950947a",
+      "old": "778626689ee463d0f6721e8a973a0a025882709c"
+    },
+    "refs/tags/v0.2.4": {
+      "new": "40c3e736864b4ba60ab016bd729d134a1532a4f9",
+      "old": "7aa277af2231c955c5e55839ad65e69e071fb58b"
+    },
+    "refs/tags/v0.2.5": {
+      "new": "029be25a06532ae7a45d091459a842c9b9c73ca5",
+      "old": "91397f343463669de017463dcfb370c9fafca851"
+    },
+    "refs/tags/v0.2.6": {
+      "new": "bf7f1eee29356d811d2d72e09a0771d35433e5e2",
+      "old": "5a5f45dcc37c443876aee5d29ed280bcf6c6058d"
+    }
+  },
+  "tag_commits": {
+    "refs/tags/v0.1.0": {
+      "new": "46fa9e9dd86acfdddb3503cdb49d0599918326ee",
+      "old": "54348bc754686e18913bdd836f672fc0df9daced"
+    },
+    "refs/tags/v0.1.1": {
+      "new": "0cdc25a9ecdb70ec3affa33187998c294a32131d",
+      "old": "94e173a7b61bba34db913b1dd1764518f2e46ccd"
+    },
+    "refs/tags/v0.1.2": {
+      "new": "4931cac73d2221fdeecc387e7ba06da03e9129c5",
+      "old": "0ad667661e26316851e3a90406c146ce98aa9663"
+    },
+    "refs/tags/v0.2.0": {
+      "new": "70e5fd6a58417d922c0ee0771368737c3c8443a5",
+      "old": "d7f52ed74940280912f05e4ab0cec909acfc10b4"
+    },
+    "refs/tags/v0.2.1": {
+      "new": "54cc2ee44e80bf0c29a806141939d26005f60d52",
+      "old": "7b69b751772a839f090e408228d94f810fd96d1e"
+    },
+    "refs/tags/v0.2.2": {
+      "new": "c844a5c1fa67f7d80d568c096d8b27a446254a20",
+      "old": "6f6994e8fb5ceab37d7598506d5f8cfbcfc7a6ea"
+    },
+    "refs/tags/v0.2.3": {
+      "new": "c4b5d9fb7d345c58716c65ac7eb62b74a1ef8f28",
+      "old": "915db41a5791b906db72ef79f18cea6b658db521"
+    },
+    "refs/tags/v0.2.4": {
+      "new": "702ef2c91c345d256aa21f14a3893f3287cbda53",
+      "old": "9cdf90bae1b61d148cc4a4ae457a75a872f9bbba"
+    },
+    "refs/tags/v0.2.5": {
+      "new": "d3301c6d0c56c15ff048f71065b5e17a7bbfde49",
+      "old": "74e492c88a3ba8b6b59802a0fad3e74cf73712c7"
+    },
+    "refs/tags/v0.2.6": {
+      "new": "c5e1b5b3a086246cbc45db8e27f06c9861eb4c87",
+      "old": "1e3ce8d3e5a141d09e450fd3f635f987a5732be4"
+    }
+  },
+  "commit_map": {
+    "00a46287ea732127f38ed65d8d9149ae1687795a": "ebe5872162e0e531715229e9919d37486b8dabab",
+    "04cc25f7f2a3e478eeff9c993d42248d1d8e69ee": "9394fab9e6931bffa1fd8a17edb2c3eb3df05ac1",
+    "075af40a0a481b73d5ba31eea6a466433b2b1da1": "9bf4483cd1a20e1b62bc9a17fddad5fc661bbeaa",
+    "0917790022ab4969d9db360301f4b71cbf74dfc0": "04513a64e6d55dfd1abd60f255ec23dd635c1c84",
+    "0ad667661e26316851e3a90406c146ce98aa9663": "4931cac73d2221fdeecc387e7ba06da03e9129c5",
+    "0b60eb7d6e35d06a137278ffe0b3f1139c722fe6": "9dc920ce73d6d51fe5df9c7f54a457ca4200dbcb",
+    "0fb547e83da186d82626d60d32dccbc05ea9f307": "af40337bffab892fb7260fc4723ec229305d8372",
+    "0fdc87873c53e7c87d18952f83a7b94fc4149de5": "2621bdf19395c733f140f5ba9f7bfdbacfe13e79",
+    "10cc169d3c037059aca635bac3d8d5fb57786403": "e8257190c3247803dc87d19b92d4f64201ab9f42",
+    "11220d011cf8521261f5dfe7d9df21fa0fb53193": "16fa10878c197904e97fffd838514f728f5a46ee",
+    "16cc8615dcc4b397f04d780908edf041e76dca66": "948cad13f062bdb6d4dfef3e08ba9efcb9c47d8b",
+    "1e3ce8d3e5a141d09e450fd3f635f987a5732be4": "c5e1b5b3a086246cbc45db8e27f06c9861eb4c87",
+    "2554847f9085949d81a905d8f320932ced28a1e3": "f8269b200c9e22f1516fddde9d20e6625fd0a43b",
+    "27bf1e77798b2e757a007506adebac7c3d2203ed": "27bf1e77798b2e757a007506adebac7c3d2203ed",
+    "46056eeb2c2aad1e8468fbedc9eb90634b73f36b": "46056eeb2c2aad1e8468fbedc9eb90634b73f36b",
+    "463f1958555f13694de933b1b34d3ead4b9af642": "b913cd8d935e49c8f5c3ed856a86da073be7ae59",
+    "4ddf7683aef4a140cc4141c938ac83ae810156f2": "5b889d1d33bd52fee970e3cab98a3faa60220eef",
+    "54348bc754686e18913bdd836f672fc0df9daced": "46fa9e9dd86acfdddb3503cdb49d0599918326ee",
+    "59e6961a8b1e70b3230aeed3353a3f72128446b4": "a6888e4e81147b9dd298dc0b6eb157f1f9b454e9",
+    "59f1b313efa3ccdf806154f9a1f5c3608237d356": "bc2c0ed3fab5a3587f19bd9cafa4b371cdbc734b",
+    "5a99afc170dc51455beb1491e04ab76cf18f4564": "437687776bb046cc0699678461113a4433c4bc87",
+    "5baa78aa81dd735209f572708c3c82d10850cbed": "8e92cac6348e50290690fdbbdf07b00ed1a93516",
+    "622219e578d28aa3914fed6b17a0f56dc1e6b0d3": "8294530309a4ca53186be68b738193e147f6b5ca",
+    "64c2b5d06584c97d5e7f6ed3a71258348148ea55": "afa82766cee8d98256455c8e3532b21490b0086d",
+    "6582ee18f7cafffbb2a90f8f4241f89e52615570": "9dc407fc94d317a127a5349daf86081f6ba52496",
+    "69e76360d88b44d7d5b2bcedcb1a42460a90cf51": "2326c9c89c7c8d1c7a3c5622fbf2ec5b76af1505",
+    "6d2f191b3a29a0e3350e2f186e49a96cd217d5ba": "61275d20ced44ac42e131e4f0e9df4b0a7824dda",
+    "6d95c7eaa1a4ef27df2ae246edd7bddde5f3b31b": "0715c3c66cdc6547e4f8c9f29fc79acc56475c65",
+    "6ebb18c7a80480ffbd208d9da5d6034ff6906839": "1e76a13140ff9226d7b490a3edd7584e0f793e7a",
+    "6f6994e8fb5ceab37d7598506d5f8cfbcfc7a6ea": "c844a5c1fa67f7d80d568c096d8b27a446254a20",
+    "6fb5e5726b48386c918d350c6253783d8729217b": "734ad2dfcfeb5be6bfa65ed324c594e20454f090",
+    "740b82f3a1628d0c14b0405bfb36c76832fedfec": "f5c77acbf12fcd85b6fbe16345391b26c795b5ce",
+    "74972dd6fb81c3f8fdd786a2765cadc88cfcc385": "657caec27d35c88090b7eb367ff0568129e4e97d",
+    "74e492c88a3ba8b6b59802a0fad3e74cf73712c7": "d3301c6d0c56c15ff048f71065b5e17a7bbfde49",
+    "796fc7ca64ff5b228cdebce9dec3a4de73b98ed2": "e26c78f71d9002a4b95e70471b1950d7519e4eca",
+    "7b69b751772a839f090e408228d94f810fd96d1e": "54cc2ee44e80bf0c29a806141939d26005f60d52",
+    "7dfbe01da34c858d1f6f5de0a5df46ac0f640502": "4371245e6320b0a093fbac5d019962baa6c1d91b",
+    "86bbbe3a54b62a1beffbc3f4596a9338b8ef7530": "da8a4654b7b44823cc59e17cd88c672c6388fcd9",
+    "89c26cb911da0758d4a21ac8ee11770416d3df3c": "af452f063db9dccdf876980bf9a2a0654560c02f",
+    "8ae93def52e6dabb0fcacca172cbc23e11695502": "353d41c979077c8a91c61654dc48412ced116a82",
+    "8c0958d3086f166d02bbc86fa7f063d3f5485baa": "78d888076bd219f7c04abd12e053568e84d6d5e2",
+    "8efa280a43229870a12098626a9e9143709bb231": "aa6ac0234601656372f851d847d32f1322dedd3f",
+    "8f3ddfffd4e964f26b1bdacd3902527c821232ad": "f304e1723e6275868745ddb2d2114303c3068426",
+    "8f86baa04b49ea507f74b55439b1557d571d80e7": "6c66a9d5bd8e477adfef6dd753dc990b0cc4a939",
+    "915db41a5791b906db72ef79f18cea6b658db521": "c4b5d9fb7d345c58716c65ac7eb62b74a1ef8f28",
+    "9407c7d1e4aa5941723461c192960d0f56db8e79": "4f0927aeb19c16123bd625c2597eba8d1e5f599f",
+    "94e173a7b61bba34db913b1dd1764518f2e46ccd": "0cdc25a9ecdb70ec3affa33187998c294a32131d",
+    "9b61acda2de7a5c55ab67e77fb542c1eff4cb1d1": "266e955ddd77ae20832b535cb79057303add34af",
+    "9cb751aa2853ca55d9c18c38d9543f6553c33dcc": "d63e5e0eff460851656419c23309f573f6e49098",
+    "9cdf90bae1b61d148cc4a4ae457a75a872f9bbba": "702ef2c91c345d256aa21f14a3893f3287cbda53",
+    "a16ba860108921b81f5fb4424d648bbd83f11415": "e6d0b8b966e9c388543ac31cc0dc34953bacf2c5",
+    "a61806f8c7848cc246db358bdb71a0c583946bb6": "dcb649601dc6992936cbfd0988daeb5ca4c27726",
+    "ac3fb092ed408a2164334784fc492eca8b7560d4": "f26a85629ea9200fe5b271d4f91b15bda665caaa",
+    "ad443e5e26bb061a4a64349317929cd91ce2b331": "16ec15d3d4c88f0778b3e809cb5da83da32f96da",
+    "ad5fca81b9ab19226fae98531c25478671407a36": "373df5cc7d8d1504e0817c49c922a21224390609",
+    "b57e9981e15ab2442c4651f0c5bd84a6c5bc5599": "6325187f33282c551c888e2fa79af46252247c52",
+    "b6a4ef7c09f6558e9d244fbd6cb6d0ff385a7061": "364f3c4f757eca03fe0e31507208976e65c8e658",
+    "bb1d990592bd1c8ec68e9a4f15a4b1e68a91a10a": "89bbce84466bd5a0171bbddb54cab8ae5724c1f2",
+    "beb6997f764462ec00c72ed4befd7848c1d7fee0": "a1cfbe7c018c4ff6f18e9ab46e286e685b87b085",
+    "c0a9e1d6ec81acbd4ebb823cccb32b7adc82a765": "f171cbd41c561213844de148b74470a9ca637f30",
+    "c1d2c85645ef79e9800df6e26fb1ea99396c647c": "b821d3e16a494e45559ceb6a19b3d7e9c9b011d3",
+    "c876f51ff60b6bee20081825bca71cbbd5869b75": "f3a27472c5db4dc9478c5654f7bc5e6fcf317b0c",
+    "d2fa82b706c9f7c78c5d331a718e6f241f1fd276": "0d0e79815babf3ca583b225f94547560e901a790",
+    "d5baff8ffd7f903492a13407661a9613b582869b": "346f9e0a256a2c37f56ecb8a66d45ea480cb1e6c",
+    "d7f52ed74940280912f05e4ab0cec909acfc10b4": "70e5fd6a58417d922c0ee0771368737c3c8443a5",
+    "da84dc711bf414ccc2bebab5ad262339f42b5171": "4cc604f2f94e9db0cfb0c94d6ca1d627a36b6739",
+    "dacb847ea1e47e4b7087af8310239adf43de9664": "5eaf4dc83025950e3330bbffb2f7a3371e612d9d",
+    "db876df727a53650dbe3f2753237fa6c6affad3c": "e435c9388f1183dd0e6b379618fa16e098cf72f6",
+    "e98711b7f162cd2082cc37fbaf782f39f089aa81": "0b7babb575926ddfabf4f2d5396ff01f3116e78a",
+    "f522c7d4497ceb06b9b9156c5231369e219890b2": "57a25659f4686256af577e655339d0fca34b99cd",
+    "f5d2a9ca4ba9d4e1ae92ad8234cda9dc8ecb31bd": "7182edb4dce2a84bfb2ba22988b893d20ad52d63",
+    "f7ad19912fef93ab250929c84a94a1b1f676596b": "9d1c2788de6c29e5462d00f05c0a9a121f632114",
+    "f87d0cefff0b14c4c4f891e021183afbc06fe3e7": "affb1abc39853519cb9667028593d265f285bc70",
+    "fd40779d1dc7de5de5b647e076c6ce38ca162b9e": "a2bc2bf1a8f37fb98e60a891f04290d4247066ea"
+  },
+  "source_equivalence": "For every mapped commit, the complete path/mode/type/blob/gitlink tree equals the original after excluding the exact archived image paths; parent order is preserved.",
+  "original_source_commit": "9cb751aa2853ca55d9c18c38d9543f6553c33dcc",
+  "rewritten_source_commit": "d63e5e0eff460851656419c23309f573f6e49098",
+  "archive_coverage": {
+    "historical_unique_blobs": 14,
+    "verified_archive_blobs": 14,
+    "unarchived_blobs": [],
+    "index": "generated-artifacts.json"
+  },
+  "signature_changes": {
+    "signed_commit_signatures_removed": 44,
+    "signed_tag_signatures_removed": [],
+    "note": "Original signed objects remain in the verified recovery bundles. Signatures cannot authenticate rewritten commit bytes."
+  },
+  "preservation": {
+    "worktrees": 3,
+    "uncommitted_source_files": [
+      "packaging/completions/_zfetch",
+      "tests/test_completion.py"
+    ],
+    "non_target_files_and_index_entries": "preserved byte-for-byte",
+    "existing_release_asset_bytes": "unchanged",
+    "reflog_expiry": false,
+    "gc_performed": false
+  },
+  "boundary": {
+    "controlled_heads_and_tags": "All 23 refs in this mapping were cleaned.",
+    "read_only_pull_refs_observed": 5,
+    "note": "This does not erase read-only GitHub pull refs, forks, caches, old clones, or retained local recovery objects. Automatically generated tag source archives have new hashes; existing uploaded release assets retain theirs."
+  }
+}
