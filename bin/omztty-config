@@ -13,6 +13,7 @@ usage() {
 Usage: omztty config COMMAND
   init                Copy the bundled Ink defaults into an editable profile
   plan [--json]       Preview the complete home configuration deployment
+  refresh             Update unchanged defaults after a suite upgrade
   apply [--backup]    Link the profile through zdot; back up conflicts explicitly
   status              Inspect every managed configuration
   remove              Restore the files saved before adoption
@@ -33,6 +34,35 @@ case "$config" in
     *) die 'XDG_CONFIG_HOME must be below HOME for this home deployment' ;;
 esac
 case "/$config_relative/" in */../*|*/./*) die 'XDG_CONFIG_HOME must not contain dot segments' ;; esac
+prepare_profile() {
+    defaults_source="$1/components/zrc/profiles/ink"
+    defaults_out=$2
+    [ -f "$defaults_source/profile.zdot" ] || die 'this bundle does not include zrc defaults'
+    mkdir -p -- "$defaults_out"
+    cp -R -- "$defaults_source/files" "$defaults_out/files"
+    tab=$(printf '\t')
+    while IFS="$tab" read -r source destination; do
+        case "$source" in ''|'#'*) printf '%s\n' "$source"; continue ;; esac
+        case "$destination" in
+            .config/*) destination="$config_relative/${destination#.config/}" ;;
+        esac
+        printf '%s\t%s\n' "$source" "$destination"
+    done < "$defaults_source/profile.zdot" > "$defaults_out/profile.zdot"
+    cp -- "$1/config/home/.zshrc" "$defaults_out/files/.zshrc"
+    mkdir -p -- "$defaults_out/files/.config/ztty"
+    cp -- "$1/config/ztty/config" "$defaults_out/files/.config/ztty/config"
+    printf 'files/.zshrc\t.zshrc\nfiles/.config/ztty\t%s/ztty\n' "$config_relative" >> "$defaults_out/profile.zdot"
+    printf '%s\n' omztty-profile-v1 > "$defaults_out/.omztty-profile"
+    cp -- "$1/VERSION" "$defaults_out/.suite-version"
+}
+regular_profile_file() {
+    probe=$1
+    while [ "$probe" != "$profile" ]; do
+        [ ! -L "$probe" ] || return 1
+        probe=${probe%/*}
+    done
+    [ -f "$1" ]
+}
 action=${1:-help}
 [ "$#" -eq 0 ] || shift
 case "$action" in
@@ -47,32 +77,16 @@ case "$action" in
             printf 'Profile already exists: %s\n' "$profile"
             exit 0
         fi
-        defaults="$root/components/zrc/profiles/ink"
-        [ -f "$defaults/profile.zdot" ] || die 'this bundle does not include zrc defaults'
         mkdir -p -- "$config/oh-my-ztty"
         stage=$(mktemp -d "$config/oh-my-ztty/.profile.XXXXXXXX")
         trap 'rm -rf -- "$stage"' EXIT
         trap 'exit 130' INT
         trap 'exit 143' HUP TERM
-        cp -R -- "$defaults/files" "$stage/files"
-        tab=$(printf '\t')
-        while IFS="$tab" read -r source destination; do
-            case "$source" in ''|'#'*) printf '%s\n' "$source"; continue ;; esac
-            case "$destination" in
-                .config/*) destination="$config_relative/${destination#.config/}" ;;
-            esac
-            printf '%s\t%s\n' "$source" "$destination"
-        done < "$defaults/profile.zdot" > "$stage/profile.zdot"
-        cp -- "$root/config/home/.zshrc" "$stage/files/.zshrc"
-        mkdir -p -- "$stage/files/.config/ztty"
-        cp -- "$root/config/ztty/config" "$stage/files/.config/ztty/config"
-        printf 'files/.zshrc\t.zshrc\nfiles/.config/ztty\t%s/ztty\n' "$config_relative" >> "$stage/profile.zdot"
-        printf '%s\n' omztty-profile-v1 > "$stage/.omztty-profile"
-        cp -- "$root/VERSION" "$stage/.suite-version"
+        prepare_profile "$root" "$stage"
         mv -T -- "$stage" "$profile"
         printf 'Prepared %s\nNext: omztty config plan\nApply: omztty config apply --backup\n' "$profile"
         exit 0 ;;
-    plan|apply|status|remove|audit|sync) ;;
+    plan|apply|status|remove|audit|sync|refresh) ;;
     *) usage >&2; exit 2 ;;
 esac
 [ -d "$profile" ] && [ ! -L "$profile" ] &&
@@ -81,12 +95,96 @@ esac
 case "$action" in
     plan) [ "$#" -eq 0 ] || { [ "$#" -eq 1 ] && [ "$1" = --json ]; } || die 'plan accepts only --json' ;;
     apply) [ "$#" -eq 0 ] || { [ "$#" -eq 1 ] && [ "$1" = --backup ]; } || die 'apply accepts only --backup' ;;
-    status|remove|audit) [ "$#" -eq 0 ] || die "$action takes no arguments" ;;
+    status|remove|audit|refresh) [ "$#" -eq 0 ] || die "$action takes no arguments" ;;
     sync)
         [ "$#" -eq 1 ] || die 'sync requires status, pull, or push'
         case "$1" in status|pull|push) ;; *) die 'sync requires status, pull, or push' ;; esac
         exec "$root/bin/zdot" sync --root "$profile" "$1" ;;
 esac
+if [ "$action" = refresh ]; then
+    [ -f "$profile/.suite-version" ] && [ ! -L "$profile/.suite-version" ] ||
+      die 'profile has no regular .suite-version baseline'
+    previous=$(cat "$profile/.suite-version")
+    version=$(cat "$root/VERSION")
+    for value in "$previous" "$version"; do
+        printf '%s\n' "$value" | LC_ALL=C grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' ||
+          die 'profile and suite versions must be stable semantic versions'
+    done
+    if [ "$previous" = "$version" ]; then
+        printf 'Profile baseline is already suite %s.\n' "$version"
+        exit 0
+    fi
+    releases=${root%/*}
+    base=${releases%/*}
+    [ "${releases##*/}" = releases ] &&
+      [ "$(cat "$base/.owner" 2>/dev/null)" = oh-my-ztty-v1 ] ||
+      die 'refresh requires an installed suite'
+    platform=$(cat "$root/PLATFORM")
+    case "$platform" in linux-x86_64|linux-aarch64) ;; *) die 'unsupported suite platform' ;; esac
+    baseline="$releases/$previous-$platform"
+    [ -d "$baseline" ] && [ ! -L "$baseline" ] &&
+      [ -f "$baseline/MANIFEST.sha256" ] ||
+      die "baseline release $previous is unavailable; restore that installed release before refreshing"
+    for release in "$baseline" "$root"; do
+        (cd "$release" && sha256sum --quiet -c MANIFEST.sha256) ||
+          die "release defaults were modified: $release"
+    done
+    stage=$(mktemp -d "$config/oh-my-ztty/.refresh.XXXXXXXX")
+    trap 'rm -rf -- "$stage"' EXIT
+    trap 'exit 130' INT
+    trap 'exit 143' HUP TERM
+    prepare_profile "$baseline" "$stage/old"
+    prepare_profile "$root" "$stage/new"
+    (cd "$stage/old" && find files -type f -print | LC_ALL=C sort) > "$stage/old-files"
+    (cd "$stage/new" && find files -type f -print | LC_ALL=C sort) > "$stage/new-files"
+    cmp -s "$stage/old-files" "$stage/new-files" &&
+      cmp -s "$stage/old/profile.zdot" "$stage/new/profile.zdot" ||
+      die 'default file layout changed; review the new profile before refreshing'
+    : > "$stage/updates"
+    updated=0
+    preserved=0
+    while IFS= read -r relative; do
+        old="$stage/old/$relative"
+        new="$stage/new/$relative"
+        destination="$profile/$relative"
+        cmp -s "$old" "$new" && continue
+        # Never traverse a user-replaced directory or overwrite a source symlink.
+        if regular_profile_file "$destination"; then
+            cmp -s "$new" "$destination" && continue
+            if cmp -s "$old" "$destination"; then
+                replacement="$stage/updates.d/$relative"
+                mkdir -p -- "${replacement%/*}"
+                cp -p -- "$destination" "$replacement"
+                chmod u+w -- "$replacement"
+                cat -- "$new" > "$replacement"
+                chmod --reference="$destination" -- "$replacement"
+                printf '%s\n' "$relative" >> "$stage/updates"
+                continue
+            fi
+        fi
+        printf 'preserved %s\n' "$relative"
+        preserved=$((preserved + 1))
+    done < "$stage/new-files"
+    while IFS= read -r relative; do
+        destination="$profile/$relative"
+        if regular_profile_file "$destination" && cmp -s "$stage/old/$relative" "$destination"; then
+            mv -Tf -- "$stage/updates.d/$relative" "$destination"
+            printf 'updated   %s\n' "$relative"
+            updated=$((updated + 1))
+        else
+            printf 'preserved %s (changed during refresh)\n' "$relative"
+            preserved=$((preserved + 1))
+        fi
+    done < "$stage/updates"
+    cp -p -- "$profile/.suite-version" "$stage/version"
+    chmod u+w -- "$stage/version"
+    printf '%s\n' "$version" > "$stage/version"
+    chmod --reference="$profile/.suite-version" -- "$stage/version"
+    mv -Tf -- "$stage/version" "$profile/.suite-version"
+    printf 'Refreshed defaults from %s to %s: %s updated, %s preserved.\n' "$previous" "$version" "$updated" "$preserved"
+    printf 'Existing mappings, deployment backups and personal additions were preserved.\n'
+    exit 0
+fi
 if [ "$action" = audit ]; then
     "$root/bin/zdot" status --root "$profile" --target "$HOME" --state-dir "$state"
     printf '\nKnown legacy shell locations:\n'
