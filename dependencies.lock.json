@@ -1,42 +1,42 @@
 {
   "schema": 2,
-  "updated_at": "2026-11-20T17:52:49+00:00",
+  "updated_at": "2026-11-20T18:33:44+00:00",
   "components": {
     "ztty": {
       "repository": "https://github.com/LIghtJUNction/ztty.git",
       "branch": "main",
-      "commit": "d8845547b4da8fbc1fb6437c2765cf11981e598c",
-      "observed_at": "2026-11-20T17:32:15+00:00"
+      "commit": "a43aebb17a11b8c25f2c970d0d36a43f67082f9f",
+      "observed_at": "2026-11-20T18:33:32+00:00"
     },
     "ssmcp": {
       "repository": "https://github.com/LIghtJUNction/ssmcp.git",
       "branch": "main",
-      "commit": "7ddaeab07be67f25f8277aa37486474710cb1fa3",
-      "observed_at": "2026-11-20T17:32:17+00:00"
+      "commit": "cace37c7f7c8c2ad60c9ec712d39f77bc172b88b",
+      "observed_at": "2026-11-20T18:33:33+00:00"
     },
     "zshard": {
       "repository": "https://github.com/LIghtJUNction/zshard.git",
       "branch": "main",
       "commit": "f7842f70e439c4abda2a46698f0ebe067d38b297",
-      "observed_at": "2026-11-20T17:32:19+00:00"
+      "observed_at": "2026-11-20T18:33:35+00:00"
     },
     "zdot": {
       "repository": "https://github.com/LIghtJUNction/zdot.git",
       "branch": "main",
-      "commit": "d8084d4ae55a24113f56335e8b584b5f13d91925",
-      "observed_at": "2026-11-20T17:32:21+00:00"
+      "commit": "a3c6a75b1e66747822b9b69d9e046d2aac249210",
+      "observed_at": "2026-11-20T18:33:36+00:00"
     },
     "zrc": {
       "repository": "https://github.com/LIghtJUNction/zrc.git",
       "branch": "main",
-      "commit": "6311bf3377643fff0cff5a45a70b2256e22cc51f",
-      "observed_at": "2026-11-20T17:32:22+00:00"
+      "commit": "2f10ea8dcfbef2db1204ed46dd21ff98c61ed8ee",
+      "observed_at": "2026-11-20T18:33:39+00:00"
     },
     "zfetch": {
       "repository": "https://github.com/LIghtJUNction/zfetch.git",
       "branch": "main",
       "commit": "f0614f3b76eca222f4b3880f8dd1707d1308f098",
-      "observed_at": "2026-11-20T17:52:48+00:00"
+      "observed_at": "2026-11-20T18:33:40+00:00"
     }
   }
 }
