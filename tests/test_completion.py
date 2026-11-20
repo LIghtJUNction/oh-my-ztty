@@ -185,6 +185,8 @@ class InteractiveCompletion(unittest.TestCase):
             "omztty ai conn": "omztty ai connect",
             "omztty dot sy": "omztty dot sync",
             "omztty dot sync --root . pul": "omztty dot sync --root . pull",
+            "omztty dot --root . sync pul": "omztty dot --root . sync pull",
+            "omztty dot --root . plan --b": "omztty dot --root . plan --backup",
             "omztty info --no": "omztty info --no-color",
         })
 

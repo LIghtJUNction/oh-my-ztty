@@ -23,7 +23,17 @@ _omztty_zdot() {
         '(-h --help)'{-h,--help}'[Show help]'
         '(-V --version)'{-V,--version}'[Show version]'
     )
-    case $words[2] in
+    local action=''
+    local -i index=2
+    while (( index < CURRENT )); do
+        case $words[index] in
+            --root|--target|--profile|--state-dir) (( index += 2 )) ;;
+            --root=*|--target=*|--profile=*|--state-dir=*|--backup|--json|-h|--help|-V|--version)
+                (( ++index )) ;;
+            *) action=$words[index]; break ;;
+        esac
+    done
+    case $action in
         sync)
             _arguments "$options[@]" '1:command:(sync)' '2:operation:(status pull push)'
             ;;
@@ -37,7 +47,7 @@ _omztty_zdot() {
                 '--state-dir[Private journal directory]:directory:_directories'
                 '--json[Emit machine-readable output]'
             )
-            [[ $words[2] == (plan|apply) ]] && options+=('--backup[Preserve conflicting files]')
+            [[ $action == (plan|apply) ]] && options+=('--backup[Preserve conflicting files]')
             _arguments "$options[@]" '1:command:(init plan apply status remove sync)'
             ;;
     esac
