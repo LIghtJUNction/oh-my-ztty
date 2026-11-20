@@ -28,14 +28,15 @@ def planned_files(current, version):
         raise SystemExit("Overview must declare the current suite release once")
     changes[overview] = text.replace(old, f"The current suite release is **{version}**")
 
-    guide = ROOT / "site/content/installation.md"
-    text = guide.read_text()
     old_tag = f"https://github.com/LIghtJUNction/oh-my-ztty/releases/tag/v{current}"
     old_archive = f"oh-my-ztty-{current}-linux-"
-    if old_tag not in text or old_archive not in text:
-        raise SystemExit("Installation guide must identify the current release and archive")
-    text = text.replace(old_tag, f"https://github.com/LIghtJUNction/oh-my-ztty/releases/tag/v{version}")
-    changes[guide] = text.replace(old_archive, f"oh-my-ztty-{version}-linux-")
+    for name in ("docs/installation.md", "site/content/installation.md"):
+        guide = ROOT / name
+        text = guide.read_text()
+        if old_tag not in text or old_archive not in text:
+            raise SystemExit(f"Installation guide {name} must identify the current release and archive")
+        text = text.replace(old_tag, f"https://github.com/LIghtJUNction/oh-my-ztty/releases/tag/v{version}")
+        changes[guide] = text.replace(old_archive, f"oh-my-ztty-{version}-linux-")
     return changes
 
 def main():

@@ -6,6 +6,8 @@ A lean Linux terminal setup built on Project Z: **ztty + zsh + zshard + zrc + zd
 
 ## Install
 
+### Per-user release
+
 Download and inspect the installer, then run it:
 
 ```sh
@@ -14,7 +16,18 @@ sh install.sh
 ~/.local/bin/omztty shell
 ```
 
-Linux x86_64 and ARM64. Requires system zsh; the graphical terminal uses X11/fontconfig. The bundle includes the Project Z components and a native application configuration profile. Installation is per user and repeatable. Your login shell and existing tools remain available.
+Linux x86_64 and ARM64. Requires system zsh; the graphical terminal uses X11/fontconfig. The bundle includes the Project Z components and a native application configuration profile. Installation is per user and repeatable. Your login shell and existing tools remain available. Runtime and configuration commands need no Rust or Python.
+
+### Arch Linux (AUR)
+
+Install the [oh-my-ztty-bin package](https://aur.archlinux.org/packages/oh-my-ztty-bin) with an AUR helper:
+
+```sh
+yay -S oh-my-ztty-bin
+omztty doctor
+```
+
+Use your AUR helper to upgrade the system package. Configuration adoption remains explicit through the commands below. Before removing the package, run `omztty config remove` to restore adopted configurations, then remove it with your package manager. [Installation guide](docs/installation.md#arch-linux-aur) includes the `makepkg` route.
 
 ## The suite
 
@@ -45,7 +58,7 @@ omztty config plan --json
 omztty config apply --backup
 ~~~
 
-One editable profile manages zsh, ztty, Neovim, Kitty, Foot, Ghostty, tmux, fzf, bat, ripgrep and Git display settings. Existing configurations are backed up by zdot. [Configuration and recovery](docs/configuration.md) explains the native editor, application coverage and file locations.
+One editable profile manages zsh, ztty, Neovim, Kitty, Foot, Ghostty, tmux, fzf, bat, ripgrep and Git display settings. Existing configurations are backed up by zdot. After upgrading, run `omztty config refresh` to update defaults you have not changed; your edits and deliberately removed files are preserved. [Configuration and recovery](docs/configuration.md) explains the native editor, application coverage and file locations.
 
 ## Everyday commands
 
@@ -57,8 +70,8 @@ omztty doctor          # Check binaries and system dependencies
 omztty ai context      # Emit explicit shell context
 omztty ai connect      # Start ssmcp in your workspace
 omztty dot plan --root ~/dotfiles --target "$HOME"  # Preview dotfile changes
-omztty update          # Install the latest suite release
-omztty uninstall       # Remove this installation's managed files
+omztty update          # Update a per-user installation
+omztty uninstall       # Restore configs and remove a per-user installation
 ```
 
 AI-generated commands are reviewed in the shell input line before execution. The suite does not start an AI model or resident agent at shell startup.
