@@ -1,7 +1,7 @@
 #!/bin/sh
 # Per-user release installation; never changes the login shell.
 set -eu
-VERSION=0.2.2
+VERSION=0.2.3
 die() { printf 'oh-my-ztty: %s\n' "$*" >&2; exit 1; }
 usage() {
     cat <<'EOF'
