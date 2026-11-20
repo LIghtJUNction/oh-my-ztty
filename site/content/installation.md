@@ -23,7 +23,35 @@ On Ubuntu 24.04, install the basic dependencies with:
 sudo apt-get install zsh git curl libx11-6 libxrender1 libxft2 libfontconfig1
 ```
 
+## Arch Linux (AUR)
+
+Install the [oh-my-ztty-bin package](https://aur.archlinux.org/packages/oh-my-ztty-bin) with an AUR helper:
+
+```sh
+yay -S oh-my-ztty-bin
+omztty doctor
+```
+
+With Git and Arch's `base-devel` tools installed, the package can also be built directly:
+
+```sh
+git clone https://aur.archlinux.org/oh-my-ztty-bin.git
+cd oh-my-ztty-bin
+makepkg -si
+```
+
+The package uses prebuilt release binaries; runtime and configuration commands need no Rust or Python. Upgrades go through your AUR helper, and the system package manager owns installed files. Configuration adoption is explicit. After upgrading an adopted profile, run `omztty config refresh` to update defaults you have not changed.
+
+Restore adopted configurations before removing the package:
+
+```sh
+omztty config remove
+sudo pacman -R oh-my-ztty-bin
+```
+
 ## Install a release
+
+The following installer manages a per-user installation.
 
 Download the installer so you can inspect it before execution:
 
@@ -65,6 +93,8 @@ The profile unifies zsh, ztty, Neovim and everyday terminal-tool configurations.
 
 Open a new terminal after adoption. Editable files live under `${XDG_CONFIG_HOME:-$HOME/.config}/oh-my-ztty/profile`. The journal and backups live under `${XDG_STATE_HOME:-$HOME/.local/state}/zdot/oh-my-ztty`. HOME adoption requires an absolute `XDG_CONFIG_HOME` within HOME; roots outside HOME are rejected.
 
+Suite upgrades preserve the editable profile. Run `omztty config refresh` after upgrading to update files that still match their shipped defaults. Custom edits, added files and deliberately removed files are preserved.
+
 Personal completion files belong in `${XDG_CONFIG_HOME:-$HOME/.config}/oh-my-ztty/completions/`. The preset registers that directory for on-demand loading. It stays outside the runtime and survives updates and uninstallation.
 
 ## System overview
@@ -99,9 +129,13 @@ Use the aarch64 archive on ARM64. If you have already obtained the digest from t
 
 ## Update or reinstall
 
+For a per-user installation:
+
 ```sh
 omztty update
 ```
+
+If you adopted a home profile, run `omztty config refresh` after updating to receive changes to unmodified defaults. Upgrade the AUR package through your AUR helper.
 
 To change the desktop entry choice during an update, select one option:
 
@@ -117,6 +151,8 @@ Each version has its own directory. A `current` link selects the active version,
 Before activation, the installer prepares an audited completion cache. A failed preparation leaves the previous version active. Reinstalling the same archive verifies the existing files; it preserves and reports an installed version that has been modified.
 
 ## Uninstall
+
+For a per-user installation:
 
 ```sh
 omztty uninstall

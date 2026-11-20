@@ -6,6 +6,8 @@
 
 ## 安装
 
+### 用户级发行包
+
 先下载并查看安装脚本，再执行：
 
 ```sh
@@ -14,7 +16,18 @@ sh install.sh
 ~/.local/bin/omztty shell
 ```
 
-支持 Linux x86_64、ARM64。系统需提供 zsh 5.9+；图形终端使用 X11/XWayland，正式构建在 Ubuntu 24.04 验证。安装包包含六个 Project Z 组件的运行程序或原生配置，按用户安装，可重复执行，无需在安装时配置 Rust 或 Python。使用编辑器配置需要另行安装 Neovim 0.11+。
+支持 Linux x86_64、ARM64。系统需提供 zsh 5.9+；图形终端使用 X11/XWayland，正式构建在 Ubuntu 24.04 验证。安装包包含六个 Project Z 组件的运行程序或原生配置，按用户安装，可重复执行，无需在安装时配置 Rust 或 Python。使用编辑器配置需要另行安装 Neovim 0.11+；日常运行和配置部署也不需要 Rust 或 Python。
+
+### Arch Linux（AUR）
+
+通过 AUR 助手安装 [oh-my-ztty-bin](https://aur.archlinux.org/packages/oh-my-ztty-bin)：
+
+```sh
+yay -S oh-my-ztty-bin
+omztty doctor
+```
+
+系统软件包通过 AUR 助手更新，配置采用仍需执行下方命令。卸载软件包前，先运行 `omztty config remove` 恢复原配置，再通过包管理器移除软件包。未使用 AUR 助手时，可按[安装说明](docs/installation.md#arch-linux-aur)使用 `makepkg` 安装。
 
 ## 六个独立项目
 
@@ -52,7 +65,7 @@ omztty config status
 
 编辑源文件位于 `~/.config/oh-my-ztty/profile/`，个人 shell 设置放在 `~/.config/oh-my-ztty/local.zsh`，个人补全放在 `~/.config/oh-my-ztty/completions/`。对应 XDG 配置可改变这些位置；HOME 配置部署要求 `XDG_CONFIG_HOME` 位于 HOME 内。
 
-`omztty config remove` 恢复采用配置前保存的文件。卸载套件时也会先恢复这个受管理的 profile；恢复失败时保留运行程序供修复。通过 `omztty dot` 部署的其他仓库独立管理。完整位置与恢复步骤见[配置说明](docs/configuration.md)。
+升级后运行 `omztty config refresh`，即可更新尚未自行修改的默认文件；个人编辑、新增文件和主动删除的文件会保留。`omztty config remove` 恢复采用配置前保存的文件。用户级安装的 `omztty uninstall` 会先恢复这个受管理的 profile；恢复失败时保留运行程序供修复。通过 `omztty dot` 部署的其他仓库独立管理。完整位置与恢复步骤见[配置说明](docs/configuration.md)。
 
 ## 常用命令
 
@@ -65,8 +78,8 @@ omztty doctor          # 检查组件和系统依赖
 omztty config audit    # 检查统一配置及已知旧 shell 框架位置
 omztty ai context      # 输出明确选择的 shell 上下文
 omztty ai connect      # 在当前工作区启动 ssmcp
-omztty update          # 更新整套发行版
-omztty uninstall       # 先恢复采用的配置，再卸载套件
+omztty update          # 更新用户级安装
+omztty uninstall       # 先恢复配置，再卸载用户级安装
 ```
 
 AI 建议的命令先进入输入行，由人确认执行。个人配置、补全与历史位于发行版目录之外，更新或卸载时保留。

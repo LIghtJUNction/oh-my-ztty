@@ -31,6 +31,11 @@ class VersionPublication(unittest.TestCase):
                 "[release](https://github.com/LIghtJUNction/oh-my-ztty/releases/tag/v0.1.1)\n"
                 "sh install.sh --from ./oh-my-ztty-0.1.1-linux-x86_64.tar.gz\n"
                 "[audit](../../docs/reports/public-release-0.1.1.json)\n",
+            "docs/installation.md":
+                "[release](https://github.com/LIghtJUNction/oh-my-ztty/releases/tag/v0.1.1)\n"
+                "sh install.sh --from ./oh-my-ztty-0.1.1-linux-x86_64.tar.gz\n"
+                "sh install.sh --from ./oh-my-ztty-0.1.1-linux-aarch64.tar.gz\n"
+                "[audit](reports/public-release-0.1.1.json)\n",
             "Makefile": "check:\n\t@true\n",
         }
         for name, text in files.items():
@@ -57,25 +62,34 @@ class VersionPublication(unittest.TestCase):
         self.assertEqual((self.root / "VERSION").read_text(), "0.1.2\n")
         self.assertIn("VERSION=0.1.2\n", (self.root / "install.sh").read_text())
         overview = (self.root / "site/content/index.md").read_text()
-        guide = (self.root / "site/content/installation.md").read_text()
         self.assertIn("The current suite release is **0.1.2**", overview)
-        self.assertIn("releases/tag/v0.1.2", guide)
-        self.assertIn("oh-my-ztty-0.1.2-linux-x86_64.tar.gz", guide)
         self.assertIn("release-0.1.1.md", overview)
-        self.assertIn("public-release-0.1.1.json", guide)
+        for name in ("docs/installation.md", "site/content/installation.md"):
+            with self.subTest(guide=name):
+                guide = (self.root / name).read_text()
+                self.assertIn("releases/tag/v0.1.2", guide)
+                self.assertIn("oh-my-ztty-0.1.2-linux-x86_64.tar.gz", guide)
+                self.assertNotIn("oh-my-ztty-0.1.1-linux-", guide)
+                self.assertIn("public-release-0.1.1.json", guide)
+        self.assertIn("oh-my-ztty-0.1.2-linux-aarch64.tar.gz",
+                      (self.root / "docs/installation.md").read_text())
 
     def test_bump_updates_current_guidance_and_keeps_historical_evidence(self):
         self.bump()
         self.assert_current_docs()
 
     def test_document_mismatch_does_not_partially_bump(self):
-        guide = self.root / "site/content/installation.md"
-        guide.write_text(guide.read_text().replace("releases/tag/v0.1.1", "releases/tag/v0.1.0"))
-        before = {path: path.read_bytes() for path in self.root.rglob("*") if path.is_file()}
-        result = self.bump(ok=False)
-        self.assertNotEqual(result.returncode, 0)
-        self.assertIn("Installation guide", result.stderr)
-        self.assertEqual(before, {path: path.read_bytes() for path in self.root.rglob("*") if path.is_file()})
+        for name in ("docs/installation.md", "site/content/installation.md"):
+            with self.subTest(guide=name):
+                guide = self.root / name
+                original = guide.read_text()
+                guide.write_text(original.replace("releases/tag/v0.1.1", "releases/tag/v0.1.0"))
+                before = {path: path.read_bytes() for path in self.root.rglob("*") if path.is_file()}
+                result = self.bump(ok=False)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("Installation guide " + name, result.stderr)
+                self.assertEqual(before, {path: path.read_bytes() for path in self.root.rglob("*") if path.is_file()})
+                guide.write_text(original)
 
     def test_release_publishes_matching_version_and_documentation(self):
         remote = self.work / "remote.git"
@@ -94,7 +108,7 @@ class VersionPublication(unittest.TestCase):
         head = self.command("git", "--git-dir", str(remote), "rev-parse", "refs/heads/main").stdout.strip()
         tag = self.command("git", "--git-dir", str(remote), "rev-parse", "refs/tags/v0.1.2^{commit}").stdout.strip()
         self.assertEqual(head, tag)
-        for name in ("VERSION", "install.sh", "site/content/index.md", "site/content/installation.md"):
+        for name in ("VERSION", "install.sh", "site/content/index.md", "docs/installation.md", "site/content/installation.md"):
             published = self.command("git", "--git-dir", str(remote), "show", "v0.1.2:" + name).stdout
             self.assertEqual(published, (self.root / name).read_text())
         self.assertEqual(self.command("git", "status", "--porcelain").stdout, "")
