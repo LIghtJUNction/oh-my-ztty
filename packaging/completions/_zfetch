@@ -1,2 +1,12 @@
 #compdef zfetch
-_arguments '(--format)--json[emit structured system information]' '(--json)--format[select text or JSON output]:format:(text json)' '--no-color[disable ANSI color]' '(-h --help)'{-h,--help}'[show help]' '(-V --version)'{-V,--version}'[show version]'
+
+# Keep the space-separated form when completing the option name.
+local format_option='*--format'
+[[ $PREFIX$SUFFIX == --format=* ]] && format_option+='='
+
+_arguments \
+    '*--json[emit structured system information]' \
+    "${format_option}[select text or JSON output]:format:(text json)" \
+    '--no-color[disable ANSI color]' \
+    '(-h --help)'{-h,--help}'[show help]' \
+    '(-V --version)'{-V,--version}'[show version]'
