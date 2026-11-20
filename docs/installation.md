@@ -1,13 +1,15 @@
 # Installation
 
-The release bundle includes ztty, zshard, zrc, zdot, zfetch and ssmcp. Installation and configuration commands from a release do not require Rust or Python. Install system zsh 5.9 or newer first. The graphical terminal uses X11/XWayland and needs X11, Xrender, Xft and their fontconfig dependencies. Both published architectures require glibc 2.34 or newer and libgcc for ztty and ssmcp; zdot is static. Formal release validation targets Ubuntu 24.04; the ABI floor alone does not certify every distribution.
+The release bundle includes ztty, zshard, zrc, zdot, zfetch and ssmcp. Installation and configuration commands from a release do not require Rust or Python. Install system zsh 5.9 or newer first. The suite window is validated on X11/XWayland. The bundled ztty 0.5.0 links X11, Xrender, Xft, Fontconfig, Wayland, xkbcommon, FreeType, HarfBuzz, EGL and GLES runtime libraries; these libraries are required even when selecting the X11 backend. Both published architectures require glibc 2.34 or newer and libgcc for ztty and ssmcp; zdot is static. Formal release validation targets Ubuntu 24.04; the ABI floor alone does not certify every distribution.
 
 Using the editor profile requires Neovim 0.11 or newer, installed separately. The configuration commands do not install applications or language servers.
 
 On Ubuntu 24.04, install the system dependencies with:
 
 ```sh
-sudo apt-get install zsh git curl libx11-6 libxrender1 libxft2 libfontconfig1
+sudo apt-get install zsh git curl libx11-6 libxrender1 libxft2 libfontconfig1 \
+  libwayland-client0 libwayland-egl1 libwayland-cursor0 libxkbcommon0 \
+  libfreetype6 libharfbuzz0b libegl1 libgles2 libgcc-s1
 ```
 
 ## Arch Linux (AUR)

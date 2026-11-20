@@ -22,10 +22,11 @@ def main():
                    XDG_CONFIG_HOME=str(home / ".config"), XDG_CACHE_HOME=str(home / ".cache"),
                    XDG_STATE_HOME=str(home / ".local/state"))
         def run(*argv):
-            result = subprocess.run([str(x) for x in argv], env=env, text=True, capture_output=True, check=True, timeout=45)
+            result = subprocess.run([str(x) for x in argv], env=env, text=True, capture_output=True, timeout=45)
             print(result.stdout, end="")
             if result.stderr:
                 print(result.stderr, end="")
+            result.check_returncode()
             return result.stdout
         install = ["sh", ROOT / "install.sh", "--from", archive]
         run(*install)

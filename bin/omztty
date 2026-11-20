@@ -94,9 +94,12 @@ case "$cmd" in
             if command -v "$tool" >/dev/null 2>&1; then printf 'ok   system %s\n' "$tool"; else printf 'miss system %s\n' "$tool"; failed=1; fi
         done
         for tool in ztty ssmcp zdot zfetch; do
-            if "$root/bin/$tool" --version >/dev/null 2>&1; then
-                printf 'ok   '; "$root/bin/$tool" --version
-            else printf 'fail bundled %s\n' "$tool"; failed=1; fi
+            if version_output=$("$root/bin/$tool" --version 2>&1); then
+                printf 'ok   %s\n' "$version_output"
+            else
+                printf 'fail bundled %s\n%s\n' "$tool" "$version_output"
+                failed=1
+            fi
         done
         if [ -f "$root/components/zshard/zshard.zsh" ]; then printf 'ok   zshard\n'; else printf 'miss zshard\n'; failed=1; fi
         if [ -n "${DISPLAY:-}" ]; then printf 'ok   X11/XWayland display configured\n'; else printf 'info no DISPLAY; shell and AI commands still work\n'; fi

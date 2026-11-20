@@ -38,7 +38,10 @@ jobs:
       - name: Install build and shell prerequisites
         run: |
           sudo apt-get update
-          sudo apt-get install -y zsh xvfb xdotool imagemagick fonts-dejavu-core libx11-6 libxft2 libxrender1 libfontconfig1
+          sudo apt-get install -y zsh xvfb xdotool imagemagick fonts-dejavu-core \
+            libx11-6 libxft2 libxrender1 libfontconfig1 \
+            libwayland-client0 libwayland-egl1 libwayland-cursor0 libxkbcommon0 \
+            libfreetype6 libharfbuzz0b libegl1 libgles2 libgcc-s1
           rustup toolchain install 1.100.0 --profile minimal
           rustup default 1.100.0
       - name: Check installer lifecycle
