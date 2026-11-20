@@ -2,7 +2,7 @@
 
 A lean Linux terminal setup built on Project Z: **ztty + zsh + zshard + zrc + zdot + zfetch + ssmcp**.
 
-[Website](https://lightjunction.github.io/oh-my-ztty/) · [中文](README.zh-CN.md) · [Install guide](docs/installation.md) · [Performance](docs/performance.md)
+[Website](https://lightjunction.github.io/oh-my-ztty/) · [中文](README.zh-CN.md) · [Install guide](docs/installation.md) · [Performance](docs/performance.md) · [0.2.1 workstation report](docs/reports/workspace-0.2.1.md)
 
 ## Install
 
@@ -33,7 +33,9 @@ Each is a separate open-source repository, pinned here as a Git submodule. zsh i
 
 A warm graphite, linen and copper palette, generous spacing and a two-line prompt with the path, cached Git branch and command status. The prompt uses zsh builtins; installed fonts fall back through Fontconfig. [Customize the preset](docs/installation.md#ink-appearance).
 
-![The native Ink editor running in ztty](docs/reports/workspace-0.2.0/nvim-home.jpg)
+![The native Ink editor running in ztty](docs/reports/workspace-0.2.1/nvim-home.jpg)
+
+Actual deployed configuration photographed on an isolated display. The documented workstation's real desktop launch chain was verified separately with a new suite broker, program execution and broker reuse; its default entry is now oh-my-ztty. See the [report, recovery history and acceptance scope](docs/reports/workspace-0.2.1.md).
 
 ## Make it your default workspace
 

@@ -1,0 +1,45 @@
+{
+  "schema": "omztty.public-maintenance-summary.v1",
+  "provenance": "Normalized summary of the operator-verified native maintenance receipts. Private paths, file inventories, environment values and history contents are excluded.",
+  "legacy_recovery": {
+    "archived_entries": 1566,
+    "regular_file_bytes": 87244510,
+    "archive_bytes": 81719145,
+    "restore_helper_preserved": true,
+    "recovery_check": "pass"
+  },
+  "cache_operations": [
+    {
+      "tool": "mise",
+      "command": "mise cache clear",
+      "before_logical_kib": 16036828,
+      "installed_tools_retained": true
+    },
+    {
+      "tool": "go",
+      "command": "go clean -cache",
+      "before_logical_kib": 7124520,
+      "after_logical_kib": 8,
+      "active_process_references_checked": true,
+      "filesystem_available_before_bytes": 19296174080,
+      "filesystem_available_after_bytes": 20841717760
+    },
+    {
+      "tool": "uv",
+      "command": "uv cache prune --offline",
+      "native_reported_mib": 495.4
+    },
+    {
+      "tool": "cargo",
+      "command": "cargo clean",
+      "native_reported_mib": [
+        243.5,
+        48.0
+      ],
+      "additional_target_rejected_without_valid_cachedir_tag": true,
+      "protection_bypassed": false
+    }
+  ],
+  "final_filesystem_available_bytes": 20812275712,
+  "space_accounting": "Logical sizes and native per-tool reports are not added into a physical-space-reclaimed total. The filesystem-available observation is a separate measurement on an active workstation."
+}

@@ -1,0 +1,12 @@
+{
+  "selected": "oh-my-ztty.desktop",
+  "argv_suffix": [
+    "terminal",
+    "-e",
+    "printf",
+    "%s",
+    "one two"
+  ],
+  "path_with_spaces": true,
+  "passed": true
+}
