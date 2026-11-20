@@ -10,7 +10,35 @@ On Ubuntu 24.04, install the system dependencies with:
 sudo apt-get install zsh git curl libx11-6 libxrender1 libxft2 libfontconfig1
 ```
 
+## Arch Linux (AUR)
+
+Install the [oh-my-ztty-bin package](https://aur.archlinux.org/packages/oh-my-ztty-bin) with an AUR helper:
+
+```sh
+yay -S oh-my-ztty-bin
+omztty doctor
+```
+
+With Git and Arch's `base-devel` tools installed, you can also build the package directly:
+
+```sh
+git clone https://aur.archlinux.org/oh-my-ztty-bin.git
+cd oh-my-ztty-bin
+makepkg -si
+```
+
+This package uses prebuilt release binaries. Runtime and configuration commands need no Rust or Python. Use your AUR helper to upgrade it; the system package manager owns installed files. Adopt the home profile explicitly with the commands below. After upgrading an adopted profile, run `omztty config refresh` to bring forward unchanged defaults.
+
+Restore adopted configurations before removing the package:
+
+```sh
+omztty config remove
+sudo pacman -R oh-my-ztty-bin
+```
+
 ## Install a release
+
+The following installer manages a per-user installation.
 
 ```sh
 curl -fLO https://github.com/LIghtJUNction/oh-my-ztty/releases/latest/download/install.sh
@@ -53,7 +81,7 @@ The editable profile covers zsh, ztty, Neovim, Kitty, Foot, Ghostty, tmux, fzf, 
 
 Open a new terminal after adoption. The profile lives under `${XDG_CONFIG_HOME:-$HOME/.config}/oh-my-ztty/profile`; its journal and backups live under `${XDG_STATE_HOME:-$HOME/.local/state}/zdot/oh-my-ztty`. HOME adoption requires an absolute `XDG_CONFIG_HOME` within HOME. Roots outside HOME are refused.
 
-Repeated `config init` and suite updates preserve the editable profile. Use `omztty config remove` to restore the saved originals, or `omztty config audit` to inspect managed files and known legacy framework locations. See [configuration and recovery](configuration.md) for application coverage and local extensions.
+Repeated `config init` and suite updates preserve the editable profile. After upgrading, run `omztty config refresh` to update files that still match their shipped defaults. Custom edits, added files and deliberately removed files are preserved. Use `omztty config remove` to restore the saved originals, or `omztty config audit` to inspect managed files and known legacy framework locations. See [configuration and recovery](configuration.md) for application coverage and local extensions.
 
 ## System overview
 
@@ -90,19 +118,23 @@ Configure an installed AI provider's executable and arguments as the `ZSHARD_AI_
 
 ## Offline installation
 
-Download the archive and its matching `.sha256` file from the same release, then run:
+Download the archive and its matching `.sha256` file from the [same release](https://github.com/LIghtJUNction/oh-my-ztty/releases/tag/v0.2.1), then run:
 
 ```sh
-sh install.sh --from ./oh-my-ztty-0.2.0-linux-x86_64.tar.gz
+sh install.sh --from ./oh-my-ztty-0.2.1-linux-x86_64.tar.gz
 ```
 
 Use the aarch64 archive on ARM64. An explicit `--sha256 HEX` can replace the sidecar file when the digest has already been obtained from the release record.
 
 ## Updates and repeat installation
 
+For a per-user installation:
+
 ```sh
 omztty update
 ```
+
+If you adopted a home profile, run `omztty config refresh` after updating to receive changes to unmodified defaults. Upgrade the AUR package through your AUR helper.
 
 To change the desktop entry choice during an update:
 
@@ -133,6 +165,8 @@ omztty dot apply --root "$HOME/dotfiles" --target "$HOME"
 Conflicts stop by default. Read [zdot's documentation](https://github.com/LIghtJUNction/zdot) before selecting its explicit backup or Git-sync commands.
 
 ## Uninstall
+
+For a per-user installation:
 
 ```sh
 omztty uninstall
