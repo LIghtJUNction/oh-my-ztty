@@ -10,17 +10,19 @@ The release bundle includes ztty, zshard, zrc, zdot, zfetch and ssmcp. Installat
 | Shell | System zsh 5.9 or newer |
 | Editor profile | Neovim 0.11 or newer, installed separately |
 | Graphical session | X11 or XWayland |
-| Graphics libraries | X11, Xrender, Xft and Fontconfig |
+| Graphics libraries | X11, Xrender, Xft, Fontconfig, Wayland, xkbcommon, FreeType, HarfBuzz, EGL and GLES |
 | Binary ABI | glibc 2.34 or newer and libgcc for ztty and ssmcp |
 
-The formal native validation platform is Ubuntu 24.04 on both architectures. The glibc symbol floor alone does not establish compatibility with every distribution. zdot is a static executable without a glibc dependency.
+The ztty 0.5.0 binary needs all of the listed graphics libraries even when selecting the X11 backend. The formal native validation platform is Ubuntu 24.04 on both architectures. The glibc symbol floor alone does not establish compatibility with every distribution. zdot is a static executable without a glibc dependency.
 
 Application and language-server installation is separate from configuration deployment.
 
 On Ubuntu 24.04, install the basic dependencies with:
 
 ```sh
-sudo apt-get install zsh git curl libx11-6 libxrender1 libxft2 libfontconfig1
+sudo apt-get install zsh git curl libx11-6 libxrender1 libxft2 libfontconfig1 \
+  libwayland-client0 libwayland-egl1 libwayland-cursor0 libxkbcommon0 \
+  libfreetype6 libharfbuzz0b libegl1 libgles2 libgcc-s1
 ```
 
 ## Arch Linux (AUR)
