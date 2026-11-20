@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "suite_build_source": "5a99afc170dc51455beb1491e04ab76cf18f4564",
+  "files": {
+    "acceptance.json": {
+      "sha256": "b8f128f73e4c336abbfbe98191ee24b6ed791ad2da3ffd75a06d553c5fc6223f",
+      "original": "acceptance-v050/result.json",
+      "copy": "byte-identical"
+    },
+    "graphical.json": {
+      "sha256": "ebb15e15168b74809f305e1576aad9d7fca3b06bc7d330410ab6cd92360c47b3",
+      "original": "acceptance-v050/graphical/linux-x86_64-suite.json",
+      "copy": "byte-identical"
+    },
+    "adapter.json": {
+      "sha256": "5ec5dbc1f63fbc8a4c2df5e70c3cd57c39d1c9615d4a5f5dae2cb2a21848282c",
+      "original": "acceptance-v050/graphical/adapter.json",
+      "copy": "byte-identical"
+    },
+    "closure.json": {
+      "sha256": "fad825224f27c0348a0aa16c36b06048289154d00989e4eb7a52298ff78411cf",
+      "original": "acceptance-v050/closure.json",
+      "copy": "byte-identical"
+    },
+    "smoke.log": {
+      "sha256": "5aa78e2005b663205cf250f1e44bf1f56f607e074d875bfbdadb5e84b66aa46b",
+      "original": "acceptance-v050/smoke-x86_64.stdout",
+      "copy": "byte-identical"
+    },
+    "local-check.json": {
+      "sha256": "ef517aea9da0a9d50173fb7e51e2c6ee9a6ce138924254434e0395aca82c76c0",
+      "original": "wrapper-gate/result.json",
+      "copy": "byte-identical"
+    },
+    "local-check.log": {
+      "sha256": "909eb2a9692cf69a4ca6833e4e20a33be1c547a80d1960233aae91c3e3fb252f",
+      "original": "wrapper-gate/suite-check.stderr",
+      "copy": "byte-identical"
+    },
+    "pin.json": {
+      "sha256": "ecd94e39460f98858adcf97726fe7552936efc507db99fc3b5c47cbac052055d",
+      "original": "pin-v050/result.json",
+      "copy": "byte-identical"
+    },
+    "linux-x86_64-terminal.png": {
+      "sha256": "8be778056fef776edbb353dbc7da97724f3ef104db69b12f720302adb6e00bf0",
+      "original": "acceptance-v050/graphical/linux-x86_64-terminal.png",
+      "copy": "byte-identical"
+    },
+    "harness/run-acceptance-v050.py": {
+      "sha256": "19a1c6312dad8490f99cac9d7fd7e09f442b28193af6752f40472950673420c4",
+      "original": "run-acceptance-v050.py",
+      "copy": "byte-identical"
+    },
+    "harness/run_graphical.py": {
+      "sha256": "581ad558218fa622558524dcda41758e53661997336e2f3467e2e9c80d425071",
+      "original": "harness/run_graphical.py",
+      "copy": "byte-identical"
+    },
+    "harness/isolated_xvfb.py": {
+      "sha256": "9baf8e2d731be49ed57eefbaa48e15ba30fe581839d0ad1738a5cc4a19ceeb0a",
+      "original": "harness/isolated_xvfb.py",
+      "copy": "byte-identical"
+    },
+    "harness/bin/Xvfb": {
+      "sha256": "14831e7e1c44bbc8351265cac945f43baf6b37cb21a8473423638990ab2c7187",
+      "original": "harness/bin/Xvfb",
+      "copy": "byte-identical"
+    },
+    "ownership.json": {
+      "sha256": "62405835b956453a948ae0e49590c9ccb81a6cd8b56dbfad5a247d0b734448a7",
+      "original": "acceptance-v050/graphical/xvfb-owner.json",
+      "copy": "selected owned-process fields; full native-display endpoints retained locally",
+      "original_sha256": "cc547d4ba6ae37dc21b3e339027eeceb25520efd561569be654ba25b5722e265"
+    }
+  }
+}

@@ -1,0 +1,192 @@
+{
+  "schema": 1,
+  "suite_source": "5a99afc170dc51455beb1491e04ab76cf18f4564",
+  "ztty_source": "c4f8f48c9598284a589e609f25242b49ceabfea8",
+  "release_id": 452238617,
+  "release_run": 44668398577,
+  "scope": "Private unreleased suite consumer candidate; VERSION remains 0.2.1; no existing installation or default terminal changed. ARM64 assembly only. No Rust compilation or AI connection.",
+  "script_sha256": "19a1c6312dad8490f99cac9d7fd7e09f442b28193af6752f40472950673420c4",
+  "cgroup": "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/app.slice/omztty-acceptance-v050-20261120.service",
+  "private_dbus": true,
+  "subreaper": true,
+  "helper_hashes": {
+    "harness/isolated_xvfb.py": "9baf8e2d731be49ed57eefbaa48e15ba30fe581839d0ad1738a5cc4a19ceeb0a",
+    "harness/bin/Xvfb": "14831e7e1c44bbc8351265cac945f43baf6b37cb21a8473423638990ab2c7187",
+    "harness/run_graphical.py": "581ad558218fa622558524dcda41758e53661997336e2f3467e2e9c80d425071"
+  },
+  "lock_sha256": "8a547dade3a73ce7cac9840d44be910be90adb3e9388f6e95c25116206ad794c",
+  "graphical_checks": [
+    "visible window",
+    "keyboard command executed in preset zsh",
+    "first completion returned to a usable shell",
+    "actual component versions verified"
+  ],
+  "component_versions": [
+    "ztty 0.5.0",
+    "zdot 0.2.0",
+    "ssmcp 0.10.10"
+  ],
+  "reaped": [
+    {
+      "pid": 1210549,
+      "status": 0
+    },
+    {
+      "pid": 1210818,
+      "status": 15
+    }
+  ],
+  "adopted_children_after": "",
+  "ok": true,
+  "steps": [
+    {
+      "name": "bundle-x86_64",
+      "command": [
+        "/usr/bin/python3",
+        "scripts/build_bundle.py",
+        "--arch",
+        "x86_64",
+        "--zdot",
+        "/home/lightjunction/Documents/GITHUB/oh-my-ztty/dist/consumer-ztty-0.5.0-20261120/inputs/x86_64/zdot",
+        "--zfetch",
+        "/home/lightjunction/Documents/GITHUB/oh-my-ztty/dist/consumer-ztty-0.5.0-20261120/inputs/x86_64/zfetch",
+        "--output",
+        "/home/lightjunction/Documents/GITHUB/oh-my-ztty/dist/consumer-ztty-0.5.0-20261120/acceptance-v050/bundles"
+      ],
+      "exit_code": 0,
+      "seconds": 3.9230909629986854,
+      "stdout": "bundle-x86_64.stdout",
+      "stderr": "bundle-x86_64.stderr"
+    },
+    {
+      "name": "bundle-aarch64",
+      "command": [
+        "/usr/bin/python3",
+        "scripts/build_bundle.py",
+        "--arch",
+        "aarch64",
+        "--zdot",
+        "/home/lightjunction/Documents/GITHUB/oh-my-ztty/dist/consumer-ztty-0.5.0-20261120/inputs/aarch64/zdot",
+        "--zfetch",
+        "/home/lightjunction/Documents/GITHUB/oh-my-ztty/dist/consumer-ztty-0.5.0-20261120/inputs/aarch64/zfetch",
+        "--output",
+        "/home/lightjunction/Documents/GITHUB/oh-my-ztty/dist/consumer-ztty-0.5.0-20261120/acceptance-v050/bundles"
+      ],
+      "exit_code": 0,
+      "seconds": 14.296448977009277,
+      "stdout": "bundle-aarch64.stdout",
+      "stderr": "bundle-aarch64.stderr"
+    },
+    {
+      "name": "smoke-x86_64",
+      "command": [
+        "/usr/bin/python3",
+        "scripts/smoke_bundle.py",
+        "/home/lightjunction/Documents/GITHUB/oh-my-ztty/dist/consumer-ztty-0.5.0-20261120/acceptance-v050/bundles/oh-my-ztty-0.2.1-linux-x86_64.tar.gz"
+      ],
+      "exit_code": 0,
+      "seconds": 1.6172979499970097,
+      "stdout": "smoke-x86_64.stdout",
+      "stderr": "smoke-x86_64.stderr"
+    },
+    {
+      "name": "graphical-x86_64",
+      "command": [
+        "/usr/bin/python3",
+        "/home/lightjunction/Documents/GITHUB/oh-my-ztty/dist/consumer-ztty-0.5.0-20261120/harness/run_graphical.py",
+        "--source",
+        "/home/lightjunction/Documents/GITHUB/oh-my-ztty/dist/consumer-ztty-0.5.0-20261120/source",
+        "--archive",
+        "/home/lightjunction/Documents/GITHUB/oh-my-ztty/dist/consumer-ztty-0.5.0-20261120/acceptance-v050/bundles/oh-my-ztty-0.2.1-linux-x86_64.tar.gz",
+        "--output",
+        "/home/lightjunction/Documents/GITHUB/oh-my-ztty/dist/consumer-ztty-0.5.0-20261120/acceptance-v050/graphical"
+      ],
+      "exit_code": 0,
+      "seconds": 2.971254518997739,
+      "stdout": "graphical-x86_64.stdout",
+      "stderr": "graphical-x86_64.stderr"
+    }
+  ],
+  "archives": {
+    "x86_64": {
+      "path": "/home/lightjunction/Documents/GITHUB/oh-my-ztty/dist/consumer-ztty-0.5.0-20261120/acceptance-v050/bundles/oh-my-ztty-0.2.1-linux-x86_64.tar.gz",
+      "sha256": "870c49759625a918ea0b36572beb05c2110c73e497c13a5b1f2c61f3415da476",
+      "bytes": 5471368,
+      "manifest_files_verified": 84,
+      "BUILD": {
+        "platform": "linux-x86_64",
+        "schema": 1,
+        "source_commits": {
+          "ssmcp": "52a531a59e9ec9236a76eafc0f4f068799e44b15",
+          "zdot": "e6b5feb98b05c59e0986624c0742dfe4a9187a2a",
+          "zfetch": "f19b278676206d76626dd01e4b89f7ad9ce9318f",
+          "zrc": "ef8bd9571e206c8086e38b9dcbdc760a466b5133",
+          "zshard": "1cfa1a1eb761d14e2ccfd5381282b6ccd1491cff",
+          "ztty": "c4f8f48c9598284a589e609f25242b49ceabfea8"
+        },
+        "suite_version": "0.2.1"
+      },
+      "ztty_elf_sha256": "3ed8cead1c4ca20aedd4aa262de8fe992bcf9639546d95f89f7a782eeef7a491",
+      "changed_members_from_official_suite_0_2_1": [
+        "BUILD.json",
+        "bin/omztty",
+        "bin/ztty",
+        "dependencies.lock.json"
+      ]
+    },
+    "aarch64": {
+      "path": "/home/lightjunction/Documents/GITHUB/oh-my-ztty/dist/consumer-ztty-0.5.0-20261120/acceptance-v050/bundles/oh-my-ztty-0.2.1-linux-aarch64.tar.gz",
+      "sha256": "bc957976e1e23850ec8a726094bfa1a4f9342551d50fb9d3209fdb4f005d75c8",
+      "bytes": 5246367,
+      "manifest_files_verified": 84,
+      "BUILD": {
+        "platform": "linux-aarch64",
+        "schema": 1,
+        "source_commits": {
+          "ssmcp": "52a531a59e9ec9236a76eafc0f4f068799e44b15",
+          "zdot": "e6b5feb98b05c59e0986624c0742dfe4a9187a2a",
+          "zfetch": "f19b278676206d76626dd01e4b89f7ad9ce9318f",
+          "zrc": "ef8bd9571e206c8086e38b9dcbdc760a466b5133",
+          "zshard": "1cfa1a1eb761d14e2ccfd5381282b6ccd1491cff",
+          "ztty": "c4f8f48c9598284a589e609f25242b49ceabfea8"
+        },
+        "suite_version": "0.2.1"
+      },
+      "ztty_elf_sha256": "39ced58ddb1f3fd2abb2558d33949a24dc6bf8801e3809cbbda187090c10057d",
+      "changed_members_from_official_suite_0_2_1": [
+        "BUILD.json",
+        "bin/omztty",
+        "bin/ztty",
+        "dependencies.lock.json"
+      ]
+    }
+  },
+  "seconds": 23.23626402199443,
+  "installed_anchors_unchanged": true,
+  "source_after": "5a99afc170dc51455beb1491e04ab76cf18f4564",
+  "source_status_after": "",
+  "resources": {
+    "memory.peak": "456372224",
+    "memory.swap.peak": "0",
+    "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nsock_throttled 0",
+    "cpu.max": "100000 100000"
+  },
+  "artifacts": {
+    "bundle-x86_64.stdout": "85a5b521b5aff9bfb7f0f5f0aa1316ca35fa1c16a5c1d2fe9bb658ea07e8c336",
+    "bundle-x86_64.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bundle-aarch64.stdout": "945d9c57dc4716a87aa8d6bf3d05804d3710131e98554f4dd0ee9ea57f76ddf7",
+    "bundle-aarch64.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "smoke-x86_64.stdout": "5aa78e2005b663205cf250f1e44bf1f56f607e074d875bfbdadb5e84b66aa46b",
+    "smoke-x86_64.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "graphical-x86_64.stdout": "83df80a773fcdfccc57732a93a099a7fb11f4dfcbd6128cbed000c4c43952482",
+    "graphical-x86_64.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bundles/oh-my-ztty-0.2.1-linux-x86_64.tar.gz": "870c49759625a918ea0b36572beb05c2110c73e497c13a5b1f2c61f3415da476",
+    "bundles/oh-my-ztty-0.2.1-linux-x86_64.tar.gz.sha256": "d97d99a87990665f72300ed872bb30a9908fbce7132f94908f4421e7d8850313",
+    "bundles/oh-my-ztty-0.2.1-linux-aarch64.tar.gz": "bc957976e1e23850ec8a726094bfa1a4f9342551d50fb9d3209fdb4f005d75c8",
+    "bundles/oh-my-ztty-0.2.1-linux-aarch64.tar.gz.sha256": "3b6cd2530ce18ca46eaa28ed67b83b2666935acc27da741548927dcaf58a6c10",
+    "graphical/xvfb-owner.json": "cc547d4ba6ae37dc21b3e339027eeceb25520efd561569be654ba25b5722e265",
+    "graphical/linux-x86_64-terminal.png": "8be778056fef776edbb353dbc7da97724f3ef104db69b12f720302adb6e00bf0",
+    "graphical/linux-x86_64-suite.json": "ebb15e15168b74809f305e1576aad9d7fca3b06bc7d330410ab6cd92360c47b3",
+    "graphical/adapter.json": "5ec5dbc1f63fbc8a4c2df5e70c3cd57c39d1c9615d4a5f5dae2cb2a21848282c"
+  }
+}
