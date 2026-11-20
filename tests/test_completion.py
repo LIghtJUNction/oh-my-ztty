@@ -203,6 +203,146 @@ class InteractiveCompletion(unittest.TestCase):
         self.assertEqual(self.complete("omztty ztty personal"), ["omztty", "ztty", "personal-backend"])
         self.assertEqual(self.complete("omztty terminal personal"), ["omztty", "terminal", "personal-backend"])
 
+    def test_native_component_commands(self):
+        self.start()
+        self.cases({
+            "ztty --back": "ztty --backend",
+            "ztty --backend way": "ztty --backend wayland",
+            "ztty --name -e --back": "ztty --name -e --backend",
+            "ztty -e git checko": "ztty -e git checkout",
+            "ztty -- git checkout feature/补": "ztty -- git checkout feature/补全",
+            "ztty shell-integration zs": "ztty shell-integration zsh",
+            "ztty mcp --http-response ss": "ztty mcp --http-response sse",
+            "zdot --ro": "zdot --root",
+            "zdot --root . sync pul": "zdot --root . sync pull",
+            "zdot plan --b": "zdot plan --backup",
+            "zfetch --no": "zfetch --no-color",
+            "ztty --cwd file": "ztty --cwd file",
+            "omztty terminal --cwd file": "omztty terminal --cwd file",
+            "zdot --root file": "zdot --root file",
+            "zdot apply --target file": "zdot apply --target file",
+            "omztty dot apply --state-dir file": "omztty dot apply --state-dir file",
+        })
+
+    def test_ssmcp_commands_and_option_arity(self):
+        self.start()
+        self.cases({
+            "ssmcp sess": "ssmcp sessions",
+            "ssmcp inv": "ssmcp invite",
+            "ssmcp invite --shell pow": "ssmcp invite --shell powershell",
+            "ssmcp joi": "ssmcp join",
+            "ssmcp loc": "ssmcp loc",
+            "ssmcp --account-co": "ssmcp --account-co",
+            "ssmcp config set git-fetch": "ssmcp config set git-fetch",
+            "ssmcp 007 upg": "ssmcp 007 upg",
+            "ssmcp sessions create fixture --the": "ssmcp sessions create fixture --theme",
+            "ssmcp sessions create fixture --json --the":
+                "ssmcp sessions create fixture --json --theme",
+            "ssmcp --th": "ssmcp --theme",
+            "ssmcp --theme nor": "ssmcp --theme nord",
+            "ssmcp --log-format pretty-v": "ssmcp --log-format pretty-verbose",
+            "ssmcp --name sessions --th": "ssmcp --name sessions --theme",
+            "ssmcp --title -e --th": "ssmcp --title -e --theme",
+            "ssmcp --server https://example.invalid list --ter":
+                "ssmcp --server https://example.invalid list --terminal",
+            "ssmcp config se": "ssmcp config set",
+            "ssmcp config set ser": "ssmcp config set server",
+            "ssmcp trust add --pub": "ssmcp trust add --public-key",
+            "ssmcp setup bro": "ssmcp setup browser",
+            "ssmcp setup browser --play": "ssmcp setup browser --playwright-mcp",
+            "ssmcp ui prev": "ssmcp ui preview",
+            "ssmcp ui preview --theme min": "ssmcp ui preview --theme minimal",
+            "ssmcp sessions lo": "ssmcp sessions logs",
+            "ssmcp sessions --json lo": "ssmcp sessions --json logs",
+            "ssmcp sessions logs fixture --li": "ssmcp sessions logs fixture --lines",
+            "ssmcp attach --read": "ssmcp attach --read-only",
+            "ssmcp service inst": "ssmcp service install",
+            "ssmcp service install --state": "ssmcp service install --state-dir",
+            "ssmcp 007 sessions rest": "ssmcp 007 sessions restart",
+            "ssmcp update --ch": "ssmcp update --check",
+        })
+        self.assertEqual(self.report()[2], "yes")
+
+    def test_ssmcp_files_directories_and_free_text(self):
+        self.start()
+        for line, expected in [
+            ("ssmcp --context-root direc", "directory with spaces 中文/"),
+            ("ssmcp --ui-config file", "file with spaces 中文.txt"),
+            ("ssmcp trust add --public-key file", "file with spaces 中文.txt"),
+            ("ssmcp setup browser --playwright-mcp file", "file with spaces 中文.txt"),
+            ("ssmcp sessions create fixture --cwd direc", "directory with spaces 中文/"),
+            ("ssmcp service install --state-dir direc", "directory with spaces 中文/"),
+        ]:
+            with self.subTest(line=line):
+                self.assertEqual(self.complete(line)[-1], expected)
+        self.cases({
+            "ssmcp --context-root file": "ssmcp --context-root file",
+            "ssmcp --name file": "ssmcp --name file",
+            "ssmcp --server file": "ssmcp --server file",
+            "ssmcp sessions logs file": "ssmcp sessions logs file",
+        })
+
+    def test_ssmcp_through_suite_and_ai_entrypoints(self):
+        self.start()
+        for prefix in ("omztty ssmcp", "omztty ai connect", "zai connect",
+                       "zshard ai connect", "omztty zshard ai connect"):
+            with self.subTest(prefix=prefix):
+                self.assertEqual(self.complete(prefix + " --theme nor"),
+                                 shlex.split(prefix + " --theme nord"))
+                self.assertEqual(self.complete(prefix + " sessions lo"),
+                                 shlex.split(prefix + " sessions logs"))
+
+    def test_framework_nested_arguments(self):
+        plugins = Path(self.env["XDG_DATA_HOME"]) / "zshard/plugins"
+        plugins.mkdir(parents=True)
+        (plugins / "local-fixture.lock").write_text("completion only; never evaluated\n")
+        self.start()
+        self.cases({
+            "zshard plugin ver": "zshard plugin verify",
+            "zshard plugin rest": "zshard plugin restore",
+            "zshard plugin remove local-fi": "zshard plugin remove local-fixture",
+            "zshard use local-fi": "zshard use local-fixture",
+            "zshard cache wa": "zshard cache warm",
+            "zshard hook precm": "zshard hook precmd",
+            "zshard ai conn": "zshard ai connect",
+            "omztty zshard plugin ver": "omztty zshard plugin verify",
+            "zai conn": "zai connect",
+            "zai ask file": "zai ask file",
+            "zshard ai ask file": "zshard ai ask file",
+            "zshard plugin export file": "zshard plugin export file",
+            "zshard completions file": "zshard completions file",
+            "zshard cache warm file": "zshard cache warm file",
+            "omztty zshard completions file": "omztty zshard completions file",
+        })
+        for line, expected in [
+            ("zshard plugin restore file", "file with spaces 中文.txt"),
+            ("zshard completions direc", "directory with spaces 中文/"),
+            ("zshard cache warm direc", "directory with spaces 中文/"),
+        ]:
+            with self.subTest(line=line):
+                self.assertEqual(self.complete(line)[-1], expected)
+
+    def personal_component_completions(self):
+        for name in ("zshard", "zai", "ssmcp"):
+            (self.personal / ("_" + name)).write_text(
+                f"#compdef {name}\ncompadd -- personal-{name}\n")
+        self.start()
+        self.cases({
+            "zshard personal": "zshard personal-zshard",
+            "zai personal": "zai personal-zai",
+            "ssmcp personal": "ssmcp personal-ssmcp",
+            "omztty zshard personal": "omztty zshard personal-zshard",
+            "omztty ssmcp personal": "omztty ssmcp personal-ssmcp",
+            "omztty ai connect personal": "omztty ai connect personal-ssmcp",
+        })
+
+    def test_personal_component_completion_priority(self):
+        self.personal_component_completions()
+
+    def test_eager_personal_component_completion_priority(self):
+        self.env["ZSHARD_COMPLETION"] = "eager"
+        self.personal_component_completions()
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

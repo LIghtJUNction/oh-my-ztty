@@ -1,0 +1,306 @@
+#compdef ssmcp
+# Native grammar follows the suite's pinned ssmcp 0.10.10.
+# Tab never runs ssmcp, reads account/session manifests or contacts a relay.
+
+_ssmcp_directories() {
+    local expl
+    # _files (used by _directories) falls back to all files on no match.
+    _wanted directories expl directory _path_files -/ "$@"
+}
+
+_ssmcp_connection() {
+    local mode=${1:-connect} context state state_descr line
+    typeset -A opt_args
+    local -a options=(
+        '(-h --help)'{-h,--help}'[Show help]'
+        '--help-full[Show all connection options]'
+        '(-V --version)'{-V,--version}'[Show version]'
+        '--title=[Session title]:title:'
+        '*--context-root[Add a read-only instruction directory]:directory:_ssmcp_directories'
+        '--shell[Use an absolute shell executable path]:shell executable:_files -g "*(*)"'
+        '--tty=[Observe commands in terminal windows]:terminal executable:_command_names'
+        '(--watchdog)--no-watchdog[Disable automatic reconnects]'
+        '(--no-watchdog)--watchdog[Enable automatic reconnects]'
+        '(--no-watchdog)--reconnect-delay[Wait between reconnects]:seconds (1-3600):'
+        '(--verbose --raw --raw-events)--log-format[Event display format]:format:(pretty pretty-verbose jsonl)'
+        '(--log-format --raw --raw-events)--verbose[Show verbose readable events]'
+        '(--log-format --verbose --raw-events)--raw[Show JSONL events]'
+        '(--log-format --verbose --raw)--raw-events[Show JSONL events]'
+        '--ui-config[Read a local UI configuration]:configuration file:_files'
+        '--theme[Choose the display theme]:theme:(dark codex-dark nord solarized light minimal)'
+        '--timestamps[Show timestamps on event headings]'
+        '--max-inline-output[Limit inline output]:lines (1-10000):'
+        '--no-color[Disable ANSI colors]'
+        '--no-browser[Print the authorization link without opening a browser]'
+    )
+    options+=(
+        '--server[Select the HTTPS relay]:HTTPS origin:'
+        '--username[Use a named relay account]:username:'
+        '*--allow[Allow specified accounts]:account principal:'
+        '--session-control[Enable local saved-session management]'
+    )
+    case $mode in
+        create)
+            if (( CURRENT == 2 )); then
+                _arguments '(-h --help)'{-h,--help}'[Show help]' '1:new session name:'
+                return
+            fi
+            options+=('--cwd[Start in a directory]:directory:_ssmcp_directories'
+                      '--json[Emit JSON]')
+            _arguments -C "$options[@]" '1:new session name:->session-name' '2:account@relay-server:->account'
+            [[ $state == session-name && $PREFIX != -* ]] && _message 'new session name'
+            [[ $state == account && $PREFIX != -* ]] && _message 'account@relay-server'
+            ;;
+        join)
+            _arguments "$options[@]" '--name[Display name]:name:' \
+                '--token[One-use invitation]:invitation:'
+            ;;
+        *)
+            options+=(
+                '--name[Display name]:name:'
+                '--daemon[Start a user-owned background session]'
+                '--list-tools[Print local tool schemas and exit]'
+                '(-i --interactive)'{-i,--interactive}'[Select a remote terminal]'
+                '--client[Select a remote client]:client identifier:'
+                '--terminal[Select a remote terminal]:terminal identifier:'
+            )
+            _arguments -C "$options[@]" '1:command or account@relay-server:->command'
+            if [[ $state == command ]]; then
+                if (( CURRENT == 2 )); then
+                    _describe 'command' actions
+                elif (( CURRENT == 4 )) && [[ $words[2] == --server ]]; then
+                    local -a account_actions=(
+                        'login:Sign in' 'logout:Remove the selected login'
+                        'whoami:Show account identity' 'list:List remote clients'
+                        'invite:Create a device invitation' 'join:Connect with a device invitation'
+                    )
+                    _describe 'account command' account_actions
+                else
+                    _message 'account@relay-server'
+                fi
+            fi
+            ;;
+    esac
+}
+
+_ssmcp_account() {
+    local -a options=(
+        '(-h --help)'{-h,--help}'[Show help]'
+        '--server[Select the HTTPS relay]:HTTPS origin:'
+    )
+    case $1 in
+        login|setup)
+            options+=('--no-browser[Print the authorization link]'
+                      '--name[Display name]:name:')
+            ;;
+        whoami|logout) options+=('--json[Emit JSON]') ;;
+        list|ls)
+            options+=(
+                '(-i --interactive)--json[Emit JSON]'
+                '(--json -i --interactive)'{-i,--interactive}'[Open a remote terminal]'
+                '--client[Select a remote client]:client identifier:'
+                '--terminal[Select a remote terminal]:terminal identifier:'
+            )
+            ;;
+        invite)
+            options+=(
+                '--ttl[Invitation lifetime]:seconds (30-3600):'
+                '--session-ttl[Session lifetime]:seconds (60-86400):'
+                '--shell[Bootstrap command syntax]:shell:(sh powershell)'
+                '--no-bootstrap[Use an already installed client]'
+                '--json[Emit JSON]'
+            )
+            ;;
+    esac
+    _arguments "$options[@]"
+}
+
+_ssmcp_sessions() {
+    local kind=${1:-normal} action=${words[2]}
+    local -a operations=(list status start stop close restart logs auth remove create)
+    [[ $kind == recovery ]] && operations=(list status start close restart remove)
+    # Management strips --json, but create must immediately follow sessions.
+    if [[ $action == --json ]]; then
+        operations=("${(@)operations:#create}")
+        [[ $words[3] == create ]] && return 1
+    fi
+    if [[ $action == --json ]] && (( CURRENT > 3 )); then
+        words=("$words[1]" "$words[3]" "$words[2]" "${words[@]:3}")
+        action=$words[2]
+    fi
+    if (( CURRENT == 2 )) || [[ $action == --json ]]; then
+        _arguments '--json[Emit JSON]' '1:session operation:($operations)'
+        return
+    fi
+    if [[ $action == create && $kind == normal ]]; then
+        shift words
+        (( --CURRENT ))
+        _ssmcp_connection create
+        return
+    fi
+    case $action in
+        list)
+            _arguments '--json[Emit JSON]' '1:session operation:(list)'
+            ;;
+        status|start|stop|close|restart|auth|remove|logs)
+            local -a options=('--json[Emit JSON]')
+            [[ $action == logs ]] && options+=('--lines[Limit returned log lines]:lines (1-1000):')
+            _arguments "$options[@]" '1:session operation:($operations)' '2:saved session name:'
+            ;;
+        *) return 1 ;;
+    esac
+}
+
+_ssmcp() {
+    local context state state_descr line action
+    typeset -A opt_args
+    local -a words=("$words[@]")
+    local -i CURRENT=$CURRENT index=2
+    local -a actions=(
+        'list:List remote clients'
+        'login:Sign in' 'whoami:Show account identity' 'logout:Remove the selected login'
+        'invite:Create a temporary device invitation' 'join:Connect with a device invitation'
+        'config:Manage client settings' 'trust:Manage relay trust pins'
+        'setup:Configure account or browser access' 'ui:Configure and preview the interface'
+        'sessions:Manage saved local sessions' 'attach:Attach to a saved session'
+        'service:Manage the background service' '007:Manage Linux recovery'
+        'update:Update the installed client'
+    )
+    # Only this global prefix is normalized ahead of account subcommands by
+    # ssmcp itself. An option value named "sessions" is never a subcommand.
+    if (( CURRENT > 4 )) && [[ $words[2] == --server && $words[4] == (login|logout|whoami|list|ls|invite|join) ]]; then
+        words=("$words[1]" "$words[4]" "$words[2]" "$words[3]" "${words[@]:4}")
+    fi
+    # A consumed value beginning with '-' must not become an option to zsh.
+    while (( index < CURRENT )); do
+        case $words[index] in
+            --name|--title|--server|--username|--allow|--context-root|\
+            --shell|--tty|--reconnect-delay|--log-format|--ui-config|\
+            --theme|--max-inline-output|--client|--terminal|--state-dir|\
+            --user|--cwd|--public-key|--pin|--playwright-mcp|--lines|\
+            --rows|--cols|--token|--ttl|--session-ttl)
+                if (( index + 1 < CURRENT )) && [[ $words[index+1] == -* ]]; then
+                    words[index+1]=__ssmcp_option_value__
+                fi
+                (( index += 2 ))
+                ;;
+            *) (( ++index )) ;;
+        esac
+    done
+    action=$words[2]
+    if (( CURRENT > 2 )); then
+        case $action in
+            login|whoami|logout|list|ls|config|trust|setup|ui|sessions|attach|service|007|update|invite|join)
+                shift words
+                (( --CURRENT ))
+                ;;
+            *) _ssmcp_connection; return ;;
+        esac
+    else
+        _ssmcp_connection
+        return
+    fi
+    case $action in
+        login|whoami|logout|list|ls|invite) _ssmcp_account "$action" ;;
+        join) _ssmcp_connection join ;;
+        config)
+            case $words[2] in
+                set|get)
+                    local -a options=('1:configuration action:(set get unset path)'
+                                      '2:setting:(server)')
+                    [[ $words[2] == set ]] && options+=('3:HTTPS relay origin:')
+                    _arguments "$options[@]"
+                    ;;
+                unset) _arguments '1:configuration action:(unset)' '2:setting:(server)' ;;
+                path) return 1 ;;
+                *) _arguments '(-h --help)'{-h,--help}'[Show help]' '1:configuration action:(set get unset path)' ;;
+            esac
+            ;;
+        trust)
+            local -a options=('(-h --help)'{-h,--help}'[Show help]'
+                              '1:trust action:(add list remove path)')
+            case $words[2] in
+                add)
+                    options+=('--server[Select the HTTPS relay]:HTTPS origin:'
+                              '(--pin)--public-key[Import a PEM public key]:public key file:_files'
+                              '(--public-key)--pin[Import an SPKI fingerprint]:sha256//BASE64:')
+                    ;;
+                remove) options+=('--server[Select the HTTPS relay]:HTTPS origin:') ;;
+            esac
+            _arguments "$options[@]"
+            ;;
+        setup)
+            if [[ $words[2] == browser ]] && (( CURRENT > 2 )); then
+                shift words
+                (( --CURRENT ))
+                _arguments \
+                    '(-h --help)'{-h,--help}'[Show help]' \
+                    '(--install --playwright-mcp --background --foreground)--native[Check native browser dependencies]' \
+                    '(--install --playwright-mcp --background --foreground)--check[Check without changing settings]' \
+                    '(--native --check --playwright-mcp)--install[Install the Playwright MCP integration]' \
+                    '(--native --check --install)--playwright-mcp[Select an installed MCP entry]:entry file:_files' \
+                    '(--native --check --foreground)--background[Control in the background]' \
+                    '(--native --check --background)--foreground[Allow window activation]' \
+                    '--json[Emit JSON]'
+            elif (( CURRENT == 2 )); then
+                _arguments '(-h --help)'{-h,--help}'[Show help]' \
+                    '--server[Select the HTTPS relay]:HTTPS origin:' \
+                    '--no-browser[Print the authorization link]' '--name[Display name]:name:' \
+                    '1:setup action:(browser)'
+            else
+                _ssmcp_account setup
+            fi
+            ;;
+        ui)
+            local -a options=('(-h --help)'{-h,--help}'[Show help]'
+                              '1:UI action:(show check init preview)'
+                              '--ui-config[Read a local UI configuration]:configuration file:_files')
+            [[ $words[2] == (show|preview) ]] && options+=(
+                '--theme[Choose the display theme]:theme:(dark codex-dark nord solarized light minimal)')
+            [[ $words[2] == preview ]] && options+=(
+                '--static[Render one preview frame]' '--rows[Frame height]:rows (1-1000):'
+                '--cols[Frame width]:columns (1-1000):')
+            _arguments "$options[@]"
+            ;;
+        sessions) _ssmcp_sessions ;;
+        attach)
+            _arguments '(-h --help)'{-h,--help}'[Show help]' \
+                '--read-only[Attach without input control]' '--json[List sessions as JSON]' \
+                '1:saved session name or list:(list)'
+            ;;
+        service)
+            local -a options=('(-h --help)'{-h,--help}'[Show help]'
+                              '1:service action:(install uninstall start stop restart status run)')
+            if [[ $words[2] != run ]]; then
+                options+=('--system[Manage the system service]' '--json[Emit JSON]')
+            fi
+            [[ $words[2] == install ]] && options+=(
+                '--user[Account owning a system installation]:account name:'
+                '--state-dir[Private session state directory]:directory:_ssmcp_directories'
+                '--dry-run[Preview the service definition]')
+            _arguments "$options[@]"
+            ;;
+        007)
+            if [[ $words[2] == sessions ]] && (( CURRENT > 2 )); then
+                shift words
+                (( --CURRENT ))
+                _ssmcp_sessions recovery
+                return
+            fi
+            local -a options=('(-h --help)'{-h,--help}'[Show help]'
+                              '1:recovery action:(install run start stop status uninstall sessions)')
+            [[ $words[2] != run ]] && options+=('--json[Emit JSON]')
+            [[ $words[2] == install ]] && options+=('--dry-run[Preview changes]')
+            [[ $words[2] == install ]] && options+=(
+                '--server[Select the HTTPS relay]:HTTPS origin:' '--name[Recovery client name]:name:'
+                '--cwd[Recovery working directory]:directory:_ssmcp_directories'
+                '--client[Installed recovery executable]:executable:_files -g "*(*)"')
+            _arguments "$options[@]"
+            ;;
+        update)
+            _arguments '(-h --help)'{-h,--help}'[Show help]' '--check[Check for an update without installing]'
+            ;;
+    esac
+}
+
+_ssmcp "$@"

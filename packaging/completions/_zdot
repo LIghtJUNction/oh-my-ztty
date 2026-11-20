@@ -1,0 +1,4 @@
+#compdef zdot
+
+autoload -Uz _omztty_zdot
+_omztty_zdot "$@"

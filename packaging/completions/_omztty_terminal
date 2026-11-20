@@ -1,0 +1,79 @@
+# Shared native completion used by the direct command and omztty wrapper.
+autoload -Uz _omztty_directories
+local context state state_descr line
+typeset -A opt_args
+local -a words=("$words[@]")
+local -i CURRENT=$CURRENT index=2
+local service=ztty
+# Follow the launcher's option arity: a value named -e is not a boundary.
+while (( index < CURRENT )); do
+    case $words[index] in
+        --config|--name|--cwd|--font|--geometry|--scrollback|--tab|--split-right|--split-down|--backend|--text-plugin)
+            if (( index + 1 < CURRENT )) && [[ $words[index+1] == -* ]]; then
+                words[index+1]=__omztty_option_value__
+            fi
+            (( index += 2 )) ;;
+        --observe) (( ++index )) ;;
+        -e|--)
+            shift $index words
+            (( CURRENT -= index ))
+            if (( CURRENT == 1 )); then _command_names
+            else local service=$words[1]; _normal
+            fi
+            return ;;
+        *) break ;;
+    esac
+done
+local action=$words[2]
+case $action in
+    attach|detach|close|rename|list|action|move|control|commands|command-output|shell-integration|plugin|save-layout|restore-layout|mcp)
+        if (( CURRENT > 2 )); then
+            shift words
+            (( --CURRENT ))
+            case $action in
+                attach) _arguments '--observe[Attach without input control]' \
+                    '--backend[Select the Linux host]:backend:(x11 wayland)' '1:session name or address:' ;;
+                detach|close|commands|save-layout) _arguments '1:session name:' ;;
+                rename) _arguments '1:session name:' '2:new name:' ;;
+                list) _arguments '*:session filter:' ;;
+                action) _arguments '1:session name:' '2:action:' ;;
+                move) _arguments '1:session name:' '2:target session:' '3:layout:(tab right down)' ;;
+                control) _arguments '1:session name:' '2:operation:(acquire release)' '--takeover[Take input control]' ;;
+                command-output) _arguments '1:session name:' '2:command identifier:' ;;
+                shell-integration) _arguments '1:shell:(bash zsh fish nu)' ;;
+                plugin) _arguments '1:operation:(check run)' '2:plugin library:_files' ;;
+                restore-layout) _arguments '1:layout file:_files' ;;
+                mcp) _arguments \
+                    '--transport[MCP transport]:transport:(stdio http)' \
+                    '--host[HTTP bind address]:host:' '--port[HTTP bind port]:port:' \
+                    '--read-only[Restrict all clients to reads]' \
+                    '--token[Operator token]:token:' '--observer-token[Observer token]:token:' \
+                    '*--allow-host[Allow an HTTP Host authority]:authority:' \
+                    '--http-response[Response format]:format:(json sse)' \
+                    '(-h --help)'{-h,--help}'[Show help]' ;;
+            esac
+            return
+        fi ;;
+esac
+_arguments -C \
+    '--backend[Select the Linux host]:backend:(x11 wayland)' \
+    '--name[Name the session]:session name:' \
+    '(--tab --split-right --split-down)--observe[Open a read-only view]' \
+    '(--observe --split-right --split-down)--tab[Open a tab in a session]:session name:' \
+    '(--observe --tab --split-down)--split-right[Open a pane to the right]:session name:' \
+    '(--observe --tab --split-right)--split-down[Open a pane below]:session name:' \
+    '--cwd[Start in a directory]:directory:_omztty_directories' \
+    '--config[Read an appearance file]:file:_files' \
+    '*--text-plugin[Register a trusted text extension]:NAME=absolute library:->text-plugin' \
+    '--font[Fontconfig pattern]:font pattern:' \
+    '--geometry[Initial character dimensions]:columns x rows:' \
+    '--scrollback[Retained line count]:lines:' \
+    '(-h --help)'{-h,--help}'[Show help]' \
+    '(-V --version)'{-V,--version}'[Show version]' \
+    '-e[Execute a command]:command:_command_names' \
+    '1:command:(attach detach close rename list action move control commands command-output shell-integration plugin save-layout restore-layout mcp)'
+if [[ $state == text-plugin ]]; then
+    if compset -P '*='; then _files -S ''
+    else _message 'NAME=/absolute/path/to/library.so'
+    fi
+fi

@@ -1,0 +1,4 @@
+#compdef ztty
+
+autoload -Uz _omztty_terminal
+_omztty_terminal "$@"
