@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "original_fixture": "/home/lightjunction/Documents/GITHUB/oh-my-ztty/dist/consumer-ztty-0.5.0-20261120/source/scripts/verify_graphical.py",
+  "fixture_sha256": "d15a1110199fc1c3d966f053087ed190dbf6376f087c2041d9c833e2db67a12e",
+  "adapter_sha256": "581ad558218fa622558524dcda41758e53661997336e2f3467e2e9c80d425071",
+  "scope": "Original verify_graphical assertions; one launcher adds --backend x11. Private SHELL=/bin/sh verifies that the suite still selects its own zsh. No installed user profile is used.",
+  "environment": {
+    "SHELL": "/bin/sh",
+    "LIBGL_ALWAYS_SOFTWARE": "1"
+  },
+  "actual_launcher_argv": [
+    "/home/lightjunction/Documents/GITHUB/oh-my-ztty/dist/consumer-ztty-0.5.0-20261120/acceptance-v050/tmp/oh-my-ztty-gui-l_d_4rz1/home/.local/bin/omztty",
+    "terminal",
+    "--backend",
+    "x11",
+    "--name",
+    "oh-my-ztty-verify",
+    "--geometry",
+    "100x28"
+  ],
+  "backend_injection_count": 1,
+  "owned_shell": {
+    "pid": 1210841,
+    "executable": "/usr/bin/zsh"
+  },
+  "renderer": {
+    "window": "6291458",
+    "raw": "_ZTTY_RENDERER(UTF8_STRING) = \"software\"\n_ZTTY_GPU_DRIVER(UTF8_STRING) = \n",
+    "actual": "software"
+  },
+  "screenshot_sha256": "8be778056fef776edbb353dbc7da97724f3ef104db69b12f720302adb6e00bf0",
+  "ok": true,
+  "launchers": [
+    {
+      "pid": 1210813,
+      "returncode": 0,
+      "stderr_tail": ""
+    }
+  ],
+  "fixture_hash_unchanged": true
+}

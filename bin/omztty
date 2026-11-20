@@ -41,7 +41,7 @@ terminal_needs_default_shell() {
     # In particular, a value such as --name '-e' is not an execution boundary.
     while [ "$#" -gt 0 ]; do
         case "$1" in
-            --config|--name|--cwd|--font|--geometry|--scrollback|--tab|--split-right|--split-down)
+            --config|--name|--cwd|--font|--geometry|--scrollback|--tab|--split-right|--split-down|--backend|--text-plugin)
                 [ "$#" -ge 2 ] || return 1
                 shift 2 ;;
             --observe) shift ;;

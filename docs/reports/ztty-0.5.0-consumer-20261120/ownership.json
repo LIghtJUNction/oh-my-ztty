@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "helper_source": "LIghtJUNction/ztty@9f5a77a1299093d0ba609bfafa2cec3b0ba931dd:tools/isolated_xvfb.py",
+  "helper_sha256": "9baf8e2d731be49ed57eefbaa48e15ba30fe581839d0ad1738a5cc4a19ceeb0a",
+  "wrapper_sha256": "14831e7e1c44bbc8351265cac945f43baf6b37cb21a8473423638990ab2c7187",
+  "created_utc": "2026-11-20T03:54:33Z",
+  "owned": {
+    "display": ":8539",
+    "pid": 1210807,
+    "pid_lock_verified": true,
+    "owned_listeners": [
+      {
+        "path": "/tmp/.X11-unix/X8539",
+        "inode": 98062868,
+        "state": "01",
+        "type": "0001"
+      },
+      {
+        "path": "@/tmp/.X11-unix/X8539",
+        "inode": 98062867,
+        "state": "01",
+        "type": "0001"
+      }
+    ],
+    "filesystem_peer_pid_verified": true,
+    "allocation": "guarded explicit random display 100..30000"
+  },
+  "child_returncode": 0,
+  "owned_endpoints_after": {
+    "display": ":8539",
+    "files": [
+      {
+        "path": "/tmp/.X8539-lock",
+        "exists": false
+      },
+      {
+        "path": "/tmp/.X11-unix/X8539",
+        "exists": false
+      },
+      {
+        "path": "/tmp/.X11-unix/X8539_",
+        "exists": false
+      }
+    ],
+    "listeners": []
+  },
+  "cleanup_complete": true,
+  "native_display_zero_unchanged": true,
+  "raw_receipt_sha256": "cc547d4ba6ae37dc21b3e339027eeceb25520efd561569be654ba25b5722e265"
+}

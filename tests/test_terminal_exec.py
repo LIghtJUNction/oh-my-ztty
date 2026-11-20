@@ -65,6 +65,9 @@ class TerminalExec(unittest.TestCase):
         cases = [
             [],
             ["--observe"],
+            ["--backend", "x11"],
+            ["--backend", "wayland", "--text-plugin", "one=/absolute/plugin one.so",
+             "--text-plugin", "two=/absolute/plugin-two.so"],
             ["--name", "named session", "--cwd", "directory with spaces",
              "--font", "monospace:size=12", "--geometry", "80x24",
              "--scrollback", "0", "--config", "custom appearance", "--tab", "target"],
@@ -80,14 +83,15 @@ class TerminalExec(unittest.TestCase):
             "-e", "--name", "--",
         ]
         for boundary in ("-e", "--"):
-            args = ["--name", "command session", boundary, *payload]
+            args = ["--backend", "wayland", "--text-plugin", "one=/absolute/plugin one.so",
+                    "--name", "command session", boundary, *payload]
             with self.subTest(boundary=boundary):
                 self.assertEqual(self.forwarded(*args), self.prefix + args)
                 self.assertFalse(self.sentinel.exists())
 
     def test_marker_shaped_option_values_are_not_commands(self):
         options = ("--name", "--cwd", "--font", "--config",
-                   "--tab", "--split-right", "--split-down")
+                   "--tab", "--split-right", "--split-down", "--backend", "--text-plugin")
         for option in options:
             for value in ("-e", "--"):
                 args = [option, value]
@@ -105,7 +109,7 @@ class TerminalExec(unittest.TestCase):
             ["-e"], ["--"], ["--unknown", "value"], ["unmarked-command", "argument"],
             *[[option] for option in (
                 "--config", "--name", "--cwd", "--font", "--geometry",
-                "--scrollback", "--tab", "--split-right", "--split-down",
+                "--scrollback", "--tab", "--split-right", "--split-down", "--backend", "--text-plugin",
             )],
         ]
         for args in cases:
