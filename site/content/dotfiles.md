@@ -43,7 +43,7 @@ Remove uses the saved deployment profile, checks link ownership and restores ori
 
 To change a deployed profile, remove its previous deployment, edit it, then apply again. Keep the repository at its original path until removal.
 
-Uninstalling oh-my-ztty restores the adopted `omztty config` home profile before removing its runtime. Independent repositories deployed through `omztty dot` remain independently managed.
+For a per-user installation, `omztty uninstall` restores the adopted `omztty config` home profile before removing the runtime. Before removing the AUR package, run `omztty config remove` to restore that profile. Independent repositories deployed through `omztty dot` remain independently managed.
 
 ## Synchronize with Git
 

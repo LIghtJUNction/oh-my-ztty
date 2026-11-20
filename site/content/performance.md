@@ -26,7 +26,7 @@ The feature sets differ. The Oh My Zsh case uses its git plugin and robbyrussell
 
 The first Tab took a median of **15.848 ms** with a warm completion dump. Creating a fresh dump took **147.310 ms**.
 
-Deferring completion moves the work to when it is needed; it does not remove the work. The suite installer prepares the audited dump before activating a release.
+Deferring completion moves the work to when it is needed; it does not remove the work. The per-user installer prepares the audited dump before activating a release.
 
 zshard 0.1.2 validates current completion files and native audit exclusions, including ownership changes and same-count file replacement. It retains native `compinit -i` auditing. That validation cost is included in the measurements.
 
