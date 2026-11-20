@@ -26,6 +26,17 @@ The profile covers zsh, ztty, Neovim, Kitty, Foot, Ghostty, tmux, fzf, bat, ripg
 
 The corresponding XDG variables change these roots; XDG_CONFIG_HOME must be inside HOME for a home deployment. `omztty config path` prints the profile directory. Repeating `init` and updating the suite preserve the editable profile.
 
+## Refresh defaults after an upgrade
+
+```sh
+omztty update
+omztty config refresh
+```
+
+`refresh` compares the editable profile with the defaults from its recorded suite version, then updates files that you have left unchanged. Customized files, removed files, source symlinks, extra personal files and the existing deployment manifest stay in place. It prints each updated or preserved path. Restart the affected application to load its refreshed configuration.
+
+Keep the previously recorded release installed until refresh completes: its verified files are the comparison baseline. A missing or modified baseline stops refresh before any profile changes. Repeating refresh at the same suite version does nothing. Refresh handles changes to existing defaults; a changed default file layout or mapping requires a deliberate profile review and is rejected without edits.
+
 ## Neovim
 
 Neovim 0.11 or newer is required for this profile. Run `nvim` for the Ink welcome page, or open a file normally. The editor has a native status line, diagnostics, a project picker and a searchable shortcut panel. It needs no plugin bootstrap, download or patched icon font.
