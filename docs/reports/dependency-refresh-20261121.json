@@ -1,0 +1,113 @@
+{
+  "schema": "oh-my-ztty.dependency-refresh.v1",
+  "recorded_utc": "2026-11-20T19:36:52.396419+00:00",
+  "source_commit": "399b3bec83c21322edf687d4913295116422edcb",
+  "source_tree": "ad67e7ad78997a2d416aff5f3055fbdfb0025c6f",
+  "parent_commit": "dbc1aed3259c0f665affba220b6e2e1ce1d45d50",
+  "platform": "linux-x86_64",
+  "source_lock": {
+    "schema": 2,
+    "updated_at": "2026-11-20T19:18:48+00:00",
+    "components": {
+      "ztty": {
+        "repository": "https://github.com/LIghtJUNction/ztty.git",
+        "branch": "main",
+        "commit": "be29c6763d3f63832f77c21746d7d62aa70e7d62",
+        "observed_at": "2026-11-20T19:18:38+00:00"
+      },
+      "ssmcp": {
+        "repository": "https://github.com/LIghtJUNction/ssmcp.git",
+        "branch": "main",
+        "commit": "cbe3d0ef1f7fbe1a26ebe367edc646cd8ef429c3",
+        "observed_at": "2026-11-20T19:18:40+00:00"
+      },
+      "zshard": {
+        "repository": "https://github.com/LIghtJUNction/zshard.git",
+        "branch": "main",
+        "commit": "f7842f70e439c4abda2a46698f0ebe067d38b297",
+        "observed_at": "2026-11-20T19:18:42+00:00"
+      },
+      "zdot": {
+        "repository": "https://github.com/LIghtJUNction/zdot.git",
+        "branch": "main",
+        "commit": "a3c6a75b1e66747822b9b69d9e046d2aac249210",
+        "observed_at": "2026-11-20T19:18:43+00:00"
+      },
+      "zrc": {
+        "repository": "https://github.com/LIghtJUNction/zrc.git",
+        "branch": "main",
+        "commit": "2f10ea8dcfbef2db1204ed46dd21ff98c61ed8ee",
+        "observed_at": "2026-11-20T19:18:45+00:00"
+      },
+      "zfetch": {
+        "repository": "https://github.com/LIghtJUNction/zfetch.git",
+        "branch": "main",
+        "commit": "f0614f3b76eca222f4b3880f8dd1707d1308f098",
+        "observed_at": "2026-11-20T19:18:46+00:00"
+      }
+    }
+  },
+  "source_lock_sha256": "9b67b762600a84f3cf5cf82317d60dd63de89cb298635831d169d106f11e50e0",
+  "validation": {
+    "suite_scripts": {
+      "command": "make check",
+      "tests": 112,
+      "exit_code": 0,
+      "seconds": 48.97,
+      "scope": "Unchanged suite implementation and fixtures; the final bundle checks below use both updated components."
+    },
+    "bundle": {
+      "command": "python3 scripts/build_bundle.py --output <temporary-directory>",
+      "exit_code": 0,
+      "seconds": 185.09
+    },
+    "isolated_install": {
+      "command": "python3 scripts/smoke_bundle.py <built-archive>",
+      "exit_code": 0,
+      "seconds": 1.27,
+      "checks": [
+        "install and repeat install",
+        "doctor and shell startup",
+        "local AI context without a model connection",
+        "native component command entrypoints",
+        "boot-chain entrypoints",
+        "configuration adoption, backup and restore",
+        "custom XDG configuration path",
+        "uninstall"
+      ]
+    }
+  },
+  "bundle": {
+    "name": "oh-my-ztty-0.2.6-linux-x86_64.tar.gz",
+    "bytes": 8070037,
+    "sha256": "af9b7e2f2ee1f8c434863516ea528b36876eac6298843289b16e3ec574da0942",
+    "build": {
+      "platform": "linux-x86_64",
+      "schema": 2,
+      "source_branches": {
+        "ssmcp": "main",
+        "zdot": "main",
+        "zfetch": "main",
+        "zrc": "main",
+        "zshard": "main",
+        "ztty": "main"
+      },
+      "source_commits": {
+        "ssmcp": "cbe3d0ef1f7fbe1a26ebe367edc646cd8ef429c3",
+        "zdot": "a3c6a75b1e66747822b9b69d9e046d2aac249210",
+        "zfetch": "f0614f3b76eca222f4b3880f8dd1707d1308f098",
+        "zrc": "2f10ea8dcfbef2db1204ed46dd21ff98c61ed8ee",
+        "zshard": "f7842f70e439c4abda2a46698f0ebe067d38b297",
+        "ztty": "be29c6763d3f63832f77c21746d7d62aa70e7d62"
+      },
+      "sources_updated_at": "2026-11-20T19:18:48+00:00",
+      "suite_version": "0.2.6"
+    }
+  },
+  "interrupted_attempt": {
+    "status": "connection_interrupted_during_compilation",
+    "source_tree": "ad67e7ad78997a2d416aff5f3055fbdfb0025c6f",
+    "resolution": "Repeated the bundle and installation checks on the same frozen source tree; both completed successfully."
+  },
+  "artifact_role": "Locally verified development bundle from the recorded source snapshot."
+}
