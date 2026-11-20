@@ -1,0 +1,103 @@
+{
+  "schema": "oh-my-ztty.local-validation-observed-summary.v1",
+  "source_sha": "1e3ce8d3e5a141d09e450fd3f635f987a5732be4",
+  "source_tree_sha": "753a123cd9c1019c92a20f4804b08a00e5e54679",
+  "summary_kind": "Observed summary; original command logs remain at the recorded development-machine evidence directory.",
+  "evidence_directory": "$TASK/frozen-026-gates",
+  "source_input_directory": "$FROZEN_CHECKOUT",
+  "tracked_diff_exit_code": 0,
+  "expected_untracked_output_links": [
+    ".cache",
+    "target"
+  ],
+  "input_scope": {
+    "ztty": "sparse root checkout; immutable official tag, HEAD and LICENSE; official binary input",
+    "ssmcp": "sparse root checkout; immutable official tag, HEAD and LICENSE; official binary input",
+    "full_source_components": [
+      "zdot",
+      "zfetch",
+      "zrc",
+      "zshard"
+    ]
+  },
+  "make_check": {
+    "exit_code": 0,
+    "tests_run": 90,
+    "skipped": 0,
+    "unittest_seconds": 36.483,
+    "total_seconds": 37.269
+  },
+  "builds": {
+    "x86_64": {
+      "exit_code": 0,
+      "seconds": 32.421,
+      "archive_bytes": 7246782,
+      "archive_sha256": "73e5fd9872aaada8691159b8b7236f7d5b20e619370b708571d1887394f8d15e",
+      "manifest_entries": 126,
+      "elf_binaries": 4
+    },
+    "aarch64": {
+      "exit_code": 0,
+      "seconds": 1.029,
+      "zdot_cross_compile_seconds": 1.304,
+      "zfetch_cross_compile_seconds": 0.519,
+      "archive_bytes": 6956223,
+      "archive_sha256": "240afc3bf7fb1e0d04814fe0f70f9baa099d0d37292bea44da33cac47472adc3",
+      "manifest_entries": 126,
+      "elf_binaries": 4,
+      "native_arm_execution": false
+    }
+  },
+  "smoke_x86_64": {
+    "exit_code": 0,
+    "seconds": 1.9
+  },
+  "mixed_version_lifecycle": {
+    "exit_code": 0,
+    "seconds": 5.298,
+    "versions": [
+      "0.2.5",
+      "0.2.6",
+      "0.2.5",
+      "0.2.6"
+    ],
+    "atomic_current_renames_observed": 3,
+    "personal_edits_preserved": true,
+    "intentional_deletion_preserved": true,
+    "personal_tab_completion_checked": true,
+    "backup_restore_checked": true,
+    "fixture_removed": true
+  },
+  "site": {
+    "exit_code": 0,
+    "pages": 9,
+    "files": 17,
+    "bytes": 266940,
+    "local_links_checked": 493
+  },
+  "graphical_local": {
+    "exit_code": 1,
+    "seconds": 10.904,
+    "ztty_started": false,
+    "failure_phase": "Xvfb display allocation",
+    "abstract_af_unix_bind_errno": 1,
+    "private_path_af_unix_bind_errno": 1,
+    "error": "Operation not permitted",
+    "sandbox_changed": false,
+    "native_bypass_retry": false
+  },
+  "cli_worker": {
+    "completed": true,
+    "exit_code": 0,
+    "seconds": 211.516,
+    "post_head": "1e3ce8d3e5a141d09e450fd3f635f987a5732be4",
+    "post_status": "?? .cache\n?? target\n"
+  },
+  "graphical_formal": {
+    "run_id": 44719594477,
+    "x86_64": "passed",
+    "aarch64": "passed",
+    "x86_64_receipt": "linux-x86_64-suite.json",
+    "aarch64_receipt": "linux-aarch64-suite.json"
+  }
+}

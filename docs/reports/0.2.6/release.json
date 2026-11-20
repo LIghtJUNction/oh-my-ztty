@@ -1,0 +1,399 @@
+{
+  "schema": "oh-my-ztty.release-receipt.v1",
+  "version": "0.2.6",
+  "source_sha": "1e3ce8d3e5a141d09e450fd3f635f987a5732be4",
+  "source_tree_sha": "753a123cd9c1019c92a20f4804b08a00e5e54679",
+  "tag": "v0.2.6",
+  "tag_object_sha": "5a5f45dcc37c443876aee5d29ed280bcf6c6058d",
+  "release": {
+    "id": 452554850,
+    "url": "https://github.com/LIghtJUNction/oh-my-ztty/releases/tag/v0.2.6",
+    "published_at": "2026-11-20T10:31:09Z",
+    "draft": false,
+    "prerelease": false,
+    "assets": [
+      {
+        "name": "install.sh",
+        "url": "https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.6/install.sh",
+        "sha256": "ec281545ebed3c84027504750621951bcf310e66c5eb5baa8e0a6635b99d26d2",
+        "bytes": 10917,
+        "id": 771404198
+      },
+      {
+        "name": "install.sh.sha256",
+        "url": "https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.6/install.sh.sha256",
+        "sha256": "0d311db16c1911c2b37e7eccbe0aa1745bfab9718bcb4233d0272c20933d4ee5",
+        "bytes": 77,
+        "id": 771404269
+      },
+      {
+        "name": "oh-my-ztty-0.2.6-linux-aarch64.tar.gz",
+        "url": "https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.6/oh-my-ztty-0.2.6-linux-aarch64.tar.gz",
+        "sha256": "b035c460e3444e7b33dda4e5dd25bceecf0757af40b095950adb8d0ad001637b",
+        "bytes": 7011427,
+        "id": 771404423
+      },
+      {
+        "name": "oh-my-ztty-0.2.6-linux-aarch64.tar.gz.sha256",
+        "url": "https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.6/oh-my-ztty-0.2.6-linux-aarch64.tar.gz.sha256",
+        "sha256": "1445105bc516ead983494c5663a3b8bae1ab0be1d2e412b77fbdc8bb8e91764b",
+        "bytes": 104,
+        "id": 771404482
+      },
+      {
+        "name": "oh-my-ztty-0.2.6-linux-x86_64.tar.gz",
+        "url": "https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.6/oh-my-ztty-0.2.6-linux-x86_64.tar.gz",
+        "sha256": "94a22ce1300a337e741ef0c2a336e29e90696b621fbdfa05c0b66673ce10dc20",
+        "bytes": 7273546,
+        "id": 771404323
+      },
+      {
+        "name": "oh-my-ztty-0.2.6-linux-x86_64.tar.gz.sha256",
+        "url": "https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.6/oh-my-ztty-0.2.6-linux-x86_64.tar.gz.sha256",
+        "sha256": "205da553db6ca352e158b754bb42d4e16788462c49f5673a1dfc98482d01def5",
+        "bytes": 103,
+        "id": 771404388
+      }
+    ]
+  },
+  "formal": {
+    "run_id": 44719594477,
+    "url": "https://github.com/LIghtJUNction/oh-my-ztty/actions/runs/44719594477",
+    "status": "completed",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "id": 136231640959,
+        "name": "bundle (ubuntu-24.04-arm, aarch64)",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 44719594477,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v7",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Match immutable tag to suite version",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Install build and shell prerequisites",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Check installer lifecycle",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Build complete locked bundle",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Smoke actual bundled programs in isolated HOME",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Check actual terminal window, keyboard, completion and cleanup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Run actions/upload-artifact@v7",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Post Run actions/checkout@v7",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 18
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 19
+          }
+        ]
+      },
+      {
+        "id": 136231641285,
+        "name": "bundle (ubuntu-24.04, x86_64)",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 44719594477,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v7",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Match immutable tag to suite version",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Install build and shell prerequisites",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Check installer lifecycle",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Build complete locked bundle",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Smoke actual bundled programs in isolated HOME",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Check actual terminal window, keyboard, completion and cleanup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Run actions/upload-artifact@v7",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Post Run actions/checkout@v7",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 18
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 19
+          }
+        ]
+      },
+      {
+        "id": 136232508880,
+        "name": "publish",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 44719594477,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v7",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/download-artifact@v8",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Prepare bootstrap installer checksum",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Publish complete release",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Post Run actions/checkout@v7",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11
+          }
+        ]
+      }
+    ]
+  },
+  "sources": {
+    "ztty": "6e2ce246b0b50e6b82da99756832feae6e966f21",
+    "ssmcp": "4f4dd88275c205e0e61a7601b4e0d11f56038769",
+    "zfetch": "154c9b826a794e22135eda2d77a03b7214f8e427",
+    "zrc": "e6e6a7d4a07bc74ae95b5ec1f0391ad4e5155d86",
+    "zshard": "f7842f70e439c4abda2a46698f0ebe067d38b297",
+    "zdot": "e6b5feb98b05c59e0986624c0742dfe4a9187a2a"
+  },
+  "ci_archive_verification": {
+    "x86_64": {
+      "artifact_id": 14620663689,
+      "artifact_zip_sha256": "e7662accd422ba72e9da5227ac1424eb88475c9f054bd152de18608a50d62d35",
+      "archive_sha256": "94a22ce1300a337e741ef0c2a336e29e90696b621fbdfa05c0b66673ce10dc20",
+      "manifest_entries": 126
+    },
+    "aarch64": {
+      "artifact_id": 14621900002,
+      "artifact_zip_sha256": "28821545b7a40c6314dbfd352ae1abd094ae5fe4f3c4321110af085732efc15e",
+      "archive_sha256": "b035c460e3444e7b33dda4e5dd25bceecf0757af40b095950adb8d0ad001637b",
+      "manifest_entries": 126
+    },
+    "archive_digests_match_public_release_api": true,
+    "independent_public_release_url_download_complete": true
+  },
+  "native_installation": {
+    "status": "installed_and_verified",
+    "attempted": true,
+    "previous_suite_version": "0.2.5",
+    "suite_version": "0.2.6",
+    "official_x86_64_archive_sha256": "94a22ce1300a337e741ef0c2a336e29e90696b621fbdfa05c0b66673ce10dc20",
+    "current": "releases/0.2.6-linux-x86_64",
+    "reinstall_idempotent": true,
+    "retained_previous_release": true,
+    "protected_baselines_match": true,
+    "path_readback_status": "version_readback_complete_manager_targets_unverified",
+    "receipt": "actual-install.json"
+  },
+  "drive_evidence": {
+    "file_id": "15c79p02J6VqnXF2qnSYacMJOj7hp4-6E",
+    "url": "https://drive.google.com/file/d/15c79p02J6VqnXF2qnSYacMJOj7hp4-6E/view?usp=drivesdk",
+    "scope": "final_release_and_installation_evidence",
+    "current_installation_receipt": "actual-install.json"
+  },
+  "official_download": {
+    "status": "passed",
+    "source_sha": "1e3ce8d3e5a141d09e450fd3f635f987a5732be4",
+    "tag": "v0.2.6",
+    "release_id": 452554850,
+    "workflow_run": 44719594477,
+    "seconds": 9.836,
+    "source": "Independent HTTPS downloads from exact public GitHub Release asset URLs, checked against GitHub API digests and sidecar contents.",
+    "assets": [
+      {
+        "name": "install.sh",
+        "url": "https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.6/install.sh",
+        "sha256": "ec281545ebed3c84027504750621951bcf310e66c5eb5baa8e0a6635b99d26d2",
+        "bytes": 10917,
+        "id": 771404198,
+        "verified": true
+      },
+      {
+        "name": "install.sh.sha256",
+        "url": "https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.6/install.sh.sha256",
+        "sha256": "0d311db16c1911c2b37e7eccbe0aa1745bfab9718bcb4233d0272c20933d4ee5",
+        "bytes": 77,
+        "id": 771404269,
+        "verified": true
+      },
+      {
+        "name": "oh-my-ztty-0.2.6-linux-aarch64.tar.gz",
+        "url": "https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.6/oh-my-ztty-0.2.6-linux-aarch64.tar.gz",
+        "sha256": "b035c460e3444e7b33dda4e5dd25bceecf0757af40b095950adb8d0ad001637b",
+        "bytes": 7011427,
+        "id": 771404423,
+        "verified": true
+      },
+      {
+        "name": "oh-my-ztty-0.2.6-linux-aarch64.tar.gz.sha256",
+        "url": "https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.6/oh-my-ztty-0.2.6-linux-aarch64.tar.gz.sha256",
+        "sha256": "1445105bc516ead983494c5663a3b8bae1ab0be1d2e412b77fbdc8bb8e91764b",
+        "bytes": 104,
+        "id": 771404482,
+        "verified": true
+      },
+      {
+        "name": "oh-my-ztty-0.2.6-linux-x86_64.tar.gz",
+        "url": "https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.6/oh-my-ztty-0.2.6-linux-x86_64.tar.gz",
+        "sha256": "94a22ce1300a337e741ef0c2a336e29e90696b621fbdfa05c0b66673ce10dc20",
+        "bytes": 7273546,
+        "id": 771404323,
+        "verified": true
+      },
+      {
+        "name": "oh-my-ztty-0.2.6-linux-x86_64.tar.gz.sha256",
+        "url": "https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.6/oh-my-ztty-0.2.6-linux-x86_64.tar.gz.sha256",
+        "sha256": "205da553db6ca352e158b754bb42d4e16788462c49f5673a1dfc98482d01def5",
+        "bytes": 103,
+        "id": 771404388,
+        "verified": true
+      }
+    ]
+  },
+  "binary_provenance": {
+    "ztty": {
+      "bundle": {
+        "origin": "official GitHub Release tar member copied without byte transformation",
+        "archive_url": "https://github.com/LIghtJUNction/ztty/releases/download/v0.5.2/ztty-linux-x86_64.tar.gz",
+        "archive_sha256": "a69a4df53b3856d57c3a6f5e9a2109cd7727e5a7f02be902f133a137b186546f",
+        "archive_bytes": 652986,
+        "member": "ztty",
+        "elf_bytes": 1365456,
+        "elf_sha256": "9e8f1c084376df913087c10d4b10d11e2c0172a2eb63a31e64813742067dab19",
+        "builder_source": "https://github.com/LIghtJUNction/oh-my-ztty/blob/1e3ce8d3e5a141d09e450fd3f635f987a5732be4/scripts/build_bundle.py"
+      },
+      "independent_cargo": {
+        "path": "~/.cargo/bin/ztty",
+        "origin": "local cargo install from official registry 0.5.2",
+        "features": [
+          "wayland"
+        ],
+        "profile": "release",
+        "elf_bytes": 1367376,
+        "elf_sha256": "0d697554c280ddc51631874d67a4ce729c709cce861d400e052e00e9f95b174a",
+        "preserved_by_suite_installation": true,
+        "installation_receipt": "https://github.com/LIghtJUNction/ztty/blob/76fa2cfd13b776c027d5a86fadafde8e035f88f2/docs/releases/0.5.2/report.zh-CN.md"
+      }
+    }
+  }
+}

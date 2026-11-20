@@ -1,0 +1,1483 @@
+{
+  "schema": "oh-my-ztty.actual-install.v1",
+  "status": "installed_and_verified",
+  "recorded_utc": "2026-11-20T10:46:44.863779+00:00",
+  "source": {
+    "sha": "1e3ce8d3e5a141d09e450fd3f635f987a5732be4",
+    "tree": "753a123cd9c1019c92a20f4804b08a00e5e54679"
+  },
+  "official_download": {
+    "status": "passed",
+    "source_sha": "1e3ce8d3e5a141d09e450fd3f635f987a5732be4",
+    "tag": "v0.2.6",
+    "release_id": 452554850,
+    "workflow_run": 44719594477,
+    "seconds": 9.836,
+    "source": "Independent HTTPS downloads from exact public GitHub Release asset URLs, checked against GitHub API digests and sidecar contents.",
+    "assets": [
+      {
+        "name": "install.sh",
+        "url": "https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.6/install.sh",
+        "sha256": "ec281545ebed3c84027504750621951bcf310e66c5eb5baa8e0a6635b99d26d2",
+        "bytes": 10917,
+        "id": 771404198,
+        "verified": true
+      },
+      {
+        "name": "install.sh.sha256",
+        "url": "https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.6/install.sh.sha256",
+        "sha256": "0d311db16c1911c2b37e7eccbe0aa1745bfab9718bcb4233d0272c20933d4ee5",
+        "bytes": 77,
+        "id": 771404269,
+        "verified": true
+      },
+      {
+        "name": "oh-my-ztty-0.2.6-linux-aarch64.tar.gz",
+        "url": "https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.6/oh-my-ztty-0.2.6-linux-aarch64.tar.gz",
+        "sha256": "b035c460e3444e7b33dda4e5dd25bceecf0757af40b095950adb8d0ad001637b",
+        "bytes": 7011427,
+        "id": 771404423,
+        "verified": true
+      },
+      {
+        "name": "oh-my-ztty-0.2.6-linux-aarch64.tar.gz.sha256",
+        "url": "https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.6/oh-my-ztty-0.2.6-linux-aarch64.tar.gz.sha256",
+        "sha256": "1445105bc516ead983494c5663a3b8bae1ab0be1d2e412b77fbdc8bb8e91764b",
+        "bytes": 104,
+        "id": 771404482,
+        "verified": true
+      },
+      {
+        "name": "oh-my-ztty-0.2.6-linux-x86_64.tar.gz",
+        "url": "https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.6/oh-my-ztty-0.2.6-linux-x86_64.tar.gz",
+        "sha256": "94a22ce1300a337e741ef0c2a336e29e90696b621fbdfa05c0b66673ce10dc20",
+        "bytes": 7273546,
+        "id": 771404323,
+        "verified": true
+      },
+      {
+        "name": "oh-my-ztty-0.2.6-linux-x86_64.tar.gz.sha256",
+        "url": "https://github.com/LIghtJUNction/oh-my-ztty/releases/download/v0.2.6/oh-my-ztty-0.2.6-linux-x86_64.tar.gz.sha256",
+        "sha256": "205da553db6ca352e158b754bb42d4e16788462c49f5673a1dfc98482d01def5",
+        "bytes": 103,
+        "id": 771404388,
+        "verified": true
+      }
+    ]
+  },
+  "official_archives": {
+    "x86_64": {
+      "sha256": "94a22ce1300a337e741ef0c2a336e29e90696b621fbdfa05c0b66673ce10dc20",
+      "bytes": 7273546,
+      "manifest_entries": 126,
+      "manifest_sha256": "d1e4be7f61cdde1239251faf7561ace26edacfb781b6e60b93ca8d4988eafb5c",
+      "build": {
+        "platform": "linux-x86_64",
+        "schema": 1,
+        "source_commits": {
+          "ssmcp": "4f4dd88275c205e0e61a7601b4e0d11f56038769",
+          "zdot": "e6b5feb98b05c59e0986624c0742dfe4a9187a2a",
+          "zfetch": "154c9b826a794e22135eda2d77a03b7214f8e427",
+          "zrc": "e6e6a7d4a07bc74ae95b5ec1f0391ad4e5155d86",
+          "zshard": "f7842f70e439c4abda2a46698f0ebe067d38b297",
+          "ztty": "6e2ce246b0b50e6b82da99756832feae6e966f21"
+        },
+        "suite_version": "0.2.6"
+      },
+      "elf": {
+        "ztty": {
+          "sha256": "9e8f1c084376df913087c10d4b10d11e2c0172a2eb63a31e64813742067dab19",
+          "bytes": 1365456,
+          "elf_machine": 62
+        },
+        "ssmcp": {
+          "sha256": "434b6158bbb8e1ff12ffceb6bc0d703f20d368653c37b59ede2333a128bbfe2e",
+          "bytes": 13434720,
+          "elf_machine": 62
+        },
+        "zdot": {
+          "sha256": "7eab1f9685cd7f3d5dae2e464f3cb374b486d7891f9d158a0b9de2f812acf8e1",
+          "bytes": 57880,
+          "elf_machine": 62
+        },
+        "zfetch": {
+          "sha256": "5ddbf53b7ab7332b722883483825c27a3c316bb42c4624566e019b3fc3d0ef39",
+          "bytes": 28648,
+          "elf_machine": 62
+        }
+      }
+    },
+    "aarch64": {
+      "sha256": "b035c460e3444e7b33dda4e5dd25bceecf0757af40b095950adb8d0ad001637b",
+      "bytes": 7011427,
+      "manifest_entries": 126,
+      "manifest_sha256": "2a62f5bf871f2eb4fccacb02b2618a266989727bb018bb1cd68554937ee0b996",
+      "build": {
+        "platform": "linux-aarch64",
+        "schema": 1,
+        "source_commits": {
+          "ssmcp": "4f4dd88275c205e0e61a7601b4e0d11f56038769",
+          "zdot": "e6b5feb98b05c59e0986624c0742dfe4a9187a2a",
+          "zfetch": "154c9b826a794e22135eda2d77a03b7214f8e427",
+          "zrc": "e6e6a7d4a07bc74ae95b5ec1f0391ad4e5155d86",
+          "zshard": "f7842f70e439c4abda2a46698f0ebe067d38b297",
+          "ztty": "6e2ce246b0b50e6b82da99756832feae6e966f21"
+        },
+        "suite_version": "0.2.6"
+      },
+      "elf": {
+        "ztty": {
+          "sha256": "db5ababbd79dde74959051c2b9e210df98d64f0410eac78e92e33856c242757c",
+          "bytes": 1299432,
+          "elf_machine": 183
+        },
+        "ssmcp": {
+          "sha256": "22591e8bca586b666c5335501b92e59691e8cb942cb04446b0bf6af922d2c33e",
+          "bytes": 11211384,
+          "elf_machine": 183
+        },
+        "zdot": {
+          "sha256": "0046c84cd1d1312db524ce5bee70b85a7e935752438a3547ad598c0a75a542fe",
+          "bytes": 66168,
+          "elf_machine": 183
+        },
+        "zfetch": {
+          "sha256": "bdaeb072dbd5ed72fe978872cdad3ae2b62e2594d07d1daccc5847466b7524e7",
+          "bytes": 66168,
+          "elf_machine": 183
+        }
+      }
+    }
+  },
+  "local_candidate_archives_sha256": {
+    "x86_64": "73e5fd9872aaada8691159b8b7236f7d5b20e619370b708571d1887394f8d15e",
+    "aarch64": "240afc3bf7fb1e0d04814fe0f70f9baa099d0d37292bea44da33cac47472adc3"
+  },
+  "write_scope": {
+    "managed_runtime": "~/.local/share/oh-my-ztty",
+    "completion_cache": "~/.cache/oh-my-ztty",
+    "staging_tmpdir": "$TASK/tmp",
+    "outside_paths": "all six command entries, man entry and enabled desktop link already exist; mkdir -p sees existing directories; desktop preference and ownership are initialized"
+  },
+  "worker_visibility": {
+    "checked_visible_proc": true,
+    "other_codex_workers_at_frozen_root": [],
+    "prior_pid_visible": false
+  },
+  "initialized_preferences": {
+    "owner": "oh-my-ztty-v1",
+    "bin_dir": "~/.local/bin",
+    "desktop_enabled": true
+  },
+  "available_preinstall_bytes": {
+    "~/.local/share/oh-my-ztty": 7678291968,
+    "~/.cache/oh-my-ztty": 7678291968,
+    "$TASK/tmp": 759997812736
+  },
+  "available_postcheck_bytes": 32930365440,
+  "before": {
+    "current": {
+      "path": "~/.local/share/oh-my-ztty/current",
+      "inode": 185270863,
+      "mode": 511,
+      "target": "releases/0.2.5-linux-x86_64",
+      "target_bytes_sha256": "23520e5b162a1c98d0067042ececd9971c097bf405faab388a923dfccdeaf45a",
+      "real_release": "~/.local/share/oh-my-ztty/releases/0.2.5-linux-x86_64",
+      "mtime_ns": 1795163947834641494
+    },
+    "protected_trees": {
+      "~/.config/oh-my-ztty": {
+        "entries": 262,
+        "sha256": "b1e7b96a2b71ea673b3d80bad88d0550bb18d6fe805cd4d44f64b97f2da739d7"
+      },
+      "~/.local/state/zdot/oh-my-ztty": {
+        "entries": 55,
+        "sha256": "72ead9ad173b3749467ca8eca9412366a9d2d0206f8689f58edb3ff92d63f758"
+      },
+      "~/.zshrc": {
+        "entries": 1,
+        "sha256": "29b83174d78bbfaf0d36d4c2517c2848c4843eb7c6ce3e200f02844cbe2d86be"
+      },
+      "~/.zshenv": {
+        "entries": 1,
+        "sha256": "50b462125801d004798a71306ec2e2b7b19aa79af03d2ae2eaa22c778a373345"
+      },
+      "~/.zprofile": {
+        "entries": 1,
+        "sha256": "2ad8e5cee0ca485f779355de8d8ec43c4eb7f98d060f648dd69c77b5320cc6e7"
+      },
+      "~/.zlogin": {
+        "entries": 1,
+        "sha256": "69f33b9df4a6e27a5b5c8105a18e212d8e4596433a977749d17b76b26b40321a"
+      },
+      "~/.cargo/bin": {
+        "entries": 77,
+        "sha256": "ab7ddf5faf9e166f2487e146be524c893fdd3a14f23fa8f5da40d52bdca80d0f"
+      }
+    },
+    "root_metadata": {
+      ".owner": {
+        "path": "~/.local/share/oh-my-ztty/.owner",
+        "inode": 183960671,
+        "mode": 420,
+        "resolved": "~/.local/share/oh-my-ztty/.owner",
+        "sha256": "5902f3939e4fd2f8c8c2c492d68559d52a51945b52d2252decae60a844f1b6a1"
+      },
+      ".bin-dir": {
+        "path": "~/.local/share/oh-my-ztty/.bin-dir",
+        "inode": 183960672,
+        "mode": 420,
+        "resolved": "~/.local/share/oh-my-ztty/.bin-dir",
+        "sha256": "9764488ee21f129cdad58283d1c1fae52a59e2f3b74299cce52f913307cdae49"
+      },
+      ".desktop-enabled": {
+        "path": "~/.local/share/oh-my-ztty/.desktop-enabled",
+        "inode": 183960750,
+        "mode": 384,
+        "resolved": "~/.local/share/oh-my-ztty/.desktop-enabled",
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      ".desktop-path": {
+        "path": "~/.local/share/oh-my-ztty/.desktop-path",
+        "inode": 183960749,
+        "mode": 420,
+        "resolved": "~/.local/share/oh-my-ztty/.desktop-path",
+        "sha256": "93f51cb2fa343351c058148066a6c776a5412ef49fa1197a2acd3a9fb76ec176"
+      },
+      "oh-my-ztty.desktop": {
+        "path": "~/.local/share/oh-my-ztty/oh-my-ztty.desktop",
+        "inode": 183960747,
+        "mode": 420,
+        "resolved": "~/.local/share/oh-my-ztty/oh-my-ztty.desktop",
+        "sha256": "7da085e7cd90491d31ca453824cb69b45ca2df8c1394e12f38a98f1f64dc2aea"
+      }
+    },
+    "managed_command_entries_and_external_links": {
+      "~/.local/bin/omztty": {
+        "path": "~/.local/bin/omztty",
+        "inode": 183960742,
+        "mode": 511,
+        "target": "~/.local/share/oh-my-ztty/current/bin/omztty",
+        "target_bytes_sha256": "37eccb0d141a7550cccab52d1a5ad03cb90f7864aa2b9b9235d74a41daee46cc",
+        "resolved": "~/.local/share/oh-my-ztty/releases/0.2.5-linux-x86_64/bin/omztty",
+        "sha256": "8646de65a20d8fefadb13c1afe43ef59fc26b28615aa7533352b15bdb9bcde06"
+      },
+      "~/.local/bin/ztty": {
+        "path": "~/.local/bin/ztty",
+        "inode": 181959438,
+        "mode": 511,
+        "target": "/usr/bin/ztty",
+        "target_bytes_sha256": "7c7b196df74303054c2ef1dce1006bed186823b6d6aaefd3bb6b04b5e95fbc9c",
+        "resolved": "/usr/bin/ztty",
+        "sha256": "88a4db35e3ad0b39153690db9405bcbf3e07ad6c2314838c0ae93a4380b1e20c"
+      },
+      "~/.local/bin/ssmcp": {
+        "path": "~/.local/bin/ssmcp",
+        "inode": 183960743,
+        "mode": 511,
+        "target": "~/.local/share/oh-my-ztty/current/bin/ssmcp",
+        "target_bytes_sha256": "87d657d1a5b89a18c536195b7698879c46377858c4529e9ed6ccad7e6f6a4130",
+        "resolved": "~/.local/share/oh-my-ztty/releases/0.2.5-linux-x86_64/bin/ssmcp",
+        "sha256": "409af30e7af8f4c43be24e1f9fc87ec46320a7531f89b590eab31265812055e7"
+      },
+      "~/.local/bin/zdot": {
+        "path": "~/.local/bin/zdot",
+        "inode": 183960744,
+        "mode": 511,
+        "target": "~/.local/share/oh-my-ztty/current/bin/zdot",
+        "target_bytes_sha256": "b590e47f35e2ed4205dbd446bb09c5051a5a8d53a8cfa592dc66b6c7b670b5b1",
+        "resolved": "~/.local/share/oh-my-ztty/releases/0.2.5-linux-x86_64/bin/zdot",
+        "sha256": "7eab1f9685cd7f3d5dae2e464f3cb374b486d7891f9d158a0b9de2f812acf8e1"
+      },
+      "~/.local/bin/zshard": {
+        "path": "~/.local/bin/zshard",
+        "inode": 183960745,
+        "mode": 511,
+        "target": "~/.local/share/oh-my-ztty/current/bin/zshard",
+        "target_bytes_sha256": "acc4791c7b1f26324e59686d6dde0d8cb024ea47b318a76983f94118b8429ad7",
+        "resolved": "~/.local/share/oh-my-ztty/releases/0.2.5-linux-x86_64/bin/zshard",
+        "sha256": "b9e29355ee94dd2f03832ab57e2e3c19337ac434bb5961e905b81f5db257ff6b"
+      },
+      "~/.local/bin/zfetch": {
+        "path": "~/.local/bin/zfetch",
+        "inode": 184325744,
+        "mode": 511,
+        "target": "~/.local/share/oh-my-ztty/current/bin/zfetch",
+        "target_bytes_sha256": "977f5e65e5e76861602d0d75a2ca05d75e066a4ef086adbb765b178fb00e8aee",
+        "resolved": "~/.local/share/oh-my-ztty/releases/0.2.5-linux-x86_64/bin/zfetch",
+        "sha256": "bc9daa34256f0af271bd4d2bc2bb3f90e6161e2566f8ec5bf95f4cde3c195f2a"
+      },
+      "~/.local/share/man/man1/omztty.1": {
+        "path": "~/.local/share/man/man1/omztty.1",
+        "inode": 183960746,
+        "mode": 511,
+        "target": "~/.local/share/oh-my-ztty/current/packaging/omztty.1",
+        "target_bytes_sha256": "d76a23ccf459dca351ec72a70a7b06aaca89cc94bab9719dcf9b28577bd32144",
+        "resolved": "~/.local/share/oh-my-ztty/releases/0.2.5-linux-x86_64/packaging/omztty.1",
+        "sha256": "37f3b2e38764d13a9aaf6c95d4765ec6676c84699143bb14b0d0dea5cc241506"
+      },
+      "~/.local/share/applications/oh-my-ztty.desktop": {
+        "path": "~/.local/share/applications/oh-my-ztty.desktop",
+        "inode": 183960748,
+        "mode": 511,
+        "target": "~/.local/share/oh-my-ztty/oh-my-ztty.desktop",
+        "target_bytes_sha256": "57d111fbbd593e9b3de32139a1d9ef7360787c1f73d556933c153e2ed80530d2",
+        "resolved": "~/.local/share/oh-my-ztty/oh-my-ztty.desktop",
+        "sha256": "7da085e7cd90491d31ca453824cb69b45ca2df8c1394e12f38a98f1f64dc2aea"
+      }
+    },
+    "zshrc_link_and_target": {
+      "path": "~/.zshrc",
+      "inode": 184335988,
+      "mode": 511,
+      "target": "~/.config/oh-my-ztty/profile/files/.zshrc",
+      "target_bytes_sha256": "4cd1cb4ea58d80fa3b1eb946adb9c7ce0aab3a9646909ec7c8f82014d147276a",
+      "resolved": "~/.config/oh-my-ztty/profile/files/.zshrc",
+      "sha256": "cc28281b23f0b916d66116ea4ab75629905650f8f3a61ac94173f217a079b7df"
+    },
+    "0.2.5_release_tree": {
+      "sha256": "bd9f0a4ba6d75fa4f7c3194fa6c2bd80c43eff42f5971a861dac4f9eb0795256",
+      "entries": 157
+    }
+  },
+  "after": {
+    "current": {
+      "path": "~/.local/share/oh-my-ztty/current",
+      "inode": 185524942,
+      "mode": 511,
+      "target": "releases/0.2.6-linux-x86_64",
+      "target_bytes_sha256": "61ec63e96176c01100885d1a24263a206832eb8257a4a3bc4b987e6c7309c64c",
+      "real_release": "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64",
+      "mtime_ns": 1795171523659908189
+    },
+    "protected_trees": {
+      "~/.config/oh-my-ztty": {
+        "entries": 262,
+        "sha256": "b1e7b96a2b71ea673b3d80bad88d0550bb18d6fe805cd4d44f64b97f2da739d7"
+      },
+      "~/.local/state/zdot/oh-my-ztty": {
+        "entries": 55,
+        "sha256": "72ead9ad173b3749467ca8eca9412366a9d2d0206f8689f58edb3ff92d63f758"
+      },
+      "~/.zshrc": {
+        "entries": 1,
+        "sha256": "29b83174d78bbfaf0d36d4c2517c2848c4843eb7c6ce3e200f02844cbe2d86be"
+      },
+      "~/.zshenv": {
+        "entries": 1,
+        "sha256": "50b462125801d004798a71306ec2e2b7b19aa79af03d2ae2eaa22c778a373345"
+      },
+      "~/.zprofile": {
+        "entries": 1,
+        "sha256": "2ad8e5cee0ca485f779355de8d8ec43c4eb7f98d060f648dd69c77b5320cc6e7"
+      },
+      "~/.zlogin": {
+        "entries": 1,
+        "sha256": "69f33b9df4a6e27a5b5c8105a18e212d8e4596433a977749d17b76b26b40321a"
+      },
+      "~/.cargo/bin": {
+        "entries": 77,
+        "sha256": "ab7ddf5faf9e166f2487e146be524c893fdd3a14f23fa8f5da40d52bdca80d0f"
+      }
+    },
+    "root_metadata": {
+      ".owner": {
+        "path": "~/.local/share/oh-my-ztty/.owner",
+        "inode": 183960671,
+        "mode": 420,
+        "resolved": "~/.local/share/oh-my-ztty/.owner",
+        "sha256": "5902f3939e4fd2f8c8c2c492d68559d52a51945b52d2252decae60a844f1b6a1"
+      },
+      ".bin-dir": {
+        "path": "~/.local/share/oh-my-ztty/.bin-dir",
+        "inode": 183960672,
+        "mode": 420,
+        "resolved": "~/.local/share/oh-my-ztty/.bin-dir",
+        "sha256": "9764488ee21f129cdad58283d1c1fae52a59e2f3b74299cce52f913307cdae49"
+      },
+      ".desktop-enabled": {
+        "path": "~/.local/share/oh-my-ztty/.desktop-enabled",
+        "inode": 183960750,
+        "mode": 384,
+        "resolved": "~/.local/share/oh-my-ztty/.desktop-enabled",
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      ".desktop-path": {
+        "path": "~/.local/share/oh-my-ztty/.desktop-path",
+        "inode": 183960749,
+        "mode": 420,
+        "resolved": "~/.local/share/oh-my-ztty/.desktop-path",
+        "sha256": "93f51cb2fa343351c058148066a6c776a5412ef49fa1197a2acd3a9fb76ec176"
+      },
+      "oh-my-ztty.desktop": {
+        "path": "~/.local/share/oh-my-ztty/oh-my-ztty.desktop",
+        "inode": 183960747,
+        "mode": 420,
+        "resolved": "~/.local/share/oh-my-ztty/oh-my-ztty.desktop",
+        "sha256": "7da085e7cd90491d31ca453824cb69b45ca2df8c1394e12f38a98f1f64dc2aea"
+      }
+    },
+    "managed_command_entries_and_external_links": {
+      "~/.local/bin/omztty": {
+        "path": "~/.local/bin/omztty",
+        "inode": 183960742,
+        "mode": 511,
+        "target": "~/.local/share/oh-my-ztty/current/bin/omztty",
+        "target_bytes_sha256": "37eccb0d141a7550cccab52d1a5ad03cb90f7864aa2b9b9235d74a41daee46cc",
+        "resolved": "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/omztty",
+        "sha256": "8646de65a20d8fefadb13c1afe43ef59fc26b28615aa7533352b15bdb9bcde06"
+      },
+      "~/.local/bin/ztty": {
+        "path": "~/.local/bin/ztty",
+        "inode": 181959438,
+        "mode": 511,
+        "target": "/usr/bin/ztty",
+        "target_bytes_sha256": "7c7b196df74303054c2ef1dce1006bed186823b6d6aaefd3bb6b04b5e95fbc9c",
+        "resolved": "/usr/bin/ztty",
+        "sha256": "88a4db35e3ad0b39153690db9405bcbf3e07ad6c2314838c0ae93a4380b1e20c"
+      },
+      "~/.local/bin/ssmcp": {
+        "path": "~/.local/bin/ssmcp",
+        "inode": 183960743,
+        "mode": 511,
+        "target": "~/.local/share/oh-my-ztty/current/bin/ssmcp",
+        "target_bytes_sha256": "87d657d1a5b89a18c536195b7698879c46377858c4529e9ed6ccad7e6f6a4130",
+        "resolved": "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/ssmcp",
+        "sha256": "434b6158bbb8e1ff12ffceb6bc0d703f20d368653c37b59ede2333a128bbfe2e"
+      },
+      "~/.local/bin/zdot": {
+        "path": "~/.local/bin/zdot",
+        "inode": 183960744,
+        "mode": 511,
+        "target": "~/.local/share/oh-my-ztty/current/bin/zdot",
+        "target_bytes_sha256": "b590e47f35e2ed4205dbd446bb09c5051a5a8d53a8cfa592dc66b6c7b670b5b1",
+        "resolved": "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/zdot",
+        "sha256": "7eab1f9685cd7f3d5dae2e464f3cb374b486d7891f9d158a0b9de2f812acf8e1"
+      },
+      "~/.local/bin/zshard": {
+        "path": "~/.local/bin/zshard",
+        "inode": 183960745,
+        "mode": 511,
+        "target": "~/.local/share/oh-my-ztty/current/bin/zshard",
+        "target_bytes_sha256": "acc4791c7b1f26324e59686d6dde0d8cb024ea47b318a76983f94118b8429ad7",
+        "resolved": "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/zshard",
+        "sha256": "b9e29355ee94dd2f03832ab57e2e3c19337ac434bb5961e905b81f5db257ff6b"
+      },
+      "~/.local/bin/zfetch": {
+        "path": "~/.local/bin/zfetch",
+        "inode": 184325744,
+        "mode": 511,
+        "target": "~/.local/share/oh-my-ztty/current/bin/zfetch",
+        "target_bytes_sha256": "977f5e65e5e76861602d0d75a2ca05d75e066a4ef086adbb765b178fb00e8aee",
+        "resolved": "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/zfetch",
+        "sha256": "5ddbf53b7ab7332b722883483825c27a3c316bb42c4624566e019b3fc3d0ef39"
+      },
+      "~/.local/share/man/man1/omztty.1": {
+        "path": "~/.local/share/man/man1/omztty.1",
+        "inode": 183960746,
+        "mode": 511,
+        "target": "~/.local/share/oh-my-ztty/current/packaging/omztty.1",
+        "target_bytes_sha256": "d76a23ccf459dca351ec72a70a7b06aaca89cc94bab9719dcf9b28577bd32144",
+        "resolved": "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/packaging/omztty.1",
+        "sha256": "37f3b2e38764d13a9aaf6c95d4765ec6676c84699143bb14b0d0dea5cc241506"
+      },
+      "~/.local/share/applications/oh-my-ztty.desktop": {
+        "path": "~/.local/share/applications/oh-my-ztty.desktop",
+        "inode": 183960748,
+        "mode": 511,
+        "target": "~/.local/share/oh-my-ztty/oh-my-ztty.desktop",
+        "target_bytes_sha256": "57d111fbbd593e9b3de32139a1d9ef7360787c1f73d556933c153e2ed80530d2",
+        "resolved": "~/.local/share/oh-my-ztty/oh-my-ztty.desktop",
+        "sha256": "7da085e7cd90491d31ca453824cb69b45ca2df8c1394e12f38a98f1f64dc2aea"
+      }
+    },
+    "zshrc_link_and_target": {
+      "path": "~/.zshrc",
+      "inode": 184335988,
+      "mode": 511,
+      "target": "~/.config/oh-my-ztty/profile/files/.zshrc",
+      "target_bytes_sha256": "4cd1cb4ea58d80fa3b1eb946adb9c7ce0aab3a9646909ec7c8f82014d147276a",
+      "resolved": "~/.config/oh-my-ztty/profile/files/.zshrc",
+      "sha256": "cc28281b23f0b916d66116ea4ab75629905650f8f3a61ac94173f217a079b7df"
+    },
+    "0.2.5_release_tree": {
+      "sha256": "bd9f0a4ba6d75fa4f7c3194fa6c2bd80c43eff42f5971a861dac4f9eb0795256",
+      "entries": 157
+    }
+  },
+  "install_attempts": 2,
+  "repeated_install_same_current_inode_and_target": true,
+  "protected_baselines_match": true,
+  "protected_post_path_readback": {
+    "status": "passed",
+    "paths_checked": 18,
+    "available_after_bytes": 32930365440
+  },
+  "installed": {
+    "release": "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64",
+    "manifest_entries": 126,
+    "build": {
+      "platform": "linux-x86_64",
+      "schema": 1,
+      "source_commits": {
+        "ssmcp": "4f4dd88275c205e0e61a7601b4e0d11f56038769",
+        "zdot": "e6b5feb98b05c59e0986624c0742dfe4a9187a2a",
+        "zfetch": "154c9b826a794e22135eda2d77a03b7214f8e427",
+        "zrc": "e6e6a7d4a07bc74ae95b5ec1f0391ad4e5155d86",
+        "zshard": "f7842f70e439c4abda2a46698f0ebe067d38b297",
+        "ztty": "6e2ce246b0b50e6b82da99756832feae6e966f21"
+      },
+      "suite_version": "0.2.6"
+    },
+    "archive_sha256": "94a22ce1300a337e741ef0c2a336e29e90696b621fbdfa05c0b66673ce10dc20",
+    "elf": {
+      "ztty": {
+        "sha256": "9e8f1c084376df913087c10d4b10d11e2c0172a2eb63a31e64813742067dab19",
+        "bytes": 1365456,
+        "elf_machine": 62
+      },
+      "ssmcp": {
+        "sha256": "434b6158bbb8e1ff12ffceb6bc0d703f20d368653c37b59ede2333a128bbfe2e",
+        "bytes": 13434720,
+        "elf_machine": 62
+      },
+      "zdot": {
+        "sha256": "7eab1f9685cd7f3d5dae2e464f3cb374b486d7891f9d158a0b9de2f812acf8e1",
+        "bytes": 57880,
+        "elf_machine": 62
+      },
+      "zfetch": {
+        "sha256": "5ddbf53b7ab7332b722883483825c27a3c316bb42c4624566e019b3fc3d0ef39",
+        "bytes": 28648,
+        "elf_machine": 62
+      }
+    }
+  },
+  "retained_0.2.5": {
+    "release": "~/.local/share/oh-my-ztty/releases/0.2.5-linux-x86_64",
+    "manifest_entries": 119,
+    "build": {
+      "platform": "linux-x86_64",
+      "schema": 1,
+      "source_commits": {
+        "ssmcp": "52a531a59e9ec9236a76eafc0f4f068799e44b15",
+        "zdot": "e6b5feb98b05c59e0986624c0742dfe4a9187a2a",
+        "zfetch": "f19b278676206d76626dd01e4b89f7ad9ce9318f",
+        "zrc": "f4a0fe84c3499c00c5a01f1831e34fcbf5d5790c",
+        "zshard": "f7842f70e439c4abda2a46698f0ebe067d38b297",
+        "ztty": "c4f8f48c9598284a589e609f25242b49ceabfea8"
+      },
+      "suite_version": "0.2.5"
+    },
+    "archive_sha256": "79d58efac183069e9d50701374fc76dc9938d96d69c9a58d35252a629129a388",
+    "elf": {
+      "ztty": {
+        "sha256": "3ed8cead1c4ca20aedd4aa262de8fe992bcf9639546d95f89f7a782eeef7a491",
+        "bytes": 1217232,
+        "elf_machine": 62
+      },
+      "ssmcp": {
+        "sha256": "409af30e7af8f4c43be24e1f9fc87ec46320a7531f89b590eab31265812055e7",
+        "bytes": 10202640,
+        "elf_machine": 62
+      },
+      "zdot": {
+        "sha256": "7eab1f9685cd7f3d5dae2e464f3cb374b486d7891f9d158a0b9de2f812acf8e1",
+        "bytes": 57880,
+        "elf_machine": 62
+      },
+      "zfetch": {
+        "sha256": "bc9daa34256f0af271bd4d2bc2bb3f90e6161e2566f8ec5bf95f4cde3c195f2a",
+        "bytes": 22808,
+        "elf_machine": 62
+      }
+    }
+  },
+  "bundled_versions": {
+    "omztty": {
+      "version": "oh-my-ztty 0.2.6",
+      "sha256": "8646de65a20d8fefadb13c1afe43ef59fc26b28615aa7533352b15bdb9bcde06",
+      "path": "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/omztty"
+    },
+    "ztty": {
+      "version": "ztty 0.5.2",
+      "sha256": "9e8f1c084376df913087c10d4b10d11e2c0172a2eb63a31e64813742067dab19",
+      "path": "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/ztty"
+    },
+    "ssmcp": {
+      "version": "ssmcp 0.10.20",
+      "sha256": "434b6158bbb8e1ff12ffceb6bc0d703f20d368653c37b59ede2333a128bbfe2e",
+      "path": "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/ssmcp"
+    },
+    "zfetch": {
+      "version": "zfetch 0.1.1",
+      "sha256": "5ddbf53b7ab7332b722883483825c27a3c316bb42c4624566e019b3fc3d0ef39",
+      "path": "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/zfetch"
+    },
+    "zdot": {
+      "version": "zdot 0.2.0",
+      "sha256": "7eab1f9685cd7f3d5dae2e464f3cb374b486d7891f9d158a0b9de2f812acf8e1",
+      "path": "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/zdot"
+    },
+    "zshard": {
+      "version": "zshard 0.2.1",
+      "sha256": "b9e29355ee94dd2f03832ab57e2e3c19337ac434bb5961e905b81f5db257ff6b",
+      "path": "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/zshard"
+    }
+  },
+  "independent_pacman_package": "oh-my-ztty-bin 0.2.5-1",
+  "path_readback": {
+    "status": "version_readback_complete_manager_targets_unverified",
+    "snapshot": {
+      "sha256": "64f48b896d80c0dbf723be4de43d58ab1f7dc936b26f146257278793384e5483",
+      "native_recorded_utc": "2026-11-20T10:41:52Z",
+      "systemd_environment_read_exit": 0
+    },
+    "contexts": {
+      "native_exec": {
+        "path_snapshot_sha256": "a39157a9daf62da10ac55aa6c414258673ca223105108ae5b3a455ee7bf44697",
+        "commands": {
+          "omztty": {
+            "command_v": "~/.local/bin/omztty",
+            "command_v_realpath": "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/omztty",
+            "link_target": "~/.local/share/oh-my-ztty/current/bin/omztty",
+            "command_v_bytes_sha256": "8646de65a20d8fefadb13c1afe43ef59fc26b28615aa7533352b15bdb9bcde06",
+            "executable": "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/omztty",
+            "sha256": "8646de65a20d8fefadb13c1afe43ef59fc26b28615aa7533352b15bdb9bcde06",
+            "version": "oh-my-ztty 0.2.6"
+          },
+          "ztty": {
+            "command_v": "~/.cargo/bin/ztty",
+            "command_v_realpath": "~/.cargo/bin/ztty",
+            "link_target": null,
+            "command_v_bytes_sha256": "0d697554c280ddc51631874d67a4ce729c709cce861d400e052e00e9f95b174a",
+            "executable": "~/.cargo/bin/ztty",
+            "sha256": "0d697554c280ddc51631874d67a4ce729c709cce861d400e052e00e9f95b174a",
+            "version": "ztty 0.5.2"
+          },
+          "ssmcp": {
+            "command_v": "~/.cargo/bin/ssmcp",
+            "command_v_realpath": "~/.cargo/bin/ssmcp",
+            "link_target": null,
+            "command_v_bytes_sha256": "434b6158bbb8e1ff12ffceb6bc0d703f20d368653c37b59ede2333a128bbfe2e",
+            "executable": "~/.cargo/bin/ssmcp",
+            "sha256": "434b6158bbb8e1ff12ffceb6bc0d703f20d368653c37b59ede2333a128bbfe2e",
+            "version": "ssmcp 0.10.20"
+          },
+          "zfetch": {
+            "command_v": "~/.local/bin/zfetch",
+            "command_v_realpath": "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/zfetch",
+            "link_target": "~/.local/share/oh-my-ztty/current/bin/zfetch",
+            "command_v_bytes_sha256": "5ddbf53b7ab7332b722883483825c27a3c316bb42c4624566e019b3fc3d0ef39",
+            "executable": "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/zfetch",
+            "sha256": "5ddbf53b7ab7332b722883483825c27a3c316bb42c4624566e019b3fc3d0ef39",
+            "version": "zfetch 0.1.1"
+          },
+          "zdot": {
+            "command_v": "~/.local/bin/zdot",
+            "command_v_realpath": "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/zdot",
+            "link_target": "~/.local/share/oh-my-ztty/current/bin/zdot",
+            "command_v_bytes_sha256": "7eab1f9685cd7f3d5dae2e464f3cb374b486d7891f9d158a0b9de2f812acf8e1",
+            "executable": "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/zdot",
+            "sha256": "7eab1f9685cd7f3d5dae2e464f3cb374b486d7891f9d158a0b9de2f812acf8e1",
+            "version": "zdot 0.2.0"
+          },
+          "zshard": {
+            "command_v": "~/.local/bin/zshard",
+            "command_v_realpath": "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/zshard",
+            "link_target": "~/.local/share/oh-my-ztty/current/bin/zshard",
+            "command_v_bytes_sha256": "b9e29355ee94dd2f03832ab57e2e3c19337ac434bb5961e905b81f5db257ff6b",
+            "executable": "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/zshard",
+            "sha256": "b9e29355ee94dd2f03832ab57e2e3c19337ac434bb5961e905b81f5db257ff6b",
+            "version": "zshard 0.2.1"
+          }
+        },
+        "scope": "snapshot replay only; no systemd service was started"
+      },
+      "systemd_user_manager_replay": {
+        "path_snapshot_sha256": "4d9e6a08e75260128f414f1cb5ea29f5d37de0fc2df270809c4a3d4c231c21a4",
+        "commands": {
+          "omztty": {
+            "command_v": "~/.local/bin/omztty",
+            "command_v_realpath": "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/omztty",
+            "link_target": "~/.local/share/oh-my-ztty/current/bin/omztty",
+            "command_v_bytes_sha256": "8646de65a20d8fefadb13c1afe43ef59fc26b28615aa7533352b15bdb9bcde06",
+            "executable": "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/omztty",
+            "sha256": "8646de65a20d8fefadb13c1afe43ef59fc26b28615aa7533352b15bdb9bcde06",
+            "version": "oh-my-ztty 0.2.6"
+          },
+          "ztty": {
+            "command_v": "~/.local/share/mise/shims/ztty",
+            "command_v_realpath": "/usr/bin/mise",
+            "link_target": "/usr/bin/mise",
+            "command_v_bytes_sha256": "1490afef0db4ccd8a31090255490783a645bce2abbea32c8f5f9f6e7f81959dd",
+            "resolution_status": "shim_version_probe_passed_target_unverified",
+            "mise_exit_code": 1,
+            "mise_errors": [
+              "mise ERROR ztty is a mise bin however it is not currently active. Use `mise use` to activate it in this directory.",
+              "mise ERROR Version: 2026.11.10 linux-x64 (2026-11-18)",
+              "mise ERROR Run with --verbose or MISE_VERBOSE=1 for more information"
+            ],
+            "executable": null,
+            "sha256": null,
+            "version": "ztty 0.5.0",
+            "bare_version": {
+              "exit_code": 0,
+              "stdout": "ztty 0.5.0",
+              "stderr_diagnostics": [],
+              "stdout_other_lines_omitted": 0,
+              "stderr_other_lines_omitted": 0
+            },
+            "final_binary_known": false
+          },
+          "ssmcp": {
+            "command_v": "~/.local/share/mise/shims/ssmcp",
+            "command_v_realpath": "/usr/bin/mise",
+            "link_target": "/usr/bin/mise",
+            "command_v_bytes_sha256": "1490afef0db4ccd8a31090255490783a645bce2abbea32c8f5f9f6e7f81959dd",
+            "resolution_status": "shim_version_probe_passed_target_unverified",
+            "mise_exit_code": 1,
+            "mise_errors": [
+              "mise ERROR ssmcp is a mise bin however it is not currently active. Use `mise use` to activate it in this directory.",
+              "mise ERROR Version: 2026.11.10 linux-x64 (2026-11-18)",
+              "mise ERROR Run with --verbose or MISE_VERBOSE=1 for more information"
+            ],
+            "executable": null,
+            "sha256": null,
+            "version": "ssmcp 0.10.20",
+            "bare_version": {
+              "exit_code": 0,
+              "stdout": "ssmcp 0.10.20",
+              "stderr_diagnostics": [],
+              "stdout_other_lines_omitted": 0,
+              "stderr_other_lines_omitted": 0
+            },
+            "final_binary_known": false
+          },
+          "zfetch": {
+            "command_v": "~/.local/bin/zfetch",
+            "command_v_realpath": "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/zfetch",
+            "link_target": "~/.local/share/oh-my-ztty/current/bin/zfetch",
+            "command_v_bytes_sha256": "5ddbf53b7ab7332b722883483825c27a3c316bb42c4624566e019b3fc3d0ef39",
+            "executable": "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/zfetch",
+            "sha256": "5ddbf53b7ab7332b722883483825c27a3c316bb42c4624566e019b3fc3d0ef39",
+            "version": "zfetch 0.1.1"
+          },
+          "zdot": {
+            "command_v": "~/.local/bin/zdot",
+            "command_v_realpath": "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/zdot",
+            "link_target": "~/.local/share/oh-my-ztty/current/bin/zdot",
+            "command_v_bytes_sha256": "7eab1f9685cd7f3d5dae2e464f3cb374b486d7891f9d158a0b9de2f812acf8e1",
+            "executable": "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/zdot",
+            "sha256": "7eab1f9685cd7f3d5dae2e464f3cb374b486d7891f9d158a0b9de2f812acf8e1",
+            "version": "zdot 0.2.0"
+          },
+          "zshard": {
+            "command_v": "~/.local/bin/zshard",
+            "command_v_realpath": "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/zshard",
+            "link_target": "~/.local/share/oh-my-ztty/current/bin/zshard",
+            "command_v_bytes_sha256": "b9e29355ee94dd2f03832ab57e2e3c19337ac434bb5961e905b81f5db257ff6b",
+            "executable": "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/zshard",
+            "sha256": "b9e29355ee94dd2f03832ab57e2e3c19337ac434bb5961e905b81f5db257ff6b",
+            "version": "zshard 0.2.1"
+          }
+        },
+        "scope": "snapshot replay only; no systemd service was started"
+      }
+    },
+    "explicit_foreign_ztty": {
+      "path": "~/.local/bin/ztty",
+      "link_target": "/usr/bin/ztty",
+      "executable": "/usr/bin/ztty",
+      "sha256": "88a4db35e3ad0b39153690db9405bcbf3e07ad6c2314838c0ae93a4380b1e20c",
+      "version": "ztty 0.5.0"
+    },
+    "login_zsh": {
+      "status": "observed",
+      "scope": "Real interactive login zsh with user startup files and inherited environment, stdin /dev/null, unchanged input PATH.",
+      "exit_code": 0,
+      "timeout_seconds": 20,
+      "history_fingerprint_unchanged": true,
+      "commands": {
+        "omztty": {
+          "command_v": "~/.local/bin/omztty",
+          "command_v_realpath": "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/omztty",
+          "command_v_bytes_sha256": "8646de65a20d8fefadb13c1afe43ef59fc26b28615aa7533352b15bdb9bcde06",
+          "selection_kind": "direct",
+          "command_v_exit_code": 0,
+          "bare_version_exit_code": 0,
+          "version": "oh-my-ztty 0.2.6",
+          "final_binary_known": true,
+          "executable": "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/omztty",
+          "sha256": "8646de65a20d8fefadb13c1afe43ef59fc26b28615aa7533352b15bdb9bcde06"
+        },
+        "ztty": {
+          "command_v": "~/.cargo/bin/ztty",
+          "command_v_realpath": "~/.cargo/bin/ztty",
+          "command_v_bytes_sha256": "0d697554c280ddc51631874d67a4ce729c709cce861d400e052e00e9f95b174a",
+          "selection_kind": "direct",
+          "command_v_exit_code": 0,
+          "bare_version_exit_code": 0,
+          "version": "ztty 0.5.2",
+          "final_binary_known": true,
+          "executable": "~/.cargo/bin/ztty",
+          "sha256": "0d697554c280ddc51631874d67a4ce729c709cce861d400e052e00e9f95b174a"
+        },
+        "ssmcp": {
+          "command_v": "~/.cargo/bin/ssmcp",
+          "command_v_realpath": "~/.cargo/bin/ssmcp",
+          "command_v_bytes_sha256": "434b6158bbb8e1ff12ffceb6bc0d703f20d368653c37b59ede2333a128bbfe2e",
+          "selection_kind": "direct",
+          "command_v_exit_code": 0,
+          "bare_version_exit_code": 0,
+          "version": "ssmcp 0.10.20",
+          "final_binary_known": true,
+          "executable": "~/.cargo/bin/ssmcp",
+          "sha256": "434b6158bbb8e1ff12ffceb6bc0d703f20d368653c37b59ede2333a128bbfe2e"
+        },
+        "zfetch": {
+          "command_v": "~/.local/bin/zfetch",
+          "command_v_realpath": "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/zfetch",
+          "command_v_bytes_sha256": "5ddbf53b7ab7332b722883483825c27a3c316bb42c4624566e019b3fc3d0ef39",
+          "selection_kind": "direct",
+          "command_v_exit_code": 0,
+          "bare_version_exit_code": 0,
+          "version": "zfetch 0.1.1",
+          "final_binary_known": true,
+          "executable": "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/zfetch",
+          "sha256": "5ddbf53b7ab7332b722883483825c27a3c316bb42c4624566e019b3fc3d0ef39"
+        },
+        "zdot": {
+          "command_v": "~/.local/bin/zdot",
+          "command_v_realpath": "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/zdot",
+          "command_v_bytes_sha256": "7eab1f9685cd7f3d5dae2e464f3cb374b486d7891f9d158a0b9de2f812acf8e1",
+          "selection_kind": "direct",
+          "command_v_exit_code": 0,
+          "bare_version_exit_code": 0,
+          "version": "zdot 0.2.0",
+          "final_binary_known": true,
+          "executable": "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/zdot",
+          "sha256": "7eab1f9685cd7f3d5dae2e464f3cb374b486d7891f9d158a0b9de2f812acf8e1"
+        },
+        "zshard": {
+          "selection_kind": "shell_command",
+          "command_v_exit_code": 0,
+          "bare_version_exit_code": 0,
+          "version": "zshard 0.2.1",
+          "final_binary_known": false,
+          "executable": null,
+          "sha256": null,
+          "source_evidence": "Installed zshard startup integration defines a zshard shell function."
+        }
+      },
+      "startup_diagnostics": {
+        "non_probe_stdout_present": false,
+        "stderr_line_count": 0,
+        "permission_error_observed": false
+      }
+    },
+    "mise_probe_mode": "Offline snapshot replay with automatic installation disabled. The earlier mise which result and the later bare --version result are separate observations.",
+    "exec_trace_probe": {
+      "argv": [
+        "/usr/bin/strace",
+        "-f",
+        "-e",
+        "trace=execve,execveat",
+        "-o",
+        "$TASK/actual-026-path-followup/exec-trace-probe.trace",
+        "/usr/bin/true"
+      ],
+      "exit_code": 1,
+      "error": "ptrace PTRACE_TRACEME and PTRACE_SEIZE: Operation not permitted",
+      "scope": "Trace availability probe on an owned child."
+    }
+  },
+  "process_scope": {
+    "manager_reused_as_reported_by_coordinator": true,
+    "existing_terminals_services_or_connections_stopped_by_this_task": false,
+    "existing_connections_liveness_checked": false
+  },
+  "earlier_interruption": "The previous maintenance attempt encountered ENOSPC. This run used space already available at preflight. The cause of recovered capacity was not verified.",
+  "preflight_diagnostic": "A preliminary check misclassified the execution namespace's PID 1 as another worker. No installer ran during that check. The ancestry check was corrected before installation, and the original receipt was kept.",
+  "commands": [
+    {
+      "label": "frozen-source",
+      "argv": [
+        "/usr/bin/git",
+        "rev-parse",
+        "HEAD",
+        "HEAD^{tree}"
+      ],
+      "cwd": "$FROZEN_CHECKOUT",
+      "started_utc": "2026-11-20T10:45:19.458601+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.006564
+    },
+    {
+      "label": "six-gitlinks",
+      "argv": [
+        "/usr/bin/git",
+        "ls-tree",
+        "HEAD",
+        "components/"
+      ],
+      "cwd": "$FROZEN_CHECKOUT",
+      "started_utc": "2026-11-20T10:45:19.465349+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.001628
+    },
+    {
+      "label": "mount-0",
+      "argv": [
+        "/usr/bin/findmnt",
+        "-T",
+        "~/.local/share/oh-my-ztty",
+        "-no",
+        "TARGET,SOURCE,FSTYPE"
+      ],
+      "cwd": "$FROZEN_CHECKOUT",
+      "started_utc": "2026-11-20T10:45:19.467205+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.004287
+    },
+    {
+      "label": "mount-1",
+      "argv": [
+        "/usr/bin/findmnt",
+        "-T",
+        "~/.cache/oh-my-ztty",
+        "-no",
+        "TARGET,SOURCE,FSTYPE"
+      ],
+      "cwd": "$FROZEN_CHECKOUT",
+      "started_utc": "2026-11-20T10:45:19.471671+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.002006
+    },
+    {
+      "label": "mount-2",
+      "argv": [
+        "/usr/bin/findmnt",
+        "-T",
+        "$TASK/tmp",
+        "-no",
+        "TARGET,SOURCE,FSTYPE"
+      ],
+      "cwd": "$FROZEN_CHECKOUT",
+      "started_utc": "2026-11-20T10:45:19.473876+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.002175
+    },
+    {
+      "label": "official-x64-zfetch-version",
+      "argv": [
+        "$TASK/tmp/actual-026-version-pj17sgaw/zfetch",
+        "--version"
+      ],
+      "cwd": "$TASK/tmp/actual-026-version-pj17sgaw",
+      "started_utc": "2026-11-20T10:45:20.229739+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.000447
+    },
+    {
+      "label": "official-install",
+      "argv": [
+        "/usr/bin/sh",
+        "$TASK/official-026-inputs/install.sh",
+        "--from",
+        "$TASK/official-026-inputs/oh-my-ztty-0.2.6-linux-x86_64.tar.gz"
+      ],
+      "cwd": "$FROZEN_CHECKOUT",
+      "started_utc": "2026-11-20T10:45:22.516460+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 1.173325
+    },
+    {
+      "label": "official-reinstall",
+      "argv": [
+        "/usr/bin/sh",
+        "$TASK/official-026-inputs/install.sh",
+        "--from",
+        "$TASK/official-026-inputs/oh-my-ztty-0.2.6-linux-x86_64.tar.gz"
+      ],
+      "cwd": "$FROZEN_CHECKOUT",
+      "started_utc": "2026-11-20T10:45:25.771700+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.623532
+    },
+    {
+      "label": "installed-omztty",
+      "argv": [
+        "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/omztty",
+        "--version"
+      ],
+      "cwd": "$FROZEN_CHECKOUT",
+      "started_utc": "2026-11-20T10:45:28.500950+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.005255
+    },
+    {
+      "label": "installed-ztty",
+      "argv": [
+        "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/ztty",
+        "--version"
+      ],
+      "cwd": "$FROZEN_CHECKOUT",
+      "started_utc": "2026-11-20T10:45:28.507117+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.015045
+    },
+    {
+      "label": "installed-ssmcp",
+      "argv": [
+        "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/ssmcp",
+        "--version"
+      ],
+      "cwd": "$FROZEN_CHECKOUT",
+      "started_utc": "2026-11-20T10:45:28.523559+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.001926
+    },
+    {
+      "label": "installed-zfetch",
+      "argv": [
+        "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/zfetch",
+        "--version"
+      ],
+      "cwd": "$FROZEN_CHECKOUT",
+      "started_utc": "2026-11-20T10:45:28.536435+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.000545
+    },
+    {
+      "label": "installed-zdot",
+      "argv": [
+        "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/zdot",
+        "--version"
+      ],
+      "cwd": "$FROZEN_CHECKOUT",
+      "started_utc": "2026-11-20T10:45:28.537735+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.000492
+    },
+    {
+      "label": "installed-zshard",
+      "argv": [
+        "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/zshard",
+        "--version"
+      ],
+      "cwd": "$FROZEN_CHECKOUT",
+      "started_utc": "2026-11-20T10:45:28.538726+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.007668
+    },
+    {
+      "label": "system-package-readonly",
+      "argv": [
+        "/usr/bin/pacman",
+        "-Q",
+        "oh-my-ztty-bin"
+      ],
+      "cwd": "$FROZEN_CHECKOUT",
+      "started_utc": "2026-11-20T10:45:28.547234+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.051956
+    },
+    {
+      "label": "native_exec:omztty:command-v",
+      "argv": [
+        "/usr/bin/zsh",
+        "-dfc",
+        "command -v \"$1\"",
+        "omztty-path-readback",
+        "omztty"
+      ],
+      "cwd": "~",
+      "started_utc": "2026-11-20T10:46:05.673787+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.001983
+    },
+    {
+      "label": "native_exec:omztty:version",
+      "argv": [
+        "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/omztty",
+        "--version"
+      ],
+      "cwd": "~",
+      "started_utc": "2026-11-20T10:46:05.676132+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.004348
+    },
+    {
+      "label": "native_exec:ztty:command-v",
+      "argv": [
+        "/usr/bin/zsh",
+        "-dfc",
+        "command -v \"$1\"",
+        "omztty-path-readback",
+        "ztty"
+      ],
+      "cwd": "~",
+      "started_utc": "2026-11-20T10:46:05.680502+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.001657
+    },
+    {
+      "label": "native_exec:ztty:version",
+      "argv": [
+        "~/.cargo/bin/ztty",
+        "--version"
+      ],
+      "cwd": "~",
+      "started_utc": "2026-11-20T10:46:05.711246+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.013467
+    },
+    {
+      "label": "native_exec:ssmcp:command-v",
+      "argv": [
+        "/usr/bin/zsh",
+        "-dfc",
+        "command -v \"$1\"",
+        "omztty-path-readback",
+        "ssmcp"
+      ],
+      "cwd": "~",
+      "started_utc": "2026-11-20T10:46:05.724742+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.00166
+    },
+    {
+      "label": "native_exec:ssmcp:version",
+      "argv": [
+        "~/.cargo/bin/ssmcp",
+        "--version"
+      ],
+      "cwd": "~",
+      "started_utc": "2026-11-20T10:46:05.930060+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.001822
+    },
+    {
+      "label": "native_exec:zfetch:command-v",
+      "argv": [
+        "/usr/bin/zsh",
+        "-dfc",
+        "command -v \"$1\"",
+        "omztty-path-readback",
+        "zfetch"
+      ],
+      "cwd": "~",
+      "started_utc": "2026-11-20T10:46:05.931916+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.002197
+    },
+    {
+      "label": "native_exec:zfetch:version",
+      "argv": [
+        "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/zfetch",
+        "--version"
+      ],
+      "cwd": "~",
+      "started_utc": "2026-11-20T10:46:05.935515+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.000485
+    },
+    {
+      "label": "native_exec:zdot:command-v",
+      "argv": [
+        "/usr/bin/zsh",
+        "-dfc",
+        "command -v \"$1\"",
+        "omztty-path-readback",
+        "zdot"
+      ],
+      "cwd": "~",
+      "started_utc": "2026-11-20T10:46:05.936029+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.001672
+    },
+    {
+      "label": "native_exec:zdot:version",
+      "argv": [
+        "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/zdot",
+        "--version"
+      ],
+      "cwd": "~",
+      "started_utc": "2026-11-20T10:46:05.937979+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.000362
+    },
+    {
+      "label": "native_exec:zshard:command-v",
+      "argv": [
+        "/usr/bin/zsh",
+        "-dfc",
+        "command -v \"$1\"",
+        "omztty-path-readback",
+        "zshard"
+      ],
+      "cwd": "~",
+      "started_utc": "2026-11-20T10:46:05.938355+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.001959
+    },
+    {
+      "label": "native_exec:zshard:version",
+      "argv": [
+        "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/zshard",
+        "--version"
+      ],
+      "cwd": "~",
+      "started_utc": "2026-11-20T10:46:05.940609+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.006748
+    },
+    {
+      "label": "systemd_user_manager_replay:omztty:command-v",
+      "argv": [
+        "/usr/bin/zsh",
+        "-dfc",
+        "command -v \"$1\"",
+        "omztty-path-readback",
+        "omztty"
+      ],
+      "cwd": "~",
+      "started_utc": "2026-11-20T10:46:05.947442+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.001768
+    },
+    {
+      "label": "systemd_user_manager_replay:omztty:version",
+      "argv": [
+        "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/omztty",
+        "--version"
+      ],
+      "cwd": "~",
+      "started_utc": "2026-11-20T10:46:05.949405+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.004137
+    },
+    {
+      "label": "systemd_user_manager_replay:ztty:command-v",
+      "argv": [
+        "/usr/bin/zsh",
+        "-dfc",
+        "command -v \"$1\"",
+        "omztty-path-readback",
+        "ztty"
+      ],
+      "cwd": "~",
+      "started_utc": "2026-11-20T10:46:05.953564+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.001396
+    },
+    {
+      "label": "systemd_user_manager_replay:ztty:mise-which",
+      "argv": [
+        "/usr/bin/mise",
+        "which",
+        "ztty"
+      ],
+      "cwd": "~",
+      "started_utc": "2026-11-20T10:46:06.116601+00:00",
+      "exit_code": 1,
+      "elapsed_seconds": 0.013936
+    },
+    {
+      "label": "systemd_user_manager_replay:ssmcp:command-v",
+      "argv": [
+        "/usr/bin/zsh",
+        "-dfc",
+        "command -v \"$1\"",
+        "omztty-path-readback",
+        "ssmcp"
+      ],
+      "cwd": "~",
+      "started_utc": "2026-11-20T10:46:06.130591+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.003197
+    },
+    {
+      "label": "systemd_user_manager_replay:ssmcp:mise-which",
+      "argv": [
+        "/usr/bin/mise",
+        "which",
+        "ssmcp"
+      ],
+      "cwd": "~",
+      "started_utc": "2026-11-20T10:46:06.242806+00:00",
+      "exit_code": 1,
+      "elapsed_seconds": 0.011324
+    },
+    {
+      "label": "systemd_user_manager_replay:zfetch:command-v",
+      "argv": [
+        "/usr/bin/zsh",
+        "-dfc",
+        "command -v \"$1\"",
+        "omztty-path-readback",
+        "zfetch"
+      ],
+      "cwd": "~",
+      "started_utc": "2026-11-20T10:46:06.254164+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.002425
+    },
+    {
+      "label": "systemd_user_manager_replay:zfetch:version",
+      "argv": [
+        "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/zfetch",
+        "--version"
+      ],
+      "cwd": "~",
+      "started_utc": "2026-11-20T10:46:06.256947+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.000423
+    },
+    {
+      "label": "systemd_user_manager_replay:zdot:command-v",
+      "argv": [
+        "/usr/bin/zsh",
+        "-dfc",
+        "command -v \"$1\"",
+        "omztty-path-readback",
+        "zdot"
+      ],
+      "cwd": "~",
+      "started_utc": "2026-11-20T10:46:06.257394+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.001969
+    },
+    {
+      "label": "systemd_user_manager_replay:zdot:version",
+      "argv": [
+        "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/zdot",
+        "--version"
+      ],
+      "cwd": "~",
+      "started_utc": "2026-11-20T10:46:06.259717+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.000421
+    },
+    {
+      "label": "systemd_user_manager_replay:zshard:command-v",
+      "argv": [
+        "/usr/bin/zsh",
+        "-dfc",
+        "command -v \"$1\"",
+        "omztty-path-readback",
+        "zshard"
+      ],
+      "cwd": "~",
+      "started_utc": "2026-11-20T10:46:06.260160+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.001197
+    },
+    {
+      "label": "systemd_user_manager_replay:zshard:version",
+      "argv": [
+        "~/.local/share/oh-my-ztty/releases/0.2.6-linux-x86_64/bin/zshard",
+        "--version"
+      ],
+      "cwd": "~",
+      "started_utc": "2026-11-20T10:46:06.261502+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.005514
+    },
+    {
+      "label": "explicit-foreign-ztty:version",
+      "argv": [
+        "/usr/bin/ztty",
+        "--version"
+      ],
+      "cwd": "~",
+      "started_utc": "2026-11-20T10:46:06.268125+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.003208
+    },
+    {
+      "argv": [
+        "/usr/bin/zsh",
+        "-dfc",
+        "command -v ztty"
+      ],
+      "cwd": "~",
+      "label": "manager_path:command_v:ztty",
+      "started_utc": "2026-11-20T10:52:03.675005+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.002039
+    },
+    {
+      "argv": [
+        "/usr/bin/zsh",
+        "-dfc",
+        "ztty --version"
+      ],
+      "cwd": "~",
+      "label": "manager_path:bare_version:ztty",
+      "started_utc": "2026-11-20T10:52:03.677071+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.027733
+    },
+    {
+      "argv": [
+        "/usr/bin/zsh",
+        "-dfc",
+        "command -v ssmcp"
+      ],
+      "cwd": "~",
+      "label": "manager_path:command_v:ssmcp",
+      "started_utc": "2026-11-20T10:52:03.971729+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.003806
+    },
+    {
+      "argv": [
+        "/usr/bin/zsh",
+        "-dfc",
+        "ssmcp --version"
+      ],
+      "cwd": "~",
+      "label": "manager_path:bare_version:ssmcp",
+      "started_utc": "2026-11-20T10:52:03.975551+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.050756
+    },
+    {
+      "argv": [
+        "/usr/bin/zsh",
+        "-lic",
+        "for name in omztty ztty ssmcp zfetch zdot zshard; do\n    selected=$(command -v \"$name\")\n    selection_exit=$?\n    printf '__OMZTTY_PATH__ %s %s %s\n' \"$name\" \"$selection_exit\" \"$selected\"\n    printf '__OMZTTY_VERSION_BEGIN__ %s\n' \"$name\"\n    \"$name\" --version\n    version_exit=$?\n    printf '__OMZTTY_VERSION_END__ %s %s\n' \"$name\" \"$version_exit\"\n    if [[ $selected = /* && -f $selected ]]; then\n        printf '__OMZTTY_HASH__ %s ' \"$name\"\n        /usr/bin/sha256sum -- \"${selected:A}\"\n    fi\ndone"
+      ],
+      "cwd": "~",
+      "label": "login_zsh:command_v_versions_hashes",
+      "started_utc": "2026-11-20T10:52:04.139405+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.3759
+    },
+    {
+      "label": "protected_fingerprints:post_path_followup",
+      "argv": [
+        "/usr/bin/python3",
+        "-B",
+        "$TASK/actual-026-path-followup/verify-protected.py"
+      ],
+      "cwd": "$FROZEN_CHECKOUT",
+      "started_utc": "2026-11-20T10:52:19.182846+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 2.381644
+    }
+  ],
+  "protected_post_path_followup": {
+    "status": "passed",
+    "checks": {
+      "current_link_matches_postinstall": true,
+      "old_025_release_tree_matches_postinstall": true,
+      "profile_startup_and_cargo_trees_match_postinstall": true,
+      "existing_command_man_and_desktop_entries_match_postinstall": true,
+      "owner_bin_dir_and_desktop_preferences_match_postinstall": true,
+      "zshrc_link_and_target_match_postinstall": true
+    }
+  }
+}

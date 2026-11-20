@@ -1,0 +1,152 @@
+{
+  "after_completion": {
+    "waiting_launcher": {
+      "Private_Clean_KiB": 0,
+      "Private_Dirty_KiB": 192,
+      "Pss_KiB": 1454,
+      "Rss_KiB": 4984,
+      "Shared_Clean_KiB": 3576,
+      "Shared_Dirty_KiB": 1216
+    },
+    "zsh": {
+      "Private_Clean_KiB": 1972,
+      "Private_Dirty_KiB": 1840,
+      "Pss_KiB": 3895,
+      "Rss_KiB": 5884,
+      "Shared_Clean_KiB": 2072,
+      "Shared_Dirty_KiB": 0
+    },
+    "ztty_broker": {
+      "Private_Clean_KiB": 25688,
+      "Private_Dirty_KiB": 33396,
+      "Pss_KiB": 80090,
+      "Rss_KiB": 105560,
+      "Shared_Clean_KiB": 45260,
+      "Shared_Dirty_KiB": 1216
+    }
+  },
+  "architecture": "aarch64",
+  "archive": "oh-my-ztty-0.2.6-linux-aarch64.tar.gz",
+  "archive_sha256": "b035c460e3444e7b33dda4e5dd25bceecf0757af40b095950adb8d0ad001637b",
+  "before_completion": {
+    "waiting_launcher": {
+      "Private_Clean_KiB": 0,
+      "Private_Dirty_KiB": 192,
+      "Pss_KiB": 1454,
+      "Rss_KiB": 4984,
+      "Shared_Clean_KiB": 3576,
+      "Shared_Dirty_KiB": 1216
+    },
+    "zsh": {
+      "Private_Clean_KiB": 1568,
+      "Private_Dirty_KiB": 992,
+      "Pss_KiB": 2643,
+      "Rss_KiB": 4632,
+      "Shared_Clean_KiB": 2072,
+      "Shared_Dirty_KiB": 0
+    },
+    "ztty_broker": {
+      "Private_Clean_KiB": 25688,
+      "Private_Dirty_KiB": 33396,
+      "Pss_KiB": 80090,
+      "Rss_KiB": 105560,
+      "Shared_Clean_KiB": 45260,
+      "Shared_Dirty_KiB": 1216
+    }
+  },
+  "build": {
+    "platform": "linux-aarch64",
+    "schema": 1,
+    "source_commits": {
+      "ssmcp": "4f4dd88275c205e0e61a7601b4e0d11f56038769",
+      "zdot": "e6b5feb98b05c59e0986624c0742dfe4a9187a2a",
+      "zfetch": "154c9b826a794e22135eda2d77a03b7214f8e427",
+      "zrc": "e6e6a7d4a07bc74ae95b5ec1f0391ad4e5155d86",
+      "zshard": "f7842f70e439c4abda2a46698f0ebe067d38b297",
+      "ztty": "6e2ce246b0b50e6b82da99756832feae6e966f21"
+    },
+    "suite_version": "0.2.6"
+  },
+  "cleanup": "All owned application processes and Xvfb stopped; temporary HOME removed.",
+  "completion_cache": {
+    "after_first_tab": {
+      "zcompdump-5.9": {
+        "mtime_ns": 1795170621555638961,
+        "sha256": "6827c2aca31cc38dfe772647874790d296c671878eca703bd391c0bf9033fb5b"
+      }
+    },
+    "prepared": {
+      "zcompdump-5.9": {
+        "mtime_ns": 1795170621555638961,
+        "sha256": "6827c2aca31cc38dfe772647874790d296c671878eca703bd391c0bf9033fb5b"
+      }
+    },
+    "reused": true
+  },
+  "component_versions": [
+    "ztty 0.5.2",
+    "zdot 0.2.0",
+    "ssmcp 0.10.20"
+  ],
+  "geometry": {
+    "cols": 100,
+    "rows": 28
+  },
+  "graphical_checks": [
+    "visible window",
+    "keyboard command executed in preset zsh",
+    "first completion returned to a usable shell",
+    "actual component versions verified"
+  ],
+  "kernel": "7.0.0-1017-azure",
+  "preset": {
+    "font_pattern": "JetBrains Mono,JetBrainsMono Nerd Font,Caskaydia Mono,Cascadia Mono,monospace:size=13",
+    "padding_px": 28,
+    "resolved_font_family": "DejaVu Sans Mono"
+  },
+  "recorded_utc": "2026-11-20T10:30:20.883384+00:00",
+  "schema": "oh-my-ztty.graphical.v1",
+  "scope": "One actual suite window on an isolated Xvfb display, 100x28 cells, preset font and padding, temporary Git checkout. X server excluded from application memory. No AI connection.",
+  "screenshot": "linux-aarch64-terminal.png",
+  "startup": {
+    "definition": "Warm process wall time for an interactive zsh -c exit. Suite includes launcher and preset initialization; no prompt, Tab, model or network call. Vanilla disables user/global rc and is a minimum-feature baseline.",
+    "results": {
+      "suite_shell": {
+        "median_ms": 6.335425,
+        "min_ms": 6.204914,
+        "p95_ms": 6.415004,
+        "raw_ms": [
+          6.405389,
+          6.289404,
+          6.336073,
+          6.334777,
+          6.415004,
+          6.462464,
+          6.255254,
+          6.312763,
+          6.204914,
+          6.336649
+        ]
+      },
+      "vanilla_zsh": {
+        "median_ms": 1.6505855,
+        "min_ms": 1.493996,
+        "p95_ms": 1.784817,
+        "raw_ms": [
+          1.653961,
+          1.64721,
+          1.572695,
+          1.541929,
+          1.493996,
+          1.6726,
+          1.784817,
+          2.715707,
+          1.63965,
+          1.6782
+        ]
+      }
+    },
+    "samples_per_case": 10
+  },
+  "window_visible_ms": 167.025233
+}

@@ -1,0 +1,152 @@
+{
+  "after_completion": {
+    "waiting_launcher": {
+      "Private_Clean_KiB": 116,
+      "Private_Dirty_KiB": 208,
+      "Pss_KiB": 1709,
+      "Rss_KiB": 5992,
+      "Shared_Clean_KiB": 4308,
+      "Shared_Dirty_KiB": 1360
+    },
+    "zsh": {
+      "Private_Clean_KiB": 2040,
+      "Private_Dirty_KiB": 1836,
+      "Pss_KiB": 3998,
+      "Rss_KiB": 6632,
+      "Shared_Clean_KiB": 2756,
+      "Shared_Dirty_KiB": 0
+    },
+    "ztty_broker": {
+      "Private_Clean_KiB": 26200,
+      "Private_Dirty_KiB": 32776,
+      "Pss_KiB": 77728,
+      "Rss_KiB": 101176,
+      "Shared_Clean_KiB": 40840,
+      "Shared_Dirty_KiB": 1360
+    }
+  },
+  "architecture": "x86_64",
+  "archive": "oh-my-ztty-0.2.6-linux-x86_64.tar.gz",
+  "archive_sha256": "94a22ce1300a337e741ef0c2a336e29e90696b621fbdfa05c0b66673ce10dc20",
+  "before_completion": {
+    "waiting_launcher": {
+      "Private_Clean_KiB": 116,
+      "Private_Dirty_KiB": 208,
+      "Pss_KiB": 1709,
+      "Rss_KiB": 5992,
+      "Shared_Clean_KiB": 4308,
+      "Shared_Dirty_KiB": 1360
+    },
+    "zsh": {
+      "Private_Clean_KiB": 1612,
+      "Private_Dirty_KiB": 1024,
+      "Pss_KiB": 2758,
+      "Rss_KiB": 5392,
+      "Shared_Clean_KiB": 2756,
+      "Shared_Dirty_KiB": 0
+    },
+    "ztty_broker": {
+      "Private_Clean_KiB": 26200,
+      "Private_Dirty_KiB": 32776,
+      "Pss_KiB": 77728,
+      "Rss_KiB": 101176,
+      "Shared_Clean_KiB": 40840,
+      "Shared_Dirty_KiB": 1360
+    }
+  },
+  "build": {
+    "platform": "linux-x86_64",
+    "schema": 1,
+    "source_commits": {
+      "ssmcp": "4f4dd88275c205e0e61a7601b4e0d11f56038769",
+      "zdot": "e6b5feb98b05c59e0986624c0742dfe4a9187a2a",
+      "zfetch": "154c9b826a794e22135eda2d77a03b7214f8e427",
+      "zrc": "e6e6a7d4a07bc74ae95b5ec1f0391ad4e5155d86",
+      "zshard": "f7842f70e439c4abda2a46698f0ebe067d38b297",
+      "ztty": "6e2ce246b0b50e6b82da99756832feae6e966f21"
+    },
+    "suite_version": "0.2.6"
+  },
+  "cleanup": "All owned application processes and Xvfb stopped; temporary HOME removed.",
+  "completion_cache": {
+    "after_first_tab": {
+      "zcompdump-5.9": {
+        "mtime_ns": 1795170633010339797,
+        "sha256": "82aca3190f57161647e18ee91200d71bca8186736746d73ae9b8c357171ce74f"
+      }
+    },
+    "prepared": {
+      "zcompdump-5.9": {
+        "mtime_ns": 1795170633010339797,
+        "sha256": "82aca3190f57161647e18ee91200d71bca8186736746d73ae9b8c357171ce74f"
+      }
+    },
+    "reused": true
+  },
+  "component_versions": [
+    "ztty 0.5.2",
+    "zdot 0.2.0",
+    "ssmcp 0.10.20"
+  ],
+  "geometry": {
+    "cols": 100,
+    "rows": 28
+  },
+  "graphical_checks": [
+    "visible window",
+    "keyboard command executed in preset zsh",
+    "first completion returned to a usable shell",
+    "actual component versions verified"
+  ],
+  "kernel": "7.0.0-1014-aws",
+  "preset": {
+    "font_pattern": "JetBrains Mono,JetBrainsMono Nerd Font,Caskaydia Mono,Cascadia Mono,monospace:size=13",
+    "padding_px": 28,
+    "resolved_font_family": "DejaVu Sans Mono"
+  },
+  "recorded_utc": "2026-11-20T10:30:32.416471+00:00",
+  "schema": "oh-my-ztty.graphical.v1",
+  "scope": "One actual suite window on an isolated Xvfb display, 100x28 cells, preset font and padding, temporary Git checkout. X server excluded from application memory. No AI connection.",
+  "screenshot": "linux-x86_64-terminal.png",
+  "startup": {
+    "definition": "Warm process wall time for an interactive zsh -c exit. Suite includes launcher and preset initialization; no prompt, Tab, model or network call. Vanilla disables user/global rc and is a minimum-feature baseline.",
+    "results": {
+      "suite_shell": {
+        "median_ms": 4.505407,
+        "min_ms": 4.455047,
+        "p95_ms": 4.601848,
+        "raw_ms": [
+          4.501498,
+          4.70091,
+          4.601848,
+          4.539144,
+          4.564536,
+          4.469639,
+          4.49512,
+          4.487318,
+          4.455047,
+          4.509316
+        ]
+      },
+      "vanilla_zsh": {
+        "median_ms": 1.1505714999999999,
+        "min_ms": 1.075565,
+        "p95_ms": 1.218597,
+        "raw_ms": [
+          1.24744,
+          1.10716,
+          1.101286,
+          1.082674,
+          1.075565,
+          1.200442,
+          1.218597,
+          1.14659,
+          1.173535,
+          1.154553
+        ]
+      }
+    },
+    "samples_per_case": 10
+  },
+  "window_visible_ms": 133.571401
+}
