@@ -50,6 +50,39 @@ The [workstation report](docs/reports/workspace-0.2.1.md) records the deployed I
 
 ## Make it your default workspace
 
+### Shell settings and private sync
+
+`omztty setup` guides local initialization, an optional zsh startup hook and a private dotfiles repository under your own GitHub account. Start locally with:
+
+```sh
+omztty setup --local --install-rc
+omztty env set EDITOR nvim --shared
+omztty env set PROJECT_ENDPOINT https://example.invalid
+omztty env list
+omztty path add ~/.local/bin
+omztty path add ~/tools/bin --append
+omztty rc add 10-aliases
+omztty rc edit 10-aliases
+omztty rc check
+omztty rc status
+```
+
+Shared data and zsh snippets live in `~/.config/oh-my-ztty/profile/shell/`; machine-only environment values default to `~/.config/oh-my-ztty/local/env.tsv`. Values are hidden in lists. The `env file`, `path file` and `rc file NAME` commands print their locations, and the corresponding `edit` commands validate manual changes. PATH rules keep their order and expand `~/` for each machine.
+
+Before Git is enabled, `rc backups` and `rc restore ID` manage local file versions. An independent profile Git repository switches shared shell changes to local commits and stops new snapshots. Use `sync history`, `sync restore REV [PATH]` and an explicit `sync push`; machine-only values stay outside Git. Synchronization accepts allowed text configuration and rejects binary files.
+
+```sh
+omztty setup --repo dotfiles
+omztty sync status
+omztty sync push
+omztty update --config-only
+omztty update --with-config
+```
+
+GitHub setup needs `gh auth login --hostname github.com`; commits need your Git `user.name` and `user.email`. Read the [shell guide](site/content/shell.md) and [private sync guide](site/content/dotfiles.md) for command examples, file formats and recovery.
+
+### Application configuration
+
 ~~~sh
 omztty config init
 omztty config plan --json

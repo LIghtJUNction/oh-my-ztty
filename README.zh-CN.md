@@ -52,6 +52,41 @@ omztty doctor
 
 ## 设为默认工作环境
 
+### Shell、环境变量与 PATH
+
+`omztty setup` 引导初始化、接入现有 zsh rc，并按选择在本人 GitHub 账号下创建私有 dotfiles 仓库。也可以先只在本机使用：
+
+```sh
+omztty setup --local --install-rc
+omztty env set EDITOR nvim --shared
+omztty env set PROJECT_ENDPOINT https://example.invalid
+omztty env list                         # 默认隐藏值
+omztty path add ~/.local/bin
+omztty path add ~/tools/bin --append
+omztty path move ~/tools/bin first
+omztty path list --effective
+omztty rc add 10-aliases
+omztty rc edit 10-aliases
+omztty rc check
+omztty rc status                       # 打印位置和当前 zsh 的重载命令
+```
+
+共享配置集中在 `~/.config/oh-my-ztty/profile/shell/`，机器专用变量默认保存在 `~/.config/oh-my-ztty/local/env.tsv`。`env file`、`path file`、`rc file NAME` 显示准确路径；可以使用对应的 `edit` 命令或直接编辑文本文件。PATH 保存的是有序规则，`~/` 在各台机器上按自己的 HOME 展开。
+
+未启用 Git 时，修改前保存本地文件版本，可用 `rc backups` 和 `rc restore ID` 恢复。Profile 启用独立 Git 后停止生成这些快照，共享 shell 修改自动形成**本地提交**；用 `sync history` 和 `sync restore REV [PATH]` 查看、恢复，用 `sync push` 明确上传。机器专用变量留在 Git 外。同步会检查文本类型和允许路径，拒绝二进制文件。
+
+```sh
+omztty setup --repo dotfiles            # 确认后创建本人的私有仓库
+omztty sync status
+omztty sync push
+omztty update --config-only            # 只拉取个人配置
+omztty update --with-config            # 拉取个人配置，再更新套件
+```
+
+GitHub 引导需要 `gh auth login --hostname github.com`，Git 提交需要已配置的 `user.name`、`user.email`。完整教程见 [Shell 与环境变量](site/content/shell.md)和[私有配置同步](site/content/dotfiles.md)。
+
+### 应用配置
+
 先准备可编辑配置并查看部署计划，再备份已有文件、应用链接：
 
 ```sh
@@ -63,7 +98,7 @@ omztty config status
 
 统一配置覆盖 zsh、ztty、Neovim、Kitty、Foot、Ghostty、tmux、fzf、bat、ripgrep 和 Git 显示设置；应用程序本身单独安装。Git 配色通过配置说明中的显式 include 启用。采用配置后重新打开终端，账户的登录 shell 记录保持原值。
 
-编辑源文件位于 `~/.config/oh-my-ztty/profile/`，个人 shell 设置放在 `~/.config/oh-my-ztty/local.zsh`，个人补全放在 `~/.config/oh-my-ztty/completions/`。对应 XDG 配置可改变这些位置；HOME 配置部署要求 `XDG_CONFIG_HOME` 位于 HOME 内。
+编辑源文件位于 `~/.config/oh-my-ztty/profile/`，个人 shell 片段放在 `profile/shell/rc.d/`，个人补全放在 `~/.config/oh-my-ztty/completions/`；已有的 `local.zsh` 仍会加载。对应 XDG 配置可改变这些位置；HOME 配置部署要求 `XDG_CONFIG_HOME` 位于 HOME 内。
 
 升级后运行 `omztty config refresh`，即可更新尚未自行修改的默认文件；个人编辑、新增文件和主动删除的文件会保留。`omztty config remove` 恢复采用配置前保存的文件。用户级安装的 `omztty uninstall` 会先恢复这个受管理的 profile；恢复失败时保留运行程序供修复。通过 `omztty dot` 部署的其他仓库独立管理。完整位置与恢复步骤见[配置说明](docs/configuration.md)。
 

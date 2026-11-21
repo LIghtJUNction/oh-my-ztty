@@ -11,6 +11,7 @@ The bundle includes the terminal, shell framework and configuration tools. You n
 | Operating system | Linux x86_64 or ARM64 |
 | Shell | System zsh 5.9 or newer |
 | Optional editor profile | Neovim 0.11 or newer, installed separately |
+| Private GitHub profile sync | Git and the optional GitHub CLI (`gh`) |
 | Graphical terminal session | X11 or XWayland |
 | Graphics libraries | X11, Xrender, Xft, Fontconfig, Wayland, xkbcommon, FreeType, HarfBuzz, EGL and GLES |
 | Binary ABI | glibc 2.34 or newer and libgcc for ztty and ssmcp |
@@ -74,7 +75,15 @@ sh install.sh
 
 The installer downloads the archive for your architecture, verifies its SHA-256 and file manifest, then installs under `${XDG_DATA_HOME:-$HOME/.local/share}/oh-my-ztty`.
 
-Commands go into `~/.local/bin` by default. If that directory is not already on PATH, add it in your normal shell configuration. For the current shell:
+Commands go into `~/.local/bin` by default. You can use the absolute launcher path to initialize configuration and save its PATH entry:
+
+```sh
+~/.local/bin/omztty setup --local
+~/.local/bin/omztty path add "$HOME/.local/bin"
+~/.local/bin/omztty rc install
+```
+
+Open a new zsh session to load it. For the current shell, add the directory once:
 
 ```sh
 export PATH="$HOME/.local/bin:$PATH"
@@ -97,6 +106,30 @@ omztty terminal
 ```
 
 Both commands use the suite's configuration for that session. Adopt the application profile below to link its settings into your home directory. Your account's login shell is unchanged.
+
+## Set up your own shell settings
+
+Run the setup wizard after installation:
+
+```sh
+omztty setup
+```
+
+It prepares the standard profile, offers to connect your ordinary zsh startup file and can create a private GitHub dotfiles repository under your signed-in account. The remote step is optional; `omztty setup --local` prepares local configuration without it.
+
+Manage settings directly from the command line:
+
+```sh
+omztty env set EDITOR nvim --shared
+omztty path add "$HOME/.local/bin"
+omztty rc add aliases
+omztty rc edit aliases
+omztty rc check
+```
+
+The [shell guide](shell.md) explains the values, file paths, manual editing and version history. The [dotfiles guide](dotfiles.md#synchronize-the-suite-profile) covers private synchronization and restoring configuration on another machine.
+
+Once the profile has its own Git repository, shared shell changes made by these commands become local commits. Run `omztty sync history` to inspect them and `omztty sync push` when you want to upload them. Git mode stops new file snapshots; machine-specific values and the home rc startup block remain local.
 
 ## Adopt the default workspace
 
@@ -153,7 +186,16 @@ For a per-user installation:
 omztty update
 ```
 
-If you adopted a home profile, run `omztty config refresh` after updating to receive changes to unmodified defaults. Upgrade the AUR package through your AUR helper.
+To update the profile from your own configured Git repository, select a configuration update explicitly:
+
+```sh
+omztty update --config-only
+omztty update --with-config
+```
+
+`--config-only` pulls the profile without changing the runtime. `--with-config` updates a per-user suite and pulls its profile. The profile must have a clean Git working tree and a fast-forward update available. Use `omztty sync status` to inspect local edits first.
+
+If you adopted a home profile, run `omztty config refresh` after updating to receive changes to unmodified shipped defaults. Upgrade the AUR runtime through your AUR helper; its profile can still be updated with `omztty update --config-only`.
 
 To change the desktop entry choice during an update, select one option:
 

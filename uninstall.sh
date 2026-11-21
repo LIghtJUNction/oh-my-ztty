@@ -22,13 +22,24 @@ if [ "$deployment" = 1 ]; then
     [ -d "$profile" ] && [ ! -L "$profile" ] &&
       [ "$(cat "$profile/.omztty-profile" 2>/dev/null)" = omztty-profile-v1 ] ||
         die "configuration profile ownership is damaged; installation was preserved"
-    "$base/current/bin/zdot" remove --root "$profile" --target "$HOME" --state-dir "$state" ||
+    deployment_profile=profile.zdot
+    if [ -e "$profile/.config-layout" ] || [ -L "$profile/.config-layout" ]; then
+        [ -f "$profile/.config-layout" ] && [ ! -L "$profile/.config-layout" ] &&
+          [ "$(cat "$profile/.config-layout")" = canonical-v1 ] ||
+            die "configuration layout is damaged; installation was preserved"
+        deployment_profile=.omztty-target.zdot
+    fi
+    "$base/current/bin/zdot" remove --root "$profile" --target "$HOME" --state-dir "$state" --profile "$deployment_profile" ||
         die "configuration restoration failed; installation was preserved"
     if [ -L "$HOME/.zshrc" ] && [ "$(readlink -- "$HOME/.zshrc")" = "$profile/files/.zshrc" ]; then
         die "the managed shell still depends on this installation; installation was preserved"
     fi
 elif [ "$managed_shell" = 1 ]; then
     die "the managed shell has no recovery journal; installation was preserved"
+fi
+if [ -f "$base/current/bin/omztty-manage" ]; then
+    "$base/current/bin/omztty" rc uninstall ||
+        die "shell startup hook removal failed; installation was preserved"
 fi
 for exe in omztty ztty ssmcp zdot zshard zfetch; do
     link="$bindir/$exe"

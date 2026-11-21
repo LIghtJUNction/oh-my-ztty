@@ -19,7 +19,7 @@ Usage: omztty config COMMAND
   remove              Restore the files saved before adoption
   path                Print the editable profile directory
   audit               Inspect managed files and known retired shell frameworks
-  sync status|pull|push  Use zdot's explicit Git synchronization
+  sync status|pull|push|init|history|restore  Version and sync private configuration
 Personal shell additions live in ~/.config/oh-my-ztty/local.zsh.
 Configuration commands do not install applications or start background services.
 EOF
@@ -43,16 +43,24 @@ prepare_profile() {
     tab=$(printf '\t')
     while IFS="$tab" read -r source destination; do
         case "$source" in ''|'#'*) printf '%s\n' "$source"; continue ;; esac
-        case "$destination" in
-            .config/*) destination="$config_relative/${destination#.config/}" ;;
-        esac
+        if [ "${layout:-legacy}" != canonical-v1 ]; then
+            case "$destination" in
+                .config/*) destination="$config_relative/${destination#.config/}" ;;
+            esac
+        fi
         printf '%s\t%s\n' "$source" "$destination"
     done < "$defaults_source/profile.zdot" > "$defaults_out/profile.zdot"
     cp -- "$1/config/home/.zshrc" "$defaults_out/files/.zshrc"
     mkdir -p -- "$defaults_out/files/.config/ztty"
     cp -- "$1/config/ztty/config" "$defaults_out/files/.config/ztty/config"
-    printf 'files/.zshrc\t.zshrc\nfiles/.config/ztty\t%s/ztty\n' "$config_relative" >> "$defaults_out/profile.zdot"
+    target_config=$config_relative
+    [ "${layout:-legacy}" != canonical-v1 ] || target_config=.config
+    printf 'files/.zshrc\t.zshrc\nfiles/.config/ztty\t%s/ztty\n' "$target_config" >> "$defaults_out/profile.zdot"
     printf '%s\n' omztty-profile-v1 > "$defaults_out/.omztty-profile"
+    if [ "${layout:-legacy}" = canonical-v1 ]; then
+        printf '%s\n' canonical-v1 > "$defaults_out/.config-layout"
+        printf '%s\n' /.baseline/ /.omztty-target.zdot '/.omztty-target.*' > "$defaults_out/.gitignore"
+    fi
     cp -- "$1/VERSION" "$defaults_out/.suite-version"
 }
 baseline_manifest() (
@@ -94,6 +102,9 @@ regular_profile_file() {
 }
 action=${1:-help}
 [ "$#" -eq 0 ] || shift
+if [ "$action" = sync ]; then
+    exec zsh -df "$root/bin/omztty-sync" "$@"
+fi
 case "$action" in
     help|-h|--help) usage; exit 0 ;;
     path) [ "$#" -eq 0 ] || die 'path takes no arguments'; printf '%s\n' "$profile"; exit 0 ;;
@@ -111,6 +122,7 @@ case "$action" in
         trap 'rm -rf -- "$stage"' EXIT
         trap 'exit 130' INT
         trap 'exit 143' HUP TERM
+        layout=canonical-v1
         prepare_profile "$root" "$stage"
         save_baseline "$stage" "$stage/.baseline"
         mv -T -- "$stage" "$profile"
@@ -126,12 +138,14 @@ case "$action" in
     plan) [ "$#" -eq 0 ] || { [ "$#" -eq 1 ] && [ "$1" = --json ]; } || die 'plan accepts only --json' ;;
     apply) [ "$#" -eq 0 ] || { [ "$#" -eq 1 ] && [ "$1" = --backup ]; } || die 'apply accepts only --backup' ;;
     status|remove|audit|refresh) [ "$#" -eq 0 ] || die "$action takes no arguments" ;;
-    sync)
-        [ "$#" -eq 1 ] || die 'sync requires status, pull, or push'
-        case "$1" in status|pull|push) ;; *) die 'sync requires status, pull, or push' ;; esac
-        exec "$root/bin/zdot" sync --root "$profile" "$1" ;;
 esac
 if [ "$action" = refresh ]; then
+    layout=legacy
+    if [ -e "$profile/.config-layout" ] || [ -L "$profile/.config-layout" ]; then
+        [ -f "$profile/.config-layout" ] && [ ! -L "$profile/.config-layout" ] &&
+          [ "$(cat "$profile/.config-layout")" = canonical-v1 ] || die 'unrecognized profile config layout'
+        layout=canonical-v1
+    fi
     [ -f "$profile/.suite-version" ] && [ ! -L "$profile/.suite-version" ] ||
       die 'profile has no regular .suite-version baseline'
     previous=$(cat "$profile/.suite-version")
@@ -245,8 +259,26 @@ if [ "$action" = refresh ]; then
     printf 'Existing mappings, deployment backups and personal additions were preserved.\n'
     exit 0
 fi
+deployment_profile=profile.zdot
+if [ -e "$profile/.config-layout" ] || [ -L "$profile/.config-layout" ]; then
+    [ -f "$profile/.config-layout" ] && [ ! -L "$profile/.config-layout" ] &&
+      [ "$(cat "$profile/.config-layout")" = canonical-v1 ] || die 'unrecognized profile config layout'
+    deployment_profile=.omztty-target.zdot
+    [ ! -L "$profile/$deployment_profile" ] || die 'deployment manifest must not be a symlink'
+    target_stage=$(mktemp "$profile/.omztty-target.XXXXXXXX")
+    trap 'rm -f -- "$target_stage"' EXIT
+    trap 'exit 130' INT
+    trap 'exit 143' HUP TERM
+    tab=$(printf '\t')
+    while IFS="$tab" read -r source destination; do
+        case "$source" in ''|'#'*) printf '%s\n' "$source"; continue ;; esac
+        case "$destination" in .config/*) destination="$config_relative/${destination#.config/}" ;; esac
+        printf '%s\t%s\n' "$source" "$destination"
+    done < "$profile/profile.zdot" > "$target_stage"
+    mv -f -- "$target_stage" "$profile/$deployment_profile"
+fi
 if [ "$action" = audit ]; then
-    "$root/bin/zdot" status --root "$profile" --target "$HOME" --state-dir "$state"
+    "$root/bin/zdot" status --root "$profile" --target "$HOME" --state-dir "$state" --profile "$deployment_profile"
     printf '\nKnown legacy shell locations:\n'
     count=0
     for name in .oh-my-zsh .zim .zimrc .zinit .zplug .zprezto .p10k.zsh .config/starship.toml .local/share/zinit .local/share/antidote; do
@@ -258,4 +290,4 @@ if [ "$action" = audit ]; then
     [ "$count" -ne 0 ] || printf 'No known legacy shell locations remain.\n'
     exit 0
 fi
-exec "$root/bin/zdot" "$action" --root "$profile" --target "$HOME" --state-dir "$state" "$@"
+exec "$root/bin/zdot" "$action" --root "$profile" --target "$HOME" --state-dir "$state" --profile "$deployment_profile" "$@"

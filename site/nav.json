@@ -27,6 +27,12 @@
           "description": "Set up the shell and editor, keep personal changes and refresh unchanged defaults."
         },
         {
+          "slug": "shell",
+          "title": "Shell & environment",
+          "source": "shell.md",
+          "description": "Manage environment variables, PATH and zsh snippets from the command line, with clear file locations and Git version history."
+        },
+        {
           "slug": "plugins",
           "title": "Plugins",
           "source": "plugins.md",

@@ -14,7 +14,65 @@ _omztty_config() {
     case $words[2] in
         plan) _arguments '1:action:(plan)' '--json[Emit machine-readable output]' ;;
         apply) _arguments '1:action:(apply)' '--backup[Preserve conflicting files]' ;;
-        sync) _arguments '1:action:(sync)' '2:operation:(status pull push)' ;;
+        sync) _arguments '1:action:(sync)' '2:operation:(status pull push init history restore)' ;;
+        *) return 1 ;;
+    esac
+}
+
+_omztty_settings() {
+    local group=$words[1] action=${words[2]-} file name value
+    local config=${XDG_CONFIG_HOME:-$HOME/.config}/oh-my-ztty
+    local -a actions names
+    case $group in
+        env) actions=('list:List managed names' 'get:Print a managed value' 'set:Save a literal value'
+                      'unset:Remove a saved value' 'edit:Edit the data file' 'file:Print the data file path') ;;
+        path) actions=('list:List saved PATH rules' 'add:Add a directory' 'remove:Remove a saved rule'
+                       'move:Change priority' 'edit:Edit PATH rules' 'file:Print the data file path') ;;
+        rc) actions=('init:Prepare shell configuration' 'status:Show locations and reload command'
+                     'list:List rc snippets' 'add:Create or import a snippet' 'edit:Edit a snippet'
+                     'show:Print a snippet' 'enable:Enable a snippet' 'disable:Disable a snippet'
+                     'remove:Remove a snippet' 'file:Print a snippet path' 'check:Validate without executing'
+                     'install:Connect an existing zsh rc' 'uninstall:Remove the managed source block'
+                     'backups:List saved file versions' 'restore:Restore a saved file version') ;;
+    esac
+    if (( CURRENT == 2 )); then _describe "$group action" actions; return; fi
+    case $group:$action in
+        env:list) _arguments '1:action:(list)' '--show[Reveal values]' ;;
+        env:set|env:get|env:unset)
+            if (( CURRENT == 3 )); then
+                for file in "$config/profile/shell/env.tsv" "$config/local/env.tsv"; do
+                    [[ -f $file && ! -L $file ]] || continue
+                    while IFS=$'\t' read -r name value; do
+                        [[ $name == [A-Za-z_]* && $name != *[^A-Za-z0-9_]* ]] && names+=("$name")
+                    done < "$file"
+                done
+                compadd -a names
+                [[ $action != set ]] || _message 'environment variable name'
+            elif [[ $action == set && CURRENT == 4 ]]; then
+                _message 'literal value (quote spaces)'
+            elif [[ $action != get ]]; then compadd -- --shared
+            fi ;;
+        env:edit|env:file) compadd -- --shared ;;
+        path:list) compadd -- --effective ;;
+        path:add|path:remove|path:move)
+            if (( CURRENT == 3 )); then _directories
+            elif [[ $action == add ]]; then compadd -- --prepend --append
+            elif [[ $action == move ]]; then compadd -- first last
+            fi ;;
+        rc:install|rc:uninstall) compadd -- --dry-run ;;
+        rc:add)
+            if (( CURRENT == 3 )); then _message 'snippet name'
+            elif [[ $words[CURRENT-1] == --from ]]; then _files
+            else compadd -- --from
+            fi ;;
+        rc:edit|rc:show|rc:enable|rc:disable|rc:remove|rc:file)
+            for file in "$config/profile/shell/rc.d"/*.zsh(N) "$config/profile/shell/rc.d"/*.zsh.disabled(N); do
+                names+=("${${${file:t}%.disabled}%.zsh}")
+            done
+            compadd -a names ;;
+        rc:restore)
+            for file in "${XDG_STATE_HOME:-$HOME/.local/state}/oh-my-ztty/backups"/*(N/); do names+=("${file:t}"); done
+            compadd -a names ;;
         *) return 1 ;;
     esac
 }
@@ -25,6 +83,8 @@ _omztty() {
     local -a commands=(
         'shell:Open the preset zsh' 'terminal:Open ztty with the preset'
         'ai:Use explicit AI actions' 'config:Manage the unified profile'
+        'setup:Set up shell settings and private GitHub sync' 'env:Manage environment variables'
+        'path:Manage PATH priority' 'rc:Manage shell snippets and backups' 'sync:Synchronize personal configuration'
         'dot:Run zdot' 'zdot:Run zdot' 'zshard:Manage shell plugins'
         'ztty:Run ztty' 'ssmcp:Run ssmcp'
         'info:Show system information' 'zfetch:Run zfetch'
@@ -46,6 +106,16 @@ _omztty() {
     local curcontext="$curcontext"
     case $command in
         config) _omztty_config ;;
+        env|path|rc) _omztty_settings ;;
+        sync)
+            if (( CURRENT == 2 )); then _arguments '1:operation:(status pull push init history restore)'
+            elif [[ $words[2] == restore && CURRENT == 3 ]]; then _message 'Git commit or revision'
+            elif [[ $words[2] == restore && CURRENT == 4 ]]; then _message 'optional profile-relative file'
+            fi ;;
+        setup) _arguments '(--repo --from)--local[Prepare local configuration only]' \
+            '(--local --from)--repo[Create a private repository]:repository name:' \
+            '(--local --repo)--from[Restore a private repository]:owner/repository:' \
+            '--yes[Confirm the explicitly selected setup mode]' '--install-rc[Install the zsh source block]' ;;
         terminal|ztty)
             # Keep personal ztty completions in the normal dispatch path.
             local omztty_terminal_preset=0
@@ -83,8 +153,10 @@ _omztty() {
             elif [[ $words[2] == (ask|propose) ]]; then
                 _message 'request text'
             fi ;;
-        update) _arguments '(--no-desktop)--desktop[Enable the desktop entry]' \
-            '(--desktop)--no-desktop[Disable the desktop entry]' ;;
+        update) _arguments '(--no-desktop --config-only)--desktop[Enable the desktop entry]' \
+            '(--desktop --config-only)--no-desktop[Disable the desktop entry]' \
+            '(--config-only)--with-config[Also pull personal configuration]' \
+            '(--desktop --no-desktop --with-config)--config-only[Only pull personal configuration]' ;;
         *) return 1 ;;
     esac
 }

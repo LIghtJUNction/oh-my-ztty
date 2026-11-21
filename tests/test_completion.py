@@ -151,6 +151,17 @@ class InteractiveCompletion(unittest.TestCase):
             "omztty config status --j": "omztty config status --j",
             "omztty config refresh --b": "omztty config refresh --b",
             "omztty update --no": "omztty update --no-desktop",
+            "omztty update --config-o": "omztty update --config-only",
+            "omztty update --with-c": "omztty update --with-config",
+            "omztty setup --inst": "omztty setup --install-rc",
+            "omztty path mo": "omztty path move",
+            "omztty path add /tmp --app": "omztty path add /tmp --append",
+            "omztty path move /tmp la": "omztty path move /tmp last",
+            "omztty env edit --sh": "omztty env edit --shared",
+            "omztty env list --sh": "omztty env list --show",
+            "omztty rc install --dry": "omztty rc install --dry-run",
+            "omztty rc back": "omztty rc backups",
+            "omztty sync his": "omztty sync history",
         })
 
     def test_terminal_options_and_command_boundaries(self):

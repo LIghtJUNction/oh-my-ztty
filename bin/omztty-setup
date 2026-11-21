@@ -1,0 +1,123 @@
+#!/usr/bin/env zsh
+# Interactive local setup, with explicitly selected private GitHub sync.
+emulate -LR zsh
+setopt err_exit no_unset pipe_fail
+umask 077
+root=${OMZTTY_ROOT:?run this through omztty}
+source "$root/bin/omztty-sync"
+
+setup_usage() {
+    cat <<'EOF'
+Usage: omztty setup [--local | --repo NAME | --from OWNER/NAME] [--yes] [--install-rc]
+  --local       Initialize local configuration without creating a GitHub repo
+  --repo NAME   Create a private repo under your authenticated GitHub account
+  --from REPO   Restore your existing private repo into an absent profile
+  --install-rc  Add the managed loader to your zsh rc file
+  --yes         Skip prompts for an explicitly selected mode
+Without options, setup guides you interactively; remote setup defaults to no.
+EOF
+}
+setup_confirm() {
+    local answer
+    print -n -- "$1 [y/N] "
+    read -r answer || return 1
+    [[ ${(L)answer} == y || ${(L)answer} == yes ]]
+}
+setup_mode=interactive
+setup_name=''
+setup_yes=0
+setup_install_rc=0
+setup_stage=''
+while (( $# )); do
+    case "$1" in
+        --local|--repo|--from)
+            [[ $setup_mode == interactive ]] || sync_die 'choose only one of --local, --repo or --from'
+            setup_mode=${1#--}
+            if [[ $setup_mode != local ]]; then
+                (( $# >= 2 )) && [[ -n $2 && $2 != -* ]] || sync_die "$1 requires a repository name"
+                setup_name=$2
+                shift
+            fi ;;
+        --yes) setup_yes=1 ;;
+        --install-rc) setup_install_rc=1 ;;
+        help|-h|--help) setup_usage; exit 0 ;;
+        *) setup_usage >&2; exit 2 ;;
+    esac
+    shift
+done
+if [[ $setup_mode == interactive ]]; then
+    (( setup_yes == 0 )) || sync_die '--yes requires --local, --repo NAME or --from OWNER/NAME'
+    [[ -t 0 && -t 1 ]] || sync_die 'noninteractive setup requires --local, or --repo/--from with --yes'
+elif [[ $setup_mode != local && $setup_yes == 0 && ( ! -t 0 || ! -t 1 ) ]]; then
+    sync_die 'use --yes with an explicit --repo or --from in noninteractive setup'
+fi
+if [[ $setup_mode == repo ]]; then
+    [[ $setup_name =~ '^[A-Za-z0-9_][A-Za-z0-9_.-]*$' && $setup_name != . && $setup_name != .. ]] ||
+        sync_die '--repo accepts a repository name, without an owner or URL'
+fi
+
+trap '[[ -z $setup_stage ]] || rm -rf -- "$setup_stage"' EXIT
+trap 'exit 130' INT
+trap 'exit 143' HUP TERM
+
+if [[ $setup_mode == from ]]; then
+    [[ ! -e $profile_root && ! -L $profile_root ]] || sync_die 'preserving the existing profile; restore into a new HOME/config directory'
+    sync_verify_github "$setup_name"
+    if (( setup_yes == 0 )) && ! setup_confirm "Restore private repository $sync_repository?"; then
+        print -- 'No configuration changed.'
+        exit 0
+    fi
+    mkdir -p -- "$config_root/oh-my-ztty"
+    setup_stage=$(mktemp -d "$config_root/oh-my-ztty/.restore.XXXXXXXX")
+    setup_destination=$profile_root
+    GH_HOST=github.com gh repo clone "$sync_repository" "$setup_stage/repository" -- --no-checkout
+    profile_root=$setup_stage/repository
+    [[ -d $profile_root/.git && ! -L $profile_root/.git ]] || sync_die 'clone did not produce an independent Git repository'
+    sync_validate_tree HEAD
+    sync_git reset --hard HEAD
+    profile_root=$setup_destination
+    mv -T --no-clobber -- "$setup_stage/repository" "$profile_root"
+    [[ ! -e $setup_stage/repository ]] || sync_die 'profile appeared during restore; existing files were preserved'
+fi
+
+"$root/bin/omztty" rc init
+if (( setup_install_rc )) || { [[ $setup_mode == interactive ]] && setup_confirm 'Load oh-my-ztty settings from your zsh rc file?'; }; then
+    "$root/bin/omztty" rc install
+fi
+
+if [[ $setup_mode == interactive ]]; then
+    if ! command -v gh >/dev/null; then
+        print -- 'Local setup is ready. For GitHub sync, install gh and run gh auth login --hostname github.com.'
+        exit 0
+    fi
+    if ! setup_confirm 'Create a private GitHub repository for this profile?'; then
+        print -r -- "Local setup ready: $profile_root"
+        exit 0
+    fi
+    print -n -- 'Repository name [oh-my-ztty-dotfiles]: '
+    read -r setup_name
+    setup_name=${setup_name:-oh-my-ztty-dotfiles}
+    [[ $setup_name =~ '^[A-Za-z0-9_][A-Za-z0-9_.-]*$' ]] || sync_die 'invalid repository name'
+    setup_mode=repo
+    setup_yes=1
+fi
+
+if [[ $setup_mode == repo ]]; then
+    sync_init
+    sync_github_account
+    sync_repository=$sync_account/$setup_name
+    if sync_git remote get-url origin >/dev/null 2>&1; then
+        sync_die 'origin is already configured; use omztty sync status, pull or push'
+    fi
+    if (( setup_yes == 0 )) && ! setup_confirm "Create private repository $sync_repository and push this profile?"; then
+        print -- 'Local setup is ready. No GitHub repository was created.'
+        exit 0
+    fi
+    # Finish local validation and resolve Git identity before creating a remote.
+    sync_prepare_commit
+    sync_validate_history HEAD
+    GH_HOST=github.com gh repo create "$sync_repository" --private --source "$profile_root" --remote origin
+    sync_push
+fi
+print -r -- "Setup ready: $profile_root"
+[[ $setup_mode != local ]] || print -- 'Local mode: no GitHub repository was created.'

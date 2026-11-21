@@ -1,0 +1,358 @@
+#!/usr/bin/env zsh
+# Explicit Git synchronization of the user-owned, portable profile.
+emulate -LR zsh
+setopt err_exit no_unset pipe_fail
+umask 077
+
+root=${OMZTTY_ROOT:?run this through omztty}
+config_root=${XDG_CONFIG_HOME:-$HOME/.config}
+profile_root=$config_root/oh-my-ztty/profile
+# Never inherit a caller's repository or temporary index selection.
+unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_COMMON_DIR GIT_OBJECT_DIRECTORY GIT_ALTERNATE_OBJECT_DIRECTORIES
+
+sync_die() { print -ru2 -- "oh-my-ztty sync: $*"; exit 1; }
+sync_git() { command git -c core.hooksPath=/dev/null -C "$profile_root" "$@"; }
+sync_usage() {
+    cat <<'EOF'
+Usage: omztty sync init|status|history|pull|push|restore REV [PATH]
+  init     Initialize Git and commit the initial profile; no remote is created
+  status   Show local Git status without contacting a server
+  history  Show the latest 20 local configuration commits
+  restore  Restore shell/ or one allowed file, then record a local commit
+  pull     Fetch and fast-forward a clean profile; never execute its rc files
+  push     Commit allowed profile changes, then push to your private GitHub repo
+Machine-local variables, backups, baseline files and secret files are excluded.
+Set a Git user.name and user.email before the first push.
+EOF
+}
+sync_require_profile() {
+    [[ $HOME == /* && $config_root == /* ]] || sync_die 'HOME and XDG_CONFIG_HOME must be absolute'
+    [[ $config_root != *$'\n'* && $config_root != *$'\r'* ]] || sync_die 'configuration path contains a line break'
+    [[ -d $profile_root && ! -L $profile_root && -f $profile_root/.omztty-profile && ! -L $profile_root/.omztty-profile ]] ||
+        sync_die 'no owned profile; run omztty setup --local'
+    [[ $(<$profile_root/.omztty-profile) == omztty-profile-v1 ]] || sync_die 'unrecognized profile marker'
+}
+sync_require_repo() {
+    sync_require_profile
+    [[ -d $profile_root/.git && ! -L $profile_root/.git ]] ||
+        sync_die 'profile has no independent Git repository; run omztty sync init'
+    local top
+    top=$(sync_git rev-parse --show-toplevel) || sync_die 'invalid profile Git repository'
+    [[ ${top:A} == ${profile_root:A} ]] || sync_die 'refusing a parent or unrelated Git repository'
+}
+sync_require_idle() {
+    local pending
+    for pending in MERGE_HEAD CHERRY_PICK_HEAD REVERT_HEAD rebase-merge rebase-apply; do
+        [[ ! -e $profile_root/.git/$pending ]] || sync_die 'finish the current Git operation before synchronizing'
+    done
+}
+sync_allowed() {
+    local relative=$1 lower=${(L)1}
+    [[ $relative != /* && $relative != *$'\n'* && $relative != *$'\r'* && $relative != *$'\t'* ]] || return 1
+    case "/$lower/" in
+        */../*|*/./*|*//*|*/.git/*|*/.baseline/*|*/local/*|*/backups/*|*/secret/*|*/secrets/*|*/credentials/*|*/.ssh/*|*/.gnupg/*|*/.aws/*|*/.config/gh/*) return 1 ;;
+    esac
+    case "${lower:t}" in
+        .env|.env.*|*secret*|credentials*|.netrc|id_rsa*|id_ed25519*|*.pem|*.key|*.p12|*.pfx|*.age|*.gpg|*.bak|*.old|*.swp|*~) return 1 ;;
+    esac
+    case "$relative" in
+        .omztty-profile|.suite-version|.config-layout|profile.zdot|.gitignore|README|README.md|README.zh-CN.md|shell/env.tsv|shell/path.tsv|files/*) return 0 ;;
+        shell/rc.d/*.zsh|shell/rc.d/*.zsh.disabled) [[ ${relative#shell/rc.d/} != */* ]]; return ;;
+        *) return 1 ;;
+    esac
+}
+sync_regular_text() {
+    local relative=$1 probe=$profile_root/$1
+    while [[ $probe != $profile_root ]]; do
+        [[ ! -L $probe ]] || sync_die "refusing a symlink: $relative"
+        probe=${probe:h}
+    done
+    [[ -f $profile_root/$relative ]] || sync_die "not a regular profile file: $relative"
+    [[ ! -s $profile_root/$relative ]] || LC_ALL=C grep -I '' "$profile_root/$relative" >/dev/null ||
+        sync_die "refusing a binary profile file: $relative"
+    command -v iconv >/dev/null || sync_die 'iconv is required to validate UTF-8 configuration'
+    command iconv -f UTF-8 -t UTF-8 -- "$profile_root/$relative" >/dev/null 2>&1 ||
+        sync_die "profile configuration must be UTF-8 text: $relative"
+}
+sync_validate_config() {
+    emulate -L zsh
+    local relative=$1 input=$2
+    local -A _omztty_data
+    local -a _omztty_paths _omztty_places
+    case "$relative" in
+        shell/env.tsv|shell/path.tsv)
+            [[ -f $root/config/zsh/settings-lib.zsh ]] || {
+                print -ru2 -- 'oh-my-ztty sync: settings reader is missing from this suite'; return 1
+            }
+            source "$root/config/zsh/settings-lib.zsh" || return 1
+            if [[ $relative == shell/env.tsv ]]; then
+                _omztty_read_env "$input"
+            else
+                _omztty_read_paths "$input"
+            fi ;;
+        shell/rc.d/*.zsh|shell/rc.d/*.zsh.disabled)
+            command zsh -f -n -- "$input" ;;
+        .config-layout)
+            [[ $(<"$input") == canonical-v1 ]] || {
+                print -ru2 -- 'oh-my-ztty sync: unrecognized configuration layout'; return 1
+            } ;;
+    esac
+}
+sync_ignore() {
+    local entry
+    [[ ! -L $profile_root/.gitignore ]] || sync_die 'refusing a symlinked .gitignore'
+    touch -- "$profile_root/.gitignore"
+    # These files stay local even when the profile is a Git working tree.
+    for entry in '.baseline/' '.omztty-target.zdot' 'local/' 'backups/' '.env' '.env.*' '**/.env' '**/.env.*' '**/*secret*' '**/credentials*' '*.key' '*.pem' '*.p12' '*.pfx' '*.bak' '*.old' '*.swp' '*~'; do
+        if ! grep -Fqx -- "$entry" "$profile_root/.gitignore"; then
+            printf '\n%s\n' "$entry" >> "$profile_root/.gitignore"
+        fi
+    done
+}
+sync_init() {
+    sync_require_profile
+    command -v git >/dev/null || sync_die 'git is required for synchronization'
+    if [[ ! -e $profile_root/.git && ! -L $profile_root/.git ]]; then
+        command git -c core.hooksPath=/dev/null init --quiet --initial-branch=main -- "$profile_root"
+    fi
+    sync_require_repo
+    sync_ignore
+    if ! sync_git rev-parse --verify HEAD >/dev/null 2>&1; then
+        sync_prepare_commit
+    fi
+    print -r -- "Git profile ready: $profile_root"
+}
+sync_repo_name() {
+    local remote=$1
+    case "$remote" in
+        https://github.com/*) sync_repository=${remote#https://github.com/} ;;
+        git@github.com:*) sync_repository=${remote#git@github.com:} ;;
+        ssh://git@github.com/*) sync_repository=${remote#ssh://git@github.com/} ;;
+        *) return 1 ;;
+    esac
+    sync_repository=${sync_repository%.git}
+    [[ $sync_repository =~ '^[A-Za-z0-9][A-Za-z0-9-]*/[A-Za-z0-9_][A-Za-z0-9_.-]*$' ]]
+}
+sync_github_account() {
+    command -v gh >/dev/null || sync_die 'local configuration is ready; install gh and run gh auth login --hostname github.com for GitHub sync'
+    sync_account=$(GH_HOST=github.com gh api --hostname github.com user --jq .login) ||
+        sync_die 'GitHub login is required; run gh auth login --hostname github.com'
+    [[ $sync_account =~ '^[A-Za-z0-9][A-Za-z0-9-]*$' ]] || sync_die 'GitHub returned an invalid account name'
+}
+sync_verify_github() {
+    local requested=$1 details owner private full extra
+    sync_github_account
+    [[ $requested =~ '^[A-Za-z0-9][A-Za-z0-9-]*/[A-Za-z0-9_][A-Za-z0-9_.-]*$' ]] || sync_die 'expected OWNER/NAME on github.com'
+    [[ ${(L)requested%%/*} == ${(L)sync_account} ]] || sync_die 'repository must belong to the currently authenticated GitHub account'
+    details=$(GH_HOST=github.com gh repo view "$requested" --json owner,isPrivate,nameWithOwner --jq '[.owner.login, .isPrivate, .nameWithOwner] | @tsv') ||
+        sync_die 'cannot inspect the GitHub repository'
+    IFS=$'\t' read -r owner private full extra <<< "$details"
+    [[ -z $extra && $private == true && ${(L)owner} == ${(L)sync_account} && ${(L)full} == ${(L)requested} ]] ||
+        sync_die 'refusing a public repository or a repository owned by another account'
+    sync_repository=$full
+}
+sync_origin_url() {
+    local -a values
+    local raw
+    raw=$(sync_git remote get-url --all origin 2>/dev/null) || sync_die 'no origin remote; connect a private repository with omztty setup --repo NAME'
+    values=("${(@f)raw}")
+    [[ ${#values} == 1 ]] || sync_die 'origin must have exactly one fetch URL'
+    sync_origin=$values[1]
+}
+sync_verify_push_remote() {
+    local raw repository
+    local -a urls
+    sync_origin_url
+    sync_repo_name "$sync_origin" || sync_die 'push requires a private repository on github.com'
+    repository=$sync_repository
+    raw=$(sync_git remote get-url --push --all origin) || sync_die 'cannot inspect origin push URL'
+    urls=("${(@f)raw}")
+    [[ ${#urls} == 1 ]] || sync_die 'origin must have exactly one push URL'
+    sync_repo_name "$urls[1]" && [[ ${(L)sync_repository} == ${(L)repository} ]] ||
+        sync_die 'origin fetch and push URLs must identify the same GitHub repository'
+    sync_verify_github "$repository"
+}
+sync_current_branch() {
+    sync_branch=$(sync_git symbolic-ref --quiet --short HEAD) || sync_die 'switch to a branch before synchronizing'
+    sync_git check-ref-format "refs/heads/$sync_branch" >/dev/null || sync_die 'invalid branch name'
+}
+sync_validate_tree() (
+    local revision=$1 raw record metadata relative mode kind object marker size check_dir
+    local -a records
+    command -v iconv >/dev/null || sync_die 'iconv is required to validate UTF-8 configuration'
+    check_dir=$(mktemp -d "${TMPDIR:-/tmp}/omztty-sync-check.XXXXXXXX")
+    trap 'rm -rf -- "$check_dir"' EXIT
+    trap 'exit 130' INT
+    trap 'exit 143' HUP TERM
+    marker=$(sync_git show "$revision:.omztty-profile" 2>/dev/null) || sync_die 'repository has no profile marker'
+    [[ $marker == omztty-profile-v1 ]] || sync_die 'repository is not an oh-my-ztty profile'
+    raw=$(sync_git ls-tree -rz "$revision") || sync_die 'cannot inspect profile tree'
+    records=("${(@0)raw}")
+    for record in "${records[@]}"; do
+        [[ -n $record ]] || continue
+        metadata=${record%%$'\t'*}
+        relative=${record#*$'\t'}
+        sync_allowed "$relative" || sync_die "repository contains an excluded file: $relative"
+        read -r mode kind object <<< "$metadata"
+        [[ $kind == blob && ( $mode == 100644 || $mode == 100755 ) ]] || sync_die "repository contains a link or special file: $relative"
+        size=$(sync_git cat-file -s "$object")
+        [[ $size == 0 ]] || sync_git cat-file blob "$object" | LC_ALL=C grep -I '' >/dev/null ||
+            sync_die "repository contains a binary file: $relative"
+        sync_git cat-file blob "$object" | command iconv -f UTF-8 -t UTF-8 >/dev/null 2>&1 ||
+            sync_die "repository contains non-text configuration: $relative"
+        case "$relative" in
+            shell/env.tsv|shell/path.tsv|shell/rc.d/*.zsh|shell/rc.d/*.zsh.disabled|.config-layout)
+                sync_git cat-file blob "$object" > "$check_dir/blob"
+                sync_validate_config "$relative" "$check_dir/blob" || sync_die "invalid configuration in $revision: $relative" ;;
+        esac
+    done
+)
+sync_validate_history() {
+    local range=$1 revision raw
+    raw=$(sync_git rev-list "$range") || sync_die 'cannot inspect outgoing profile history'
+    for revision in "${(@f)raw}"; do
+        [[ -n $revision ]] && sync_validate_tree "$revision"
+    done
+    return 0
+}
+sync_prepare_commit() {
+    local raw relative
+    local -a entries staged accepted
+    raw=$(sync_git diff --cached --name-only --diff-filter=U -z)
+    [[ -z $raw ]] || sync_die 'resolve Git conflicts before synchronization'
+    raw=$(sync_git diff --cached --name-only -z)
+    staged=("${(@0)raw}")
+    for relative in "${staged[@]}"; do
+        [[ -z $relative ]] || sync_allowed "$relative" || sync_die "excluded file is already staged: $relative"
+    done
+    raw=$(sync_git ls-files -z)
+    entries=("${(@0)raw}")
+    for relative in "${entries[@]}"; do
+        [[ -z $relative ]] || sync_allowed "$relative" || sync_die "excluded file is already tracked: $relative"
+    done
+    raw=$(sync_git ls-files --cached --others --exclude-standard -z)
+    entries=("${(@0)raw}")
+    accepted=()
+    for relative in "${entries[@]}"; do
+        [[ -n $relative ]] || continue
+        if ! sync_allowed "$relative"; then
+            print -r -- "Kept local: $relative"
+            continue
+        fi
+        if [[ -e $profile_root/$relative || -L $profile_root/$relative ]]; then
+            sync_regular_text "$relative"
+            sync_validate_config "$relative" "$profile_root/$relative" || sync_die "invalid configuration: $relative"
+        fi
+        accepted+=("$relative")
+    done
+    (( ${#accepted} == 0 )) || sync_git add -- "${accepted[@]}"
+    if ! sync_git diff --cached --quiet; then
+        sync_git -c commit.gpgsign=false commit -m 'Update oh-my-ztty profile' ||
+            sync_die 'commit failed; configure git user.name and user.email, then retry'
+    fi
+    sync_git rev-parse --verify HEAD >/dev/null || sync_die 'profile has no commit'
+    sync_validate_tree HEAD
+}
+sync_history() {
+    sync_require_repo
+    if ! sync_git rev-parse --verify HEAD >/dev/null 2>&1; then
+        print -- 'No configuration commits yet. Run omztty sync init.'
+        return 0
+    fi
+    sync_git --no-pager -c color.ui=false -c log.showSignature=false log -20 --date=short --format='%h  %ad  %s' |
+        LC_ALL=C tr -d '\000-\010\013-\037\177'
+}
+sync_restore() {
+    local requested=$1 selected=${2:-shell} revision current historical kind
+    sync_require_repo
+    sync_require_idle
+    [[ -z $(sync_git status --porcelain --untracked-files=all) ]] || sync_die 'profile has local changes; commit them before restoring'
+    if [[ $selected != shell ]]; then
+        sync_allowed "$selected" || sync_die 'restore PATH must name one allowed profile file'
+        [[ ! -d $profile_root/$selected ]] || sync_die 'restore PATH must name a file; omit it to restore shell/'
+    fi
+    revision=$(sync_git rev-parse --verify --end-of-options "$requested^{commit}") || sync_die 'restore revision is not a commit'
+    sync_validate_tree "$revision"
+    current=$(sync_git ls-files -z -- ":(literal)$selected")
+    historical=$(sync_git --literal-pathspecs ls-tree -r --name-only -z "$revision" -- "$selected")
+    [[ -n $current || -n $historical ]] || sync_die 'selected configuration is absent from both versions'
+    if [[ $selected != shell && -n $historical ]]; then
+        kind=$(sync_git cat-file -t "$revision:$selected")
+        [[ $kind == blob ]] || sync_die 'restore PATH must name a file; omit it to restore shell/'
+    fi
+    sync_git var GIT_AUTHOR_IDENT >/dev/null && sync_git var GIT_COMMITTER_IDENT >/dev/null ||
+        sync_die 'configure git user.name and user.email before restoring'
+    sync_git restore --source="$revision" --worktree -- ":(literal)$selected"
+    sync_git add -- ":(literal)$selected"
+    if sync_git diff --cached --quiet; then
+        print -r -- "Configuration already matches ${revision[1,12]}: $selected"
+        return 0
+    fi
+    sync_git -c commit.gpgsign=false commit -m "Restore oh-my-ztty configuration from ${revision[1,12]}"
+    print -r -- "Restored $selected and recorded a local commit. Run omztty sync push to publish it."
+}
+sync_pull() {
+    sync_require_repo
+    sync_require_idle
+    [[ -z $(sync_git status --porcelain --untracked-files=all) ]] || sync_die 'profile has local changes; push or commit them before pulling'
+    sync_current_branch
+    sync_origin_url
+    if sync_repo_name "$sync_origin"; then
+        sync_verify_github "$sync_repository"
+    else
+        case "$sync_origin" in /*|file:///*) ;; *) sync_die 'pull requires GitHub or an explicit local repository' ;; esac
+    fi
+    # Inspect incoming files before checkout. Fetch and merge --ff-only provide
+    # the same fast-forward requirement without writing an unreviewed tree first.
+    sync_git fetch --no-tags origin "refs/heads/$sync_branch"
+    sync_validate_tree FETCH_HEAD
+    sync_git merge --ff-only FETCH_HEAD
+    print -- 'Profile synchronized. Open a new shell, or run omztty rc status for the current-shell reload command.'
+}
+sync_push() {
+    local remote_head range
+    sync_require_repo
+    sync_require_idle
+    sync_verify_push_remote
+    sync_current_branch
+    remote_head=$(sync_git ls-remote --heads origin "refs/heads/$sync_branch") || sync_die 'cannot read the remote branch'
+    range=HEAD
+    if [[ -n $remote_head ]]; then
+        sync_git fetch --no-tags origin "refs/heads/$sync_branch"
+        sync_git merge-base --is-ancestor FETCH_HEAD HEAD || sync_die 'remote has new commits; run omztty sync pull before pushing'
+        range=FETCH_HEAD..HEAD
+    fi
+    sync_prepare_commit
+    sync_validate_history "$range"
+    sync_git -c push.followTags=false push --set-upstream origin "HEAD:refs/heads/$sync_branch"
+    print -r -- "Profile synchronized to private GitHub repository $sync_repository."
+}
+
+# setup shares these helpers; only this installed script is sourced.
+[[ $ZSH_EVAL_CONTEXT != *:file ]] || return 0
+
+action=${1:-status}
+(( $# == 0 )) || shift
+if [[ $action == restore ]]; then
+    (( $# == 1 || $# == 2 )) || sync_die 'restore requires REV and an optional profile-relative file'
+else
+    (( $# == 0 )) || sync_die "$action takes no arguments"
+fi
+case "$action" in
+    help|-h|--help) sync_usage ;;
+    init) sync_init ;;
+    history) sync_history ;;
+    restore) sync_restore "$@" ;;
+    status)
+        sync_require_profile
+        if [[ ! -e $profile_root/.git && ! -L $profile_root/.git ]]; then
+            print -r -- "Local profile: $profile_root"
+            print -- 'Git synchronization is not initialized. Run omztty sync init.'
+        else
+            sync_require_repo
+            sync_git status --short --branch
+        fi ;;
+    pull) sync_pull ;;
+    push) sync_push ;;
+    *) sync_usage >&2; exit 2 ;;
+esac
