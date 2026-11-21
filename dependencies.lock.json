@@ -1,42 +1,42 @@
 {
   "schema": 2,
-  "updated_at": "2026-11-21T16:41:08+00:00",
+  "updated_at": "2026-11-21T17:03:03+00:00",
   "components": {
     "ztty": {
       "repository": "https://github.com/LIghtJUNction/ztty.git",
       "branch": "main",
-      "commit": "c63dbd52e9fb597b77245403460972ecb699f096",
-      "observed_at": "2026-11-21T16:40:01+00:00"
+      "commit": "842f1a8cb7cd23ec09e3c7c1f993886bde665e62",
+      "observed_at": "2026-11-21T17:02:12+00:00"
     },
     "ssmcp": {
       "repository": "https://github.com/LIghtJUNction/ssmcp.git",
       "branch": "main",
       "commit": "dde2938e050e1d9f8186a600f57dbb67e12de211",
-      "observed_at": "2026-11-21T16:40:12+00:00"
+      "observed_at": "2026-11-21T17:02:22+00:00"
     },
     "zshard": {
       "repository": "https://github.com/LIghtJUNction/zshard.git",
       "branch": "main",
       "commit": "f7842f70e439c4abda2a46698f0ebe067d38b297",
-      "observed_at": "2026-11-21T16:40:21+00:00"
+      "observed_at": "2026-11-21T17:02:30+00:00"
     },
     "zdot": {
       "repository": "https://github.com/LIghtJUNction/zdot.git",
       "branch": "main",
       "commit": "f540adcd11a7ed56339895d3d52e0a9e5e3506c6",
-      "observed_at": "2026-11-21T16:40:30+00:00"
+      "observed_at": "2026-11-21T17:02:39+00:00"
     },
     "zrc": {
       "repository": "https://github.com/LIghtJUNction/zrc.git",
       "branch": "main",
       "commit": "c127bd2965525adc05c46c6fba492aa1e45460f1",
-      "observed_at": "2026-11-21T16:40:39+00:00"
+      "observed_at": "2026-11-21T17:02:49+00:00"
     },
     "zfetch": {
       "repository": "https://github.com/LIghtJUNction/zfetch.git",
       "branch": "main",
       "commit": "f0614f3b76eca222f4b3880f8dd1707d1308f098",
-      "observed_at": "2026-11-21T16:40:48+00:00"
+      "observed_at": "2026-11-21T17:02:58+00:00"
     }
   }
 }
