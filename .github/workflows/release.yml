@@ -62,6 +62,7 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: write
+      actions: write
     env:
       GH_TOKEN: ${{ github.token }}
       RELEASE_TAG: ${{ github.event.inputs.tag || github.ref_name }}
@@ -82,3 +83,5 @@ jobs:
           sha256sum install.sh > install.sh.sha256
       - name: Publish complete release
         run: python3 scripts/publish_release.py --tag "$RELEASE_TAG"
+      - name: Publish the current website
+        run: gh workflow run pages.yml --ref main
