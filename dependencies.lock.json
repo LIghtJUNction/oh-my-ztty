@@ -1,6 +1,6 @@
 {
   "schema": 2,
-  "updated_at": "2026-11-21T10:24:04+00:00",
+  "updated_at": "2026-11-21T10:38:41+00:00",
   "components": {
     "ztty": {
       "repository": "https://github.com/LIghtJUNction/ztty.git",
@@ -23,8 +23,8 @@
     "zdot": {
       "repository": "https://github.com/LIghtJUNction/zdot.git",
       "branch": "main",
-      "commit": "a3c6a75b1e66747822b9b69d9e046d2aac249210",
-      "observed_at": "2026-11-20T19:18:43+00:00"
+      "commit": "f540adcd11a7ed56339895d3d52e0a9e5e3506c6",
+      "observed_at": "2026-11-21T10:38:40+00:00"
     },
     "zrc": {
       "repository": "https://github.com/LIghtJUNction/zrc.git",
