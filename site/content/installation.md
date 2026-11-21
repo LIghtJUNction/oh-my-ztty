@@ -187,7 +187,7 @@ Personal shell configuration belongs outside the release directory. See [configu
 
 ## Offline installation
 
-Download an archive and its matching `.sha256` file from the same published release. The following example uses the x86_64 archive for [v0.2.6](https://github.com/LIghtJUNction/oh-my-ztty/releases/tag/v0.2.8) once that release is published.
+Download an archive and its matching `.sha256` file from the same published release. The x86_64 example below uses [this release](https://github.com/LIghtJUNction/oh-my-ztty/releases/tag/v0.2.8).
 
 ```sh
 sh install.sh --from ./oh-my-ztty-0.2.8-linux-x86_64.tar.gz
