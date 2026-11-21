@@ -1,6 +1,6 @@
 # oh-my-ztty
 
-基于 Project Z 的 Linux 工作环境：**ztty + zshard + zrc + zdot + zfetch + ssmcp**。系统 zsh 负责执行命令，套件统一终端、编辑器和常用工具的配置。
+基于 Project Z 的 Linux 工作环境：**ztty + zshard + zrc + zdot + zfetch + ssmcp + zmem**。系统 zsh 负责执行命令，套件统一终端、编辑器和常用工具的配置。
 
 [官网](https://lightjunction.github.io/oh-my-ztty/) · [English](README.md) · [安装说明](docs/installation.md) · [配置与恢复](docs/configuration.md) · [性能记录](docs/performance.md) · [0.2.1 实机报告](docs/reports/workspace-0.2.1.md)
 
@@ -18,7 +18,7 @@ sh install.sh
 ~/.local/bin/omztty shell
 ```
 
-支持 Linux x86_64、ARM64。系统需提供 zsh 5.9+；图形终端使用 X11/XWayland，正式构建在 Ubuntu 24.04 验证。安装包包含六个 Project Z 组件的运行程序或原生配置，按用户安装，可重复执行，无需在安装时配置 Rust 或 Python。使用编辑器配置需要另行安装 Neovim 0.11+；日常运行和配置部署也不需要 Rust 或 Python。
+支持 Linux x86_64、ARM64。系统需提供 zsh 5.9+；图形终端使用 X11/XWayland，正式构建在 Ubuntu 24.04 验证。安装包包含七个 Project Z 组件的运行程序或原生配置，终端套件按用户安装，默认通过 sudo 将 zmem 安装为系统内存管理器。使用 `--no-memory-manager` 可跳过系统设置；重复安装会记住该选择，无需在安装时配置 Rust 或 Python。使用编辑器配置需要另行安装 Neovim 0.11+；日常运行和配置部署也不需要 Rust 或 Python。
 
 ### Arch Linux（AUR）
 
@@ -31,7 +31,7 @@ omztty doctor
 
 系统软件包通过 AUR 助手更新，配置采用仍需执行下方命令。卸载软件包前，先运行 `omztty config remove` 恢复原配置，再通过包管理器移除软件包。未使用 AUR 助手时，可按[安装说明](docs/installation.md#arch-linux-aur)使用 `makepkg` 安装。
 
-## 六个独立项目
+## 七个独立项目
 
 | 项目 | 作用 |
 | --- | --- |
@@ -41,8 +41,21 @@ omztty doctor
 | [zdot](https://github.com/LIghtJUNction/zdot) | `no_std` 配置管理工具，预览、部署链接、备份和恢复，并显式执行 Git 同步 |
 | [zfetch](https://github.com/LIghtJUNction/zfetch) | 零 crate 依赖的原生 `no_std` 系统概况工具，按需运行 |
 | [ssmcp](https://github.com/LIghtJUNction/ssmcp) | 按需把工作区接入 AI 的 MCP 工具 |
+| [zmem](https://github.com/LIghtJUNction/zmem) | 默认系统内存与 Swap 管理器，提供压力观测、后台任务约束和自适应交换空间 |
 
 开发时同步各组件默认分支的最新源码，Git 子模块与 `dependencies.lock.json` 共同记录本次构建选用的提交。[0.2.6 发布记录](docs/reports/0.2.6/release.zh-CN.md)保留该已发布版本的组件组合与验收结果。zsh、Neovim 等系统应用需单独安装。进入 shell 后，可按需查看系统概况或启动 AI 连接。zfetch 的 Arch Linux 包名为 `zfetch-project-z` 与 `zfetch-project-z-bin`，发布状态见其仓库说明。
+
+## 默认内存管理
+
+安装器默认启用 zmem 系统服务，接管现有 Swap，把初始方案保存到 `/etc/zmem/zmem.conf`，后续升级保留本机配置。查看状态和策略，或把编译任务纳入后台管理：
+
+```sh
+omztty memory status --json --processes
+omztty memory plan --json
+omztty memory run --class background -- cargo build
+```
+
+`omztty memory setup` 可在跳过初次设置后启用 zmem；`omztty memory rollback` 恢复接管前记录的管理器与配置。系统服务运行 root 所有的 `/usr/local/bin/zmem`，独立于用户目录中的套件。卸载终端套件会保留系统内存服务；已卸载后仍可用 `sudo /usr/local/bin/zmem rollback` 恢复。默认参数和命令见[内存管理说明](site/content/memory.md)。
 
 ## Ink 默认外观
 
@@ -109,7 +122,8 @@ omztty terminal        # 用 ztty 打开预设 shell
 omztty shell           # 在当前终端体验
 omztty info            # 按需运行 zfetch，显示系统概况
 omztty zfetch          # 直接运行套件中的 zfetch
-omztty doctor          # 检查组件和系统依赖
+omztty doctor          # 检查组件、系统依赖和 zmem 服务
+omztty memory          # 查看内存压力和 Swap
 omztty config audit    # 检查统一配置及已知旧 shell 框架位置
 omztty ai context      # 输出明确选择的 shell 上下文
 omztty ai connect      # 在当前工作区启动 ssmcp
@@ -137,6 +151,6 @@ python3 scripts/workspace.py check
 python3 scripts/build_bundle.py
 ```
 
-`sync` 默认获取六个组件的最新默认分支，并在 schema 2 源码锁中记录提交与观测时间。旧锁首次升级需要完整同步；此后可用 `sync zshard` 单独更新一个组件。打包时通过 Cargo `--locked` 从记录的源码编译四个原生程序，沿用已有的共享构建目录配置。
+`sync` 默认获取七个组件的最新默认分支，并在 schema 2 源码锁中记录提交与观测时间。旧锁首次升级需要完整同步；此后可用 `sync zshard` 单独更新一个组件。打包时通过 Cargo `--locked` 从记录的源码编译五个原生程序，沿用已有的共享构建目录配置。
 
 开发、测试和显式发布步骤见 [CONTRIBUTING.md](CONTRIBUTING.md)。性能数字与测量范围见[性能记录](docs/performance.md)。项目采用 MIT 许可证。

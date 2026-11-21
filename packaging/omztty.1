@@ -150,22 +150,39 @@ Run bundled zdot for independently managed deployments.
 .B zshard
 Manage shell plugins.
 .TP
-.B doctor
-Check system and bundled components without connecting to a remote service.
+.B memory [status | plan | doctor | schema | run]
+Run bundled zmem. Without an action, show memory and Swap status.
+Use status \-\-json \-\-processes for AI-readable memory usage.
+Run background jobs with memory run \-\-class background \-\- COMMAND.
 .TP
-.B update [\-\-desktop | \-\-no-desktop] [\-\-with-config]
+.B memory setup
+Install the bundled zmem as the system memory manager using sudo.
+Existing system configuration is preserved. The service uses a root-owned copy
+at /usr/local/bin/zmem.
+.TP
+.B memory rollback
+Restore the previous memory-manager configuration using the installed system zmem.
+.TP
+.B doctor
+Check system and bundled components, including zmem service state, without starting services.
+.TP
+.B update [\-\-desktop | \-\-no-desktop] [\-\-memory-manager | \-\-no-memory-manager] [\-\-with-config]
 Install the latest published per-user release, verifying its checksum.
 \-\-with-config also pulls the configured profile repository.
 The saved desktop entry choice is preserved unless explicitly changed.
 \-\-desktop enables the managed entry; \-\-no-desktop removes only a link
 that still points to this suite. Foreign files and links are preserved.
 The preference is saved only after installation succeeds.
+Memory setup is enabled by default; its saved choice is retained by updates.
+\-\-no-memory-manager skips system setup and does not stop an existing service.
 .TP
 .B update \-\-config-only
 Pull the configured profile repository without replacing the suite runtime.
 .TP
 .B uninstall
 Remove suite-owned runtime files and links. Preserve user configuration and history.
+The independent zmem system service remains installed. Use memory rollback first
+to restore the previous managers, or sudo /usr/local/bin/zmem rollback later.
 .SH EXAMPLES
 .nf
 omztty setup \-\-local

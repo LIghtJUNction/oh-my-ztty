@@ -158,7 +158,7 @@ class WorkspaceFixture:
                                       "path": self.path,
                                       "old_head": self.old_head,
                                       "branch": self.original_branch}}
-        for name in ("ssmcp", "zshard", "zdot", "zrc", "zfetch"):
+        for name in ("ssmcp", "zshard", "zdot", "zrc", "zfetch", "zmem"):
             upstream = self.repo(name + " remote")
             (upstream / "value").write_text("old " + name + "\n")
             old_head = self.commit(upstream, "Old " + name)
@@ -414,13 +414,13 @@ class WorkspaceSyncTests(unittest.TestCase):
         f.new_release()
         marker = f.base / "first checkout"
         f.hook(f"printf '%s\\n' \"$2\" >> {shlex.quote(str(marker))}\n")
-        last = components["zfetch"]
-        (last["path"] / "value").write_text("uncommitted zfetch work\n")
+        last = components["zmem"]
+        (last["path"] / "value").write_text("uncommitted zmem work\n")
         result = f.sync_all()
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn("source changes in components/zfetch", result.stderr)
+        self.assertIn("source changes in components/zmem", result.stderr)
         self.assertFalse(marker.exists(), "A component was checked out before preflight finished")
-        self.assertEqual((last["path"] / "value").read_text(), "uncommitted zfetch work\n")
+        self.assertEqual((last["path"] / "value").read_text(), "uncommitted zmem work\n")
         f.assert_old(self)
         for component in components.values():
             self.assertEqual(f.git(component["path"], "rev-parse", "HEAD"), component["old_head"])
@@ -458,7 +458,7 @@ class WorkspaceSyncTests(unittest.TestCase):
         self.assertEqual((second["path"] / "value").read_text(), "old ssmcp\n")
         self.assertFalse((second["path"] / ".gitmodules").exists())
 
-    def test_full_sync_migrates_legacy_assets_to_all_six_source_records(self):
+    def test_full_sync_migrates_legacy_assets_to_all_seven_source_records(self):
         f = self.fixture()
         components = f.add_suite_components()
         legacy = {"schema": 1, "components": {

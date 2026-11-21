@@ -41,7 +41,7 @@ if [ -f "$base/current/bin/omztty-manage" ]; then
     "$base/current/bin/omztty" rc uninstall ||
         die "shell startup hook removal failed; installation was preserved"
 fi
-for exe in omztty ztty ssmcp zdot zshard zfetch; do
+for exe in omztty ztty ssmcp zdot zshard zfetch zmem; do
     link="$bindir/$exe"
     if [ -L "$link" ] && [ "$(readlink "$link")" = "$base/current/bin/$exe" ]; then rm -- "$link"; fi
 done

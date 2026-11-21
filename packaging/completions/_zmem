@@ -1,0 +1,38 @@
+#compdef zmem
+
+_zmem() {
+    local context state state_descr line
+    typeset -A opt_args
+    local -a commands=(
+        'status:Show memory, Swap and pressure' 'plan:Explain the policy decision'
+        'doctor:Check system support' 'schema:Describe the AI interface'
+        'run:Start a managed workload' 'daemon:Run the memory manager'
+        'once:Evaluate one policy cycle' 'install:Install the system service'
+        'rollback:Restore previous memory management'
+    )
+    if (( CURRENT == 2 )); then
+        _arguments '(-h --help)'{-h,--help}'[Show help]' \
+            '(-V --version)'{-V,--version}'[Show version]' '1:command:->command'
+        [[ $state == command ]] && _describe 'command' commands
+        return
+    fi
+    case $words[2] in
+        status) _arguments '1:command:(status)' '--json[Emit structured status]' '--processes[Include process usage]' ;;
+        plan|doctor) _arguments '1:command:(plan doctor)' '--json[Emit structured output]' ;;
+        daemon) _arguments '1:command:(daemon)' '--observe[Observe without applying decisions]' '--config[Configuration file]:file:_files' ;;
+        once) _arguments '1:command:(once)' '--apply[Apply the selected policy]' ;;
+        install) _arguments '1:command:(install)' '--replace[Replace existing memory managers]' '--config[Initial configuration]:file:_files' ;;
+        run)
+            local -i boundary=${words[(i)--]}
+            if (( boundary < CURRENT )); then
+                shift boundary words
+                (( CURRENT -= boundary ))
+                _normal
+            else
+                _arguments '1:command:(run)' '--class[Workload policy]:class:(background interactive disposable)' \
+                    '--max-memory[Hard memory limit in MiB]:MiB:' '*:command:_command_names'
+            fi ;;
+    esac
+}
+
+_zmem "$@"

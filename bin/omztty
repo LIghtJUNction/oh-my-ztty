@@ -21,11 +21,12 @@ Usage: omztty COMMAND [ARGS...]
   zshard      Manage shell plugins
   ztty|ssmcp  Run a bundled component directly
   info        Show the lightweight native system overview
+  memory      Manage memory and Swap through zmem
   doctor      Check installed components and system dependencies
   version     Show the suite version
   update      Update suite [--with-config] or only config [--config-only]
   uninstall   Remove suite-owned files and links
-No daemon or connection is started until you explicitly request it.
+zmem manages system memory after installation. AI connections start on request.
 EOF
 }
 case "${1:-help}" in
@@ -88,6 +89,23 @@ case "$cmd" in
             *) printf 'Unknown AI action: %s\n' "$action" >&2; exit 2 ;;
         esac ;;
     info|zfetch) exec "$root/bin/zfetch" "$@" ;;
+    zmem) exec "$root/bin/zmem" "$@" ;;
+    memory)
+        action=${1:-status}
+        [ "$#" -eq 0 ] || shift
+        case "$action" in
+            setup|rollback)
+                [ "$#" -eq 0 ] || { printf 'usage: omztty memory %s\n' "$action" >&2; exit 2; }
+                if [ "$action" = setup ]; then
+                    set -- "$root/bin/zmem" install --replace --config "$root/config/zmem/zmem.conf"
+                else
+                    set -- /usr/local/bin/zmem rollback
+                fi
+                if [ "$(id -u)" -eq 0 ]; then exec "$@"; fi
+                command -v sudo >/dev/null 2>&1 || { printf 'sudo is required for system memory setup\n' >&2; exit 1; }
+                exec sudo -- "$@" ;;
+            *) exec "$root/bin/zmem" "$action" "$@" ;;
+        esac ;;
     ssmcp) exec "$root/bin/ssmcp" "$@" ;;
     config) exec sh "$root/bin/omztty-config" "$@" ;;
     env|path|rc) exec zsh -df "$root/bin/omztty-manage" "$cmd" "$@" ;;
@@ -101,7 +119,7 @@ case "$cmd" in
         for tool in zsh git; do
             if command -v "$tool" >/dev/null 2>&1; then printf 'ok   system %s\n' "$tool"; else printf 'miss system %s\n' "$tool"; failed=1; fi
         done
-        for tool in ztty ssmcp zdot zfetch; do
+        for tool in ztty ssmcp zdot zfetch zmem; do
             if version_output=$("$root/bin/$tool" --version 2>&1); then
                 printf 'ok   %s\n' "$version_output"
             else
@@ -111,22 +129,33 @@ case "$cmd" in
         done
         if [ -f "$root/components/zshard/zshard.zsh" ]; then printf 'ok   zshard\n'; else printf 'miss zshard\n'; failed=1; fi
         if [ -n "${DISPLAY:-}" ]; then printf 'ok   X11/XWayland display configured\n'; else printf 'info no DISPLAY; shell and AI commands still work\n'; fi
+        if [ "$(uname -s)" = Linux ] && command -v systemctl >/dev/null 2>&1; then
+            if systemctl is-active --quiet zmem.service 2>/dev/null; then
+                printf 'ok   zmem system memory manager active\n'
+            else
+                printf 'info zmem service inactive or unavailable; setup: omztty memory setup\n'
+            fi
+        else
+            printf 'info zmem service requires Linux with systemd\n'
+        fi
         printf 'No connection or background service was started.\n'
         exit "$failed" ;;
     update)
         config_only=0
         with_config=0
         desktop_option=
+        memory_option=
         for option in "$@"; do
             case "$option" in
                 --config-only) config_only=1 ;;
                 --with-config) with_config=1 ;;
                 --desktop|--no-desktop) desktop_option=$option ;;
-                *) printf 'usage: omztty update [--desktop | --no-desktop] [--with-config] | --config-only\n' >&2; exit 2 ;;
+                --memory-manager|--no-memory-manager) memory_option=$option ;;
+                *) printf 'usage: omztty update [--desktop | --no-desktop] [--memory-manager | --no-memory-manager] [--with-config] | --config-only\n' >&2; exit 2 ;;
             esac
         done
         if [ "$config_only" -eq 1 ]; then
-            [ "$with_config" -eq 0 ] && [ -z "$desktop_option" ] || {
+            [ "$with_config" -eq 0 ] && [ -z "$desktop_option" ] && [ -z "$memory_option" ] || {
                 printf '%s\n' '--config-only cannot be combined with suite update options' >&2; exit 2;
             }
             exec zsh -df "$root/bin/omztty-sync" pull
@@ -148,7 +177,8 @@ case "$cmd" in
         base=$(CDPATH= cd -- "$root/../.." && pwd -P)
         [ -f "$base/.owner" ] || { printf 'Update requires an installed suite\n' >&2; exit 1; }
         set --
-        [ -z "$desktop_option" ] || set -- "$desktop_option"
+        [ -z "$desktop_option" ] || set -- "$@" "$desktop_option"
+        [ -z "$memory_option" ] || set -- "$@" "$memory_option"
         XDG_DATA_HOME=$(dirname -- "$base") OMZTTY_BIN_DIR=$(cat "$base/.bin-dir") sh "$tmp/install.sh" "$@" ;;
     uninstall)
         if [ -f "$root/PACKAGE_MANAGER" ]; then

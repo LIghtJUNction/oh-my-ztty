@@ -1,6 +1,6 @@
 # Architecture
 
-oh-my-ztty assembles six independent projects into one versioned Linux environment. Development synchronizes their latest default branches. Git submodules and the schema 2 source lock record the selected revisions; the release bundle contains the executables and shell files needed at runtime.
+oh-my-ztty assembles seven independent projects into one versioned Linux environment. Development synchronizes their latest default branches. Git submodules and the schema 2 source lock record the selected revisions; the release bundle contains the executables and shell files needed at runtime.
 
 ## Runtime
 
@@ -13,6 +13,7 @@ oh-my-ztty assembles six independent projects into one versioned Linux environme
 | zdot | Planning and managing dotfile links; explicit Git sync | For a requested command |
 | zfetch | Native system overview | Only for `omztty info` or `omztty zfetch` |
 | ssmcp | Authenticated MCP workspace connection | After an explicit connection command |
+| zmem | Memory pressure policy, managed background scopes and Swap lifecycle | As the system service enabled by default during installation |
 
 The shell startup path does not download plugins, run zfetch, call an AI provider or launch a suite daemon. Completion initialization is deferred; optional plugins declare how they load. The prompt uses shell state and local files.
 
@@ -26,6 +27,8 @@ zrc supplies Lua for Neovim 0.11+ and each application's native configuration fo
 
 This boundary matters when measuring memory: report the terminal, shell and an active MCP client separately, then state which processes are included in any total.
 
+zmem has a zero-dependency Rust `no_std` policy library and a Linux adapter using the standard library and system tools. Its state and policy are exposed as JSON for AI clients.
+
 ## Installation
 
 Each bundle installs to a version directory below the user's XDG data directory. A `current` link selects the active version. Launchers use the bundled executables, even when an unrelated tool with the same name is already installed.
@@ -36,9 +39,11 @@ The profile and personal additions live under `${XDG_CONFIG_HOME:-$HOME/.config}
 
 Uninstallation restores the adopted `omztty config` profile before removing the runtime. Failed restoration or inconsistent deployment records preserve the installation for recovery. Independent profiles deployed through `omztty dot` keep their separate lifecycle. See [configuration and recovery](configuration.md).
 
-The installer checks the downloaded archive before activating it. The build tool verifies that all six component checkouts are clean and match `dependencies.lock.json`, then compiles ztty, ssmcp, zdot and zfetch using Cargo's `--locked --release` options. ztty enables its Wayland feature; ssmcp's JavaScript helper comes from the same source checkout as its executable. Each native executable's ELF architecture is checked before packaging.
+The installer checks the downloaded archive before activating it. The build tool verifies that all seven component checkouts are clean and match `dependencies.lock.json`, then compiles ztty, ssmcp, zdot, zfetch and zmem using Cargo's `--locked --release` options. ztty enables its Wayland feature; ssmcp's JavaScript helper comes from the same source checkout as its executable. Each native executable's ELF architecture is checked before packaging.
 
 The source lock records each canonical GitHub URL, default branch, observed commit and observation time. A build consumes that recorded snapshot, while `workspace.py sync` fetches current default-branch heads when selecting the next snapshot. Cargo retains its existing target-directory configuration, including shared build outputs. `BUILD.json` records the source commits, branch names and synchronization time included in the archive.
+
+The default installer also enables the independent zmem system service. It copies the executable to `/usr/local/bin/zmem`, preserves existing `/etc/zmem/zmem.conf` policy, and records a recovery path for earlier managers. `--no-memory-manager` skips this setup. Removing the user suite keeps the system service installed; `sudo /usr/local/bin/zmem rollback` remains available.
 
 ## Extension points
 
@@ -54,6 +59,6 @@ The source lock records each canonical GitHub URL, default branch, observed comm
 
 ## Versioning
 
-The suite and its components have independent semantic versions. A suite release is a tested combination, recorded by its Git commit, six gitlinks and source lock. Source synchronization and release publication are separate operations. Normal shell startup uses the installed versions.
+The suite and its components have independent semantic versions. A suite release is a tested combination, recorded by its Git commit, seven gitlinks and source lock. Source synchronization and release publication are separate operations. Normal shell startup uses the installed versions.
 
 Routine checks run locally. Manual validation workflows support another environment when needed. Tag workflows produce release artifacts, and the Pages workflow publishes the static website. Release installation and the installed configuration commands do not require Rust, Python, a build system or a JavaScript application runtime.

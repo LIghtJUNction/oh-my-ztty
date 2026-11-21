@@ -88,6 +88,7 @@ _omztty() {
         'dot:Run zdot' 'zdot:Run zdot' 'zshard:Manage shell plugins'
         'ztty:Run ztty' 'ssmcp:Run ssmcp'
         'info:Show system information' 'zfetch:Run zfetch'
+        'memory:Manage memory and Swap' 'zmem:Run zmem'
         'doctor:Check dependencies' 'version:Show suite version'
         'update:Update a per-user installation' 'uninstall:Remove a per-user installation'
         'help:Show help'
@@ -139,6 +140,17 @@ _omztty() {
                 _arguments '--json[Emit structured information]' '--no-color[Disable color]' \
                     '(-h --help)'{-h,--help}'[Show help]' '(-V --version)'{-V,--version}'[Show version]'
             fi ;;
+        memory|zmem)
+            if [[ $command == memory && CURRENT == 2 ]]; then
+                local -a actions=('status:Show memory status' 'plan:Explain policy decisions'
+                    'doctor:Check memory support' 'schema:Describe AI output' 'run:Start a managed workload'
+                    'setup:Install the system memory manager' 'rollback:Restore previous managers')
+                _describe 'memory action' actions
+            else
+                words[1]=zmem
+                service=zmem
+                _normal
+            fi ;;
         shell) words[1]=zsh; service=zsh; _normal ;;
         zshard|ssmcp) _normal ;;
         ai)
@@ -155,8 +167,10 @@ _omztty() {
             fi ;;
         update) _arguments '(--no-desktop --config-only)--desktop[Enable the desktop entry]' \
             '(--desktop --config-only)--no-desktop[Disable the desktop entry]' \
+            '(--no-memory-manager --config-only)--memory-manager[Enable system memory setup]' \
+            '(--memory-manager --config-only)--no-memory-manager[Skip system memory setup]' \
             '(--config-only)--with-config[Also pull personal configuration]' \
-            '(--desktop --no-desktop --with-config)--config-only[Only pull personal configuration]' ;;
+            '(--desktop --no-desktop --memory-manager --no-memory-manager --with-config)--config-only[Only pull personal configuration]' ;;
         *) return 1 ;;
     esac
 }

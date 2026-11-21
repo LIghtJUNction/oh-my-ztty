@@ -1,6 +1,6 @@
 # Installation
 
-The release bundle includes ztty, zshard, zrc, zdot, zfetch and ssmcp. Installation and configuration commands from a release do not require Rust or Python. Install system zsh 5.9 or newer first.
+The release bundle includes ztty, zshard, zrc, zdot, zfetch, ssmcp and zmem. Installation and configuration commands from a release do not require Rust or Python. Install system zsh 5.9 or newer first.
 
 The suite window runs on X11 or XWayland. The pinned ztty 0.5.2 executable links X11, Xrender, Xft, Fontconfig, Wayland, xkbcommon, FreeType, HarfBuzz, EGL and GLES. These runtime libraries are required even when you select the X11 backend.
 
@@ -44,7 +44,7 @@ sudo pacman -R oh-my-ztty-bin
 
 ## Install a release
 
-The following installer manages a per-user installation.
+The installer manages a per-user terminal suite and, by default, its independent system memory service.
 
 ```sh
 curl -fLO https://github.com/LIghtJUNction/oh-my-ztty/releases/latest/download/install.sh
@@ -60,6 +60,22 @@ The default command directory is `~/.local/bin`. Use `--bin-dir /absolute/path` 
 A new installation creates a desktop entry by default. Use `--no-desktop` to disable it or `--desktop` to enable it. Repeat installations and updates reuse the last successful choice when neither option is supplied. Disabling an existing installation removes only desktop links that still point to this suite; replacement files and foreign links are preserved. Enabling the entry stops if an unrelated file or link already occupies its path.
 
 An unrelated `omztty` executable causes installation to stop. Other existing tools, including ztty and ssmcp, are preserved; `omztty` selects its bundled tools explicitly.
+
+## System memory manager
+
+The release installer enables zmem by default using sudo. zmem adopts existing Swap, installs a root-owned executable at `/usr/local/bin/zmem`, and keeps the system policy in `/etc/zmem/zmem.conf`. Existing configuration is preserved during upgrades.
+
+```sh
+omztty memory status --json --processes
+omztty memory plan --json
+omztty memory run --class background -- cargo build
+```
+
+For a per-user-only install or a machine without systemd, run `sh install.sh --no-memory-manager`. This skips system setup and remembers the choice on subsequent updates. It leaves an existing manager running. `omztty memory setup` enables the bundled zmem immediately; `omztty update --memory-manager` also records the choice for future updates.
+
+Use `omztty memory rollback` to restore the previous managers and configuration. The system service remains installed when the per-user terminal suite is removed; its independent recovery command is `sudo /usr/local/bin/zmem rollback`.
+
+See [memory policy and recovery](../site/content/memory.md) for defaults, workload classes and AI output.
 
 ## Try the environment
 
@@ -124,10 +140,10 @@ Configure an installed AI provider's executable and arguments as the `ZSHARD_AI_
 
 ## Offline installation
 
-Download the archive and its matching `.sha256` file from the same published release. The following example uses the x86_64 archive for [v0.2.6](https://github.com/LIghtJUNction/oh-my-ztty/releases/tag/v0.2.6) once that release is published.
+Download the archive and its matching `.sha256` file from the same published release. The following example uses the x86_64 archive for [v0.2.6](https://github.com/LIghtJUNction/oh-my-ztty/releases/tag/v0.2.7) once that release is published.
 
 ```sh
-sh install.sh --from ./oh-my-ztty-0.2.6-linux-x86_64.tar.gz
+sh install.sh --from ./oh-my-ztty-0.2.7-linux-x86_64.tar.gz
 ```
 
 Use the aarch64 archive on ARM64. An explicit `--sha256 HEX` can replace the sidecar file when the digest has already been obtained from the release record.

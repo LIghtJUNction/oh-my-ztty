@@ -33,6 +33,12 @@
           "description": "Manage environment variables, PATH and zsh snippets from the command line, with clear file locations and Git version history."
         },
         {
+          "slug": "memory",
+          "title": "Memory & Swap",
+          "source": "memory.md",
+          "description": "Use zmem, the default memory manager, inspect pressure and start managed background jobs."
+        },
+        {
           "slug": "plugins",
           "title": "Plugins",
           "source": "plugins.md",

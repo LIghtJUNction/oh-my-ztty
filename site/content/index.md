@@ -4,7 +4,7 @@ oh-my-ztty gives Linux developers a configured zsh shell and a terminal to run i
 
 Use the shell in your current terminal or open the included ztty window. An optional application profile adds matching Neovim and terminal-tool settings, which you can edit as ordinary configuration files.
 
-The current suite release is **0.2.6** once its Linux x86_64 and ARM64 bundles are published. The quick start uses the latest published installer.
+The current suite release is **0.2.7** once its Linux x86_64 and ARM64 bundles are published. The quick start uses the latest published installer.
 
 ## Quick start
 
@@ -18,7 +18,7 @@ sh install.sh
 
 This opens the configured shell in your current terminal. Type `exit` to return to your previous session. Run `~/.local/bin/omztty terminal` to open a new ztty window.
 
-The installer keeps the runtime in your account's data directory. Your login shell stays as it is; adopting application configuration is a separate step. The [installation guide](installation.md) covers dependencies, offline installation and the [Arch Linux package](installation.md#arch-linux-aur).
+The installer keeps the terminal runtime in your account's data directory and enables zmem as the system memory manager using sudo. Use `--no-memory-manager` when system setup is not needed. Your login shell stays as it is; adopting application configuration is a separate step. The [installation guide](installation.md) covers dependencies, offline installation and the [Arch Linux package](installation.md#arch-linux-aur).
 
 ## What you can use
 
@@ -28,6 +28,7 @@ The installer keeps the runtime in your account's data directory. Your login she
 | Edit code | An optional Neovim profile with file search, a shortcut panel, diagnostics and support for installed language servers |
 | Keep a consistent setup | Editable profiles for zsh, ztty, Neovim and everyday terminal tools, with backups when you adopt them |
 | Work with an AI client | Commands to inspect local context, connect the current workspace and put proposed commands into the editing buffer |
+| Manage memory pressure | zmem as the default system manager, with Swap policy, background scopes and JSON status |
 
 Neovim and other applications are installed separately. The suite supplies their configuration. AI connections and provider requests start when you invoke them.
 
@@ -47,18 +48,20 @@ The profile lives under `~/.config/oh-my-ztty/profile` by default. Edit its file
 
 | Component | Its part in the setup |
 | --- | --- |
-| [ztty 0.5.2](https://github.com/LIghtJUNction/ztty/tree/v0.5.2) | Opens terminal windows and runs shell sessions |
+| [ztty](https://github.com/LIghtJUNction/ztty) | Opens terminal windows and runs shell sessions |
 | [zshard](https://github.com/LIghtJUNction/zshard) | Adds the prompt, completion, suggestions, highlighting and plugins to system zsh |
-| [zrc 0.1.2](https://github.com/LIghtJUNction/zrc/tree/v0.1.2) | Supplies native configuration files for the editor and terminal tools |
+| [zrc](https://github.com/LIghtJUNction/zrc) | Supplies native configuration files for the editor and terminal tools |
 | [zdot](https://github.com/LIghtJUNction/zdot) | Links configuration files into place, saves originals and restores them |
-| [zfetch 0.1.1](https://github.com/LIghtJUNction/zfetch/tree/v0.1.1) | Shows system information when you run `omztty info` |
-| [ssmcp 0.10.20](https://github.com/LIghtJUNction/ssmcp/tree/v0.10.20) | Connects an AI client to a workspace on request |
+| [zfetch](https://github.com/LIghtJUNction/zfetch) | Shows system information when you run `omztty info` |
+| [ssmcp](https://github.com/LIghtJUNction/ssmcp) | Connects an AI client to a workspace on request |
+| [zmem](https://github.com/LIghtJUNction/zmem) | Manages system memory pressure and Swap, with an AI-readable interface |
 
-These components are pinned for the 0.2.6 source version. The [release page](https://github.com/LIghtJUNction/oh-my-ztty/releases/latest) provides published bundles and checksums. See [configuration](configuration.md#completion) for completion behavior.
+The source lock records the exact component commits selected for each suite release. The [release page](https://github.com/LIghtJUNction/oh-my-ztty/releases/latest) provides published bundles and checksums. See [configuration](configuration.md#completion) for completion behavior.
 
 ## Next steps
 
 - [Configure the shell and editor](configuration.md).
+- [Manage memory and Swap](memory.md).
 - [Load a shell plugin](plugins.md).
 - [Manage your own dotfile repository](dotfiles.md).
 - [Connect an AI client or provider](ai.md).

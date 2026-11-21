@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-COMPONENTS = ("ztty", "ssmcp", "zshard", "zdot", "zrc", "zfetch")
+COMPONENTS = ("ztty", "ssmcp", "zshard", "zdot", "zrc", "zfetch", "zmem")
 
 def run(*args, cwd=ROOT, capture=False):
     result = subprocess.run(args, cwd=cwd, check=True, text=True,
@@ -325,10 +325,14 @@ def sync(component=None):
 def check(component):
     if component == "zrc":
         run(sys.executable, "scripts/check.py", cwd=directory(component))
+    elif component == "zmem":
+        run("cargo", "test", "--locked", cwd=directory(component))
+        run("cargo", "check", "--locked", "--no-default-features", "--lib",
+            cwd=directory(component))
     elif component:
         run("make", "check", cwd=ROOT if component == "suite" else directory(component))
     else:
-        for name in ("zshard", "zdot", "zrc", "zfetch", "suite"):
+        for name in ("zshard", "zdot", "zrc", "zfetch", "zmem", "suite"):
             check(name)
 
 def main():
@@ -337,7 +341,7 @@ def main():
     show = commands.add_parser("status", help="show exact source pins and local changes")
     show.add_argument("--json", action="store_true")
     validate = commands.add_parser("check", help="run local checks for new components and the suite")
-    validate.add_argument("--component", choices=("suite", "zshard", "zdot", "zrc", "zfetch"))
+    validate.add_argument("--component", choices=("suite", "zshard", "zdot", "zrc", "zfetch", "zmem"))
     update = commands.add_parser("sync", help="fetch current default-branch source for one or all components")
     update.add_argument("component", nargs="?", choices=COMPONENTS)
     args = parser.parse_args()

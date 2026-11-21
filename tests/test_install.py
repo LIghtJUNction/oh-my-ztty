@@ -44,6 +44,7 @@ class Installation(unittest.TestCase):
         for rel in ["install.sh", "uninstall.sh", "bin/omztty", "bin/zshard",
                     "bin/omztty-config", "bin/omztty-manage", "bin/omztty-setup", "bin/omztty-sync",
                     "config/zsh/settings-lib.zsh", "config/zsh/settings.zsh",
+                    "config/zmem/zmem.conf",
                     "config/zsh/.zshrc", "config/zsh/completion-paths.zsh", "config/zsh/ink.zsh", "packaging/oh-my-ztty.svg", "packaging/omztty.1"]:
             out = stage / rel
             out.parent.mkdir(parents=True, exist_ok=True)
@@ -77,6 +78,16 @@ class Installation(unittest.TestCase):
             executable = stage / "bin" / name
             executable.write_text(f"#!/bin/sh\nprintf '{name} fixture\\n'\n")
             executable.chmod(0o755)
+        memory = stage / "bin/zmem"
+        memory.write_text(
+            '#!/bin/sh\n'
+            'if [ "${1:-}" = install ]; then\n'
+            '  printf "%s\\n" "$@" >> "$HOME/memory-setup-args"\n'
+            '  exit "${OMZTTY_TEST_MEMORY_EXIT:-0}"\n'
+            'fi\n'
+            'printf "zmem fixture\\n"\n'
+        )
+        memory.chmod(0o755)
         lines = [f"{sha(p)}  {p.relative_to(stage)}" for p in sorted(stage.rglob("*")) if p.is_file()]
         (stage / "MANIFEST.sha256").write_text("\n".join(lines) + "\n")
         archive = self.work / f"oh-my-ztty-{version}.tar.gz"
@@ -93,11 +104,89 @@ class Installation(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0, result.stdout)
         return result
 
-    def install(self, archive=None, ok=True, desktop=None):
+    def install(self, archive=None, ok=True, desktop=None, memory_manager=False):
         args = ["sh", ROOT / "install.sh", "--from", archive or self.archive]
         if desktop is not None:
             args.append("--desktop" if desktop else "--no-desktop")
+        if memory_manager is not None:
+            args.append("--memory-manager" if memory_manager else "--no-memory-manager")
         return self.run_command(args, ok)
+
+    def memory_privilege_fixture(self):
+        fake = self.work / "memory-tools"
+        fake.mkdir()
+        (fake / "id").write_text('#!/bin/sh\nprintf "1000\\n"\n')
+        (fake / "sudo").write_text(
+            '#!/bin/sh\n'
+            'printf "%s\\n" "$@" >> "$HOME/memory-sudo-args"\n'
+            '[ "$1" != -- ] || shift\n'
+            'exec "$@"\n'
+        )
+        for path in fake.iterdir():
+            path.chmod(0o755)
+        self.env["PATH"] = str(fake) + os.pathsep + self.env["PATH"]
+
+    def test_default_install_sets_up_system_memory_from_verified_release(self):
+        self.memory_privilege_fixture()
+        self.install(memory_manager=None)
+        release = (self.base / "current").resolve()
+        self.assertEqual((self.home / "memory-setup-args").read_text().splitlines(),
+                         ["install", "--replace", "--config", str(release / "config/zmem/zmem.conf")])
+        self.assertEqual((self.home / "memory-sudo-args").read_text().splitlines(),
+                         ["--", str(release / "bin/zmem"), "install", "--replace",
+                          "--config", str(release / "config/zmem/zmem.conf")])
+        self.assertEqual((self.base / ".memory-manager-enabled").read_text(), "1\n")
+        self.assertEqual((self.bindir / "zmem").resolve(), release / "bin/zmem")
+
+    def test_memory_skip_is_remembered_and_can_be_enabled(self):
+        self.memory_privilege_fixture()
+        self.install()
+        self.install(memory_manager=None)
+        self.assertFalse((self.home / "memory-setup-args").exists())
+        self.assertFalse((self.home / "memory-sudo-args").exists())
+        self.assertEqual((self.base / ".memory-manager-enabled").read_text(), "0\n")
+        self.install(memory_manager=True)
+        self.assertTrue((self.home / "memory-setup-args").exists())
+        self.assertEqual((self.base / ".memory-manager-enabled").read_text(), "1\n")
+
+    def test_failed_memory_setup_preserves_active_release_and_choice(self):
+        self.memory_privilege_fixture()
+        self.install()
+        previous = (self.base / "current").resolve()
+        self.env["OMZTTY_TEST_MEMORY_EXIT"] = "9"
+        result = self.install(self.bundle("0.1.1"), memory_manager=True, ok=False)
+        self.assertIn("zmem setup failed", result.stderr)
+        self.assertEqual((self.base / "current").resolve(), previous)
+        self.assertEqual((self.base / ".memory-manager-enabled").read_text(), "0\n")
+
+    def test_memory_preference_symlink_is_rejected_without_privilege(self):
+        self.memory_privilege_fixture()
+        self.install()
+        preference = self.base / ".memory-manager-enabled"
+        preference.unlink()
+        foreign = self.home / "foreign-memory-choice"
+        foreign.write_text("1\n")
+        preference.symlink_to(foreign)
+        result = self.install(memory_manager=None, ok=False)
+        self.assertIn("memory preference is not a regular file", result.stderr)
+        self.assertFalse((self.home / "memory-sudo-args").exists())
+        self.assertEqual(foreign.read_text(), "1\n")
+
+    def test_update_preserves_memory_skip(self):
+        self.memory_privilege_fixture()
+        self.install()
+        self.serve_update("0.1.1", self.bundle("0.1.1"))
+        self.cli("update")
+        self.assertFalse((self.home / "memory-sudo-args").exists())
+        self.assertEqual((self.base / ".memory-manager-enabled").read_text(), "0\n")
+
+    def test_update_can_enable_memory_manager(self):
+        self.memory_privilege_fixture()
+        self.install()
+        self.serve_update("0.1.1", self.bundle("0.1.1"))
+        self.cli("update", "--memory-manager")
+        self.assertTrue((self.home / "memory-sudo-args").exists())
+        self.assertEqual((self.base / ".memory-manager-enabled").read_text(), "1\n")
 
     def serve_update(self, version, archive):
         """Serve only the expected release URLs through a local curl stub."""

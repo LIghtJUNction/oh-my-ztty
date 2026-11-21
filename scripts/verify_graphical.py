@@ -123,7 +123,7 @@ def main():
         run(["git", "-C", demo, "-c", "user.name=oh-my-ztty", "-c", "user.email=preview@example.invalid", "-c", "commit.gpgsign=false", "commit", "--quiet", "--allow-empty", "-m", "Preview workspace"], env)
         if shutil.which("fc-match"):
             report["preset"]["resolved_font_family"] = run(["fc-match", "--format", "%{family}", preset["font"]], env).stdout
-        run(["sh", ROOT / "install.sh", "--from", archive], env)
+        run(["sh", ROOT / "install.sh", "--from", archive, "--no-memory-manager"], env)
         cli = home / ".local/bin/omztty"
         release_id = cli.resolve().parents[1].name
         cache_dir = home / ".cache/oh-my-ztty/zshard" / release_id

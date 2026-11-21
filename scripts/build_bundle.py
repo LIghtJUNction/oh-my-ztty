@@ -16,8 +16,8 @@ import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
 ARCHES = {"x86_64": 62, "aarch64": 183}
-COMPONENTS = ("ztty", "ssmcp", "zshard", "zdot", "zrc", "zfetch")
-BINARIES = ("ztty", "ssmcp", "zdot", "zfetch")
+COMPONENTS = ("ztty", "ssmcp", "zshard", "zdot", "zrc", "zfetch", "zmem")
+BINARIES = ("ztty", "ssmcp", "zdot", "zfetch", "zmem")
 
 def run(argv, cwd=ROOT, **kwargs):
     return subprocess.check_output(argv, cwd=cwd, text=True, **kwargs).strip()
@@ -37,7 +37,7 @@ def verify_sources(lock):
         raise RuntimeError("Run workspace.py sync to create the default-branch source lock")
     components = lock.get("components")
     if not isinstance(components, dict) or set(components) != set(COMPONENTS):
-        raise RuntimeError("The source lock must contain all six suite components")
+        raise RuntimeError("The source lock must contain all seven suite components")
     if not isinstance(lock.get("updated_at"), str) or not lock["updated_at"]:
         raise RuntimeError("The source lock has no synchronization time")
     sources = {}

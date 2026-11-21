@@ -16,3 +16,6 @@
 [submodule "components/zfetch"]
 	path = components/zfetch
 	url = https://github.com/LIghtJUNction/zfetch.git
+[submodule "components/zmem"]
+	path = components/zmem
+	url = https://github.com/LIghtJUNction/zmem.git

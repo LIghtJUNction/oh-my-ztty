@@ -110,8 +110,8 @@ class BundleTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "workspace.py sync"):
             BUNDLE.verify_sources({"schema": 1, "components": {}})
 
-    def test_source_lock_requires_all_six_components(self):
-        with self.assertRaisesRegex(RuntimeError, "all six"):
+    def test_source_lock_requires_all_seven_components(self):
+        with self.assertRaisesRegex(RuntimeError, "all seven"):
             BUNDLE.verify_sources({"schema": 2, "components": {"ztty": {}}})
 
     def test_verifies_exact_clean_source_heads(self):

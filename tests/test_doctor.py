@@ -20,7 +20,7 @@ class DoctorDiagnosticsTest(unittest.TestCase):
             component.mkdir(parents=True)
             (component / "zshard.zsh").touch()
             error = "ztty: error while loading shared libraries: libwayland-client.so.0: cannot open shared object file"
-            for name in ("ztty", "ssmcp", "zdot", "zfetch", "zsh", "git"):
+            for name in ("ztty", "ssmcp", "zdot", "zfetch", "zmem", "zsh", "git"):
                 program = bindir / name
                 if name == "ztty":
                     program.write_text("#!/bin/sh\nprintf '%s\\n' '" + error + "' >&2\nexit 127\n")

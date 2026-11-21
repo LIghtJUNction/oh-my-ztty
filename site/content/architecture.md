@@ -1,6 +1,6 @@
 # Architecture
 
-The suite packages six independently maintained tools around system zsh. This page explains which process does each job, where configuration lives and how a release records the versions it uses.
+The suite packages seven independently maintained tools around system zsh. This page explains which process does each job, where configuration lives and how a release records the versions it uses.
 
 ## Process boundaries
 
@@ -13,6 +13,7 @@ The suite packages six independently maintained tools around system zsh. This pa
 | zdot | Dotfile planning, links and explicit Git sync | For a requested command |
 | zfetch | Native system overview | Only for `omztty info` or `omztty zfetch` |
 | ssmcp | Authenticated MCP workspace connection | After an explicit connection command |
+| zmem | Memory pressure policy, managed background scopes and Swap lifecycle | As the system service enabled by default during installation |
 
 The ztty broker supports detached sessions that can outlive a window. Opening `omztty shell` alone does not start that broker or an AI process.
 
@@ -32,11 +33,13 @@ Development scripts and build tools are outside the installed native dependency 
 
 ## Source and artifact pins
 
-The [component gitlinks](https://github.com/LIghtJUNction/oh-my-ztty/tree/main/components) record exact source commits for ztty, zshard, zrc, zdot, zfetch and ssmcp. The `.gitmodules` file records their repository locations.
+The [component gitlinks](https://github.com/LIghtJUNction/oh-my-ztty/tree/main/components) record exact source commits for ztty, zshard, zrc, zdot, zfetch, ssmcp and zmem. The `.gitmodules` file records their repository locations.
 
-For ztty and ssmcp, [dependencies.lock.json](https://github.com/LIghtJUNction/oh-my-ztty/blob/main/dependencies.lock.json) also records the published binary digests. Source gitlinks and upstream artifact locks must agree before building the bundle.
+[dependencies.lock.json](https://github.com/LIghtJUNction/oh-my-ztty/blob/main/dependencies.lock.json) records the canonical repository, default branch, exact commit and observation time for every component. Source gitlinks and this source lock must agree before building the bundle.
 
 A release includes a build record and `MANIFEST.sha256`. The installer checks both the downloaded archive and its contents before activation. Versioned archives and their checksums are listed on the [release page](https://github.com/LIghtJUNction/oh-my-ztty/releases).
+
+zmem has a zero-dependency Rust `no_std` policy library and a Linux adapter using the standard library and system tools. Its state and policy are exposed as JSON for AI clients.
 
 ## Installation state
 
@@ -52,6 +55,8 @@ For a per-user installation, uninstallation restores the adopted profile first. 
 
 Before activation, the per-user installer prepares the audited completion cache. Native zsh auditing and input validation remain part of reuse; it is not a bypass of completion security checks.
 
+The default installer also enables the independent zmem system service. It copies the executable to `/usr/local/bin/zmem`, preserves existing `/etc/zmem/zmem.conf` policy, and records a recovery path for earlier managers. `--no-memory-manager` skips this setup. Removing the user suite keeps the system service installed; `sudo /usr/local/bin/zmem rollback` remains available.
+
 ## Extension boundaries
 
 Shell plugins use ordinary zsh files, hooks, standard completion functions and prompt callbacks. A pinned plugin installation and its explicit integrity verification are separate from loading it into a shell.
@@ -66,6 +71,6 @@ Terminal and MCP extensions remain the responsibility of their upstream Project 
 
 ## Versioned combinations
 
-The suite and its components have independent semantic versions. A suite release is a validated combination, identified by its commit and six gitlinks.
+The suite and its components have independent semantic versions. A suite release is a validated combination, identified by its commit and seven gitlinks.
 
 Publish a component change first, then advance the suite pin and validate the assembled result. Normal shell startup uses the installed versions. [Development and release workflow](development.md)

@@ -1,6 +1,6 @@
 # oh-my-ztty
 
-A lean Linux terminal setup built on Project Z: **ztty + zsh + zshard + zrc + zdot + zfetch + ssmcp**.
+A lean Linux terminal setup built on Project Z: **ztty + zsh + zshard + zrc + zdot + zfetch + ssmcp + zmem**.
 
 [Website](https://lightjunction.github.io/oh-my-ztty/) · [中文](README.zh-CN.md) · [Install guide](docs/installation.md) · [Performance](docs/performance.md) · [0.2.1 workstation report](docs/reports/workspace-0.2.1.md)
 
@@ -16,7 +16,7 @@ sh install.sh
 ~/.local/bin/omztty shell
 ```
 
-Linux x86_64 and ARM64. Requires system zsh; the graphical terminal uses X11/fontconfig. The bundle includes the Project Z components and a native application configuration profile. Installation is per user and repeatable. Your login shell and existing tools remain available. Runtime and configuration commands need no Rust or Python.
+Linux x86_64 and ARM64. Requires system zsh; the graphical terminal uses X11/fontconfig. The bundle includes the Project Z components and a native application configuration profile. The terminal suite installs per user. By default, the installer also uses sudo to set up zmem as the system memory manager; use `--no-memory-manager` for a per-user-only install. Installation is repeatable. Your login shell and existing tools remain available. Runtime and configuration commands need no Rust or Python.
 
 ### Arch Linux (AUR)
 
@@ -39,8 +39,22 @@ Use your AUR helper to upgrade the system package. Configuration adoption remain
 | [zdot](https://github.com/LIghtJUNction/zdot) | `no_std` dotfiles manager with plans, reversible links and explicit Git sync |
 | [zfetch](https://github.com/LIghtJUNction/zfetch) | On-demand native system overview, zero crate dependencies |
 | [ssmcp](https://github.com/LIghtJUNction/ssmcp) | On-demand MCP workspace connection for AI |
+| [zmem](https://github.com/LIghtJUNction/zmem) | System memory pressure, managed background jobs and adaptive Swap |
 
 Development follows each component's latest default branch. Git submodules and `dependencies.lock.json` record the exact sources selected for a build. The [0.2.6 release record](docs/reports/0.2.6/release.zh-CN.md) describes the already published combination. Your Linux distribution supplies zsh. See the [completion reference](docs/completions.md) for command and version coverage.
+
+## System memory
+
+zmem is the default memory and Swap manager. The installer adopts existing Swap, enables its system service and keeps local policy in `/etc/zmem/zmem.conf`. Subsequent installs preserve that configuration.
+
+```sh
+omztty memory status --json --processes
+omztty memory plan --json
+omztty memory run --class background -- cargo build
+omztty memory rollback
+```
+
+Use `omztty memory setup` to enable the bundled manager later. System setup copies zmem to root-owned `/usr/local/bin/zmem`; the service continues independently of the terminal suite. [Memory policy and recovery](site/content/memory.md) explain defaults, workload classes and skipped setup.
 
 ## Ink preset
 
@@ -97,7 +111,8 @@ One editable profile manages zsh, ztty, Neovim, Kitty, Foot, Ghostty, tmux, fzf,
 omztty terminal        # Open ztty with the suite's zsh configuration
 omztty shell           # Try the shell in your current terminal
 omztty info            # Native system overview
-omztty doctor          # Check binaries and system dependencies
+omztty doctor          # Check binaries, system dependencies and zmem service
+omztty memory          # Inspect memory pressure and Swap
 omztty ai context      # Emit explicit shell context
 omztty ai connect      # Start ssmcp in your workspace
 omztty dot plan --root ~/dotfiles --target "$HOME"  # Preview dotfile changes
@@ -125,7 +140,7 @@ python3 scripts/workspace.py check
 python3 scripts/build_bundle.py
 ```
 
-`sync` fetches all six default branches and records their commits and observation times in the schema 2 source lock. After the first full synchronization, `sync zshard` updates one component. The bundle compiles all four native programs from those sources with Cargo's `--locked` option and respects the configured shared target directory.
+`sync` fetches all seven default branches and records their commits and observation times in the schema 2 source lock. After the first full synchronization, `sync zshard` updates one component. The bundle compiles all five native programs from those sources with Cargo's `--locked` option and respects the configured shared target directory.
 
 [Development and release guide](CONTRIBUTING.md) covers local checks, source updates and explicit version publication. [Architecture](docs/architecture.md) describes the runtime boundaries and extension interfaces.
 

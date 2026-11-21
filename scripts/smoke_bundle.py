@@ -28,7 +28,8 @@ def main():
                 print(result.stderr, end="")
             result.check_returncode()
             return result.stdout
-        install = ["sh", ROOT / "install.sh", "--from", archive]
+        # A bundle smoke runs in a temporary HOME and must not install a host service.
+        install = ["sh", ROOT / "install.sh", "--from", archive, "--no-memory-manager"]
         run(*install)
         current = home / ".local/share/oh-my-ztty/current"
         first_target = current.resolve()
@@ -44,6 +45,9 @@ def main():
         run(cli, "dot", "--help")
         run(cli, "ssmcp", "--help")
         run(cli, "ztty", "--version")
+        run(cli, "memory", "--version")
+        memory = json.loads(run(cli, "memory", "status", "--json"))
+        assert isinstance(memory, dict) and memory.get("schema")
         info = json.loads(run(cli, "info", "--json"))
         assert info["schema"] == "zfetch.system.v1"
         boot_stages = ["firmware", "bootloader", "kernel", "initramfs", "system_manager",

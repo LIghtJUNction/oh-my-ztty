@@ -24,6 +24,7 @@ zfetch 0.1.1 accepts `--json` and `--format` in either order. The last format fl
 | ztty and omztty ztty | ztty 0.5.2 |
 | omztty terminal | ztty 0.5.2 launch options |
 | zfetch | 0.1.1 |
+| zmem and omztty memory | zmem 0.1.0 and suite setup/rollback entrypoints |
 | ssmcp | Client 0.10.20 |
 | codex | codex-cli 0.170.0 |
 | claude | Claude Code 2.1.329 |

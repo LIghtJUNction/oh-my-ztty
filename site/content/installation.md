@@ -10,6 +10,7 @@ The bundle includes the terminal, shell framework and configuration tools. You n
 | --- | --- |
 | Operating system | Linux x86_64 or ARM64 |
 | Shell | System zsh 5.9 or newer |
+| Default memory manager | Linux cgroup v2, systemd, util-linux and administrator access; Btrfs also uses btrfs-progs |
 | Optional editor profile | Neovim 0.11 or newer, installed separately |
 | Private GitHub profile sync | Git and the optional GitHub CLI (`gh`) |
 | Graphical terminal session | X11 or XWayland |
@@ -91,6 +92,22 @@ export PATH="$HOME/.local/bin:$PATH"
 
 An unrelated existing `omztty` executable stops installation. Existing tools with other names are preserved; the `omztty` launcher selects its bundled components explicitly.
 
+## System memory manager
+
+The release installer enables zmem by default using sudo. zmem adopts existing Swap, installs a root-owned executable at `/usr/local/bin/zmem`, and keeps the system policy in `/etc/zmem/zmem.conf`. Existing configuration is preserved during upgrades.
+
+```sh
+omztty memory status --json --processes
+omztty memory plan --json
+omztty memory run --class background -- cargo build
+```
+
+For a per-user-only install or a machine without systemd, run `sh install.sh --no-memory-manager`. This skips system setup and remembers the choice on subsequent updates. It leaves an existing manager running. `omztty memory setup` enables the bundled zmem immediately; `omztty update --memory-manager` also records the choice for future updates.
+
+Use `omztty memory rollback` to restore the previous managers and configuration. The system service remains installed when the per-user terminal suite is removed; its independent recovery command is `sudo /usr/local/bin/zmem rollback`.
+
+See [memory policy and recovery](memory.md) for defaults, workload classes and AI output.
+
 ## Start the environment
 
 Open a configured zsh session in your current terminal:
@@ -170,10 +187,10 @@ Personal shell configuration belongs outside the release directory. See [configu
 
 ## Offline installation
 
-Download an archive and its matching `.sha256` file from the same published release. The following example uses the x86_64 archive for [v0.2.6](https://github.com/LIghtJUNction/oh-my-ztty/releases/tag/v0.2.6) once that release is published.
+Download an archive and its matching `.sha256` file from the same published release. The following example uses the x86_64 archive for [v0.2.6](https://github.com/LIghtJUNction/oh-my-ztty/releases/tag/v0.2.7) once that release is published.
 
 ```sh
-sh install.sh --from ./oh-my-ztty-0.2.6-linux-x86_64.tar.gz
+sh install.sh --from ./oh-my-ztty-0.2.7-linux-x86_64.tar.gz
 ```
 
 Use the aarch64 archive on ARM64. If you have already obtained the digest from the release record, the installer's `--sha256` option can supply it instead of a sidecar file.

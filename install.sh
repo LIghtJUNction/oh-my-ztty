@@ -1,20 +1,24 @@
 #!/bin/sh
-# Per-user release installation; never changes the login shell.
+# Per-user suite with a separately installed system zmem service.
 set -eu
-VERSION=0.2.6
+VERSION=0.2.7
 die() { printf 'oh-my-ztty: %s\n' "$*" >&2; exit 1; }
 usage() {
     cat <<'EOF'
 Usage: sh install.sh [--version X.Y.Z] [--from ARCHIVE] [--sha256 HEX]
                      [--bin-dir DIR] [--desktop | --no-desktop]
+                     [--memory-manager | --no-memory-manager]
 Installs into $XDG_DATA_HOME/oh-my-ztty (default ~/.local/share).
 Commands go in ~/.local/bin; existing ztty/ssmcp/zdot commands are preserved.
 --from requires a .sha256 sidecar or an explicit --sha256.
 Desktop entry preference is remembered; --desktop enables it, --no-desktop disables it.
+zmem is the default system memory manager; its setup uses sudo and replaces old managers.
+--no-memory-manager skips system setup and remembers that choice for later updates.
+--memory-manager enables setup again. Existing /etc/zmem/zmem.conf edits are preserved.
 Run omztty shell or omztty terminal. Your login shell and .zshrc stay yours.
 EOF
 }
-archive= expected= desktop=
+archive= expected= desktop= memory_manager=
 bindir=${OMZTTY_BIN_DIR:-"$HOME/.local/bin"}
 while [ "$#" -gt 0 ]; do
     case "$1" in
@@ -29,6 +33,8 @@ while [ "$#" -gt 0 ]; do
             shift 2 ;;
         --desktop) desktop=1; shift ;;
         --no-desktop) desktop=0; shift ;;
+        --memory-manager) memory_manager=1; shift ;;
+        --no-memory-manager) memory_manager=0; shift ;;
         -h|--help) usage; exit 0 ;;
         *) die "unknown option: $1" ;;
     esac
@@ -71,6 +77,17 @@ if [ -z "$desktop" ]; then
         desktop=1
     fi
 fi
+memory_preference="$base/.memory-manager-enabled"
+saved_memory=
+if [ -e "$memory_preference" ] || [ -L "$memory_preference" ]; then
+    [ -f "$memory_preference" ] && [ ! -L "$memory_preference" ] || die "memory preference is not a regular file"
+    saved_memory=$(cat "$memory_preference")
+    case "$saved_memory" in 0|1) ;; *) die "memory preference must be 0 or 1" ;; esac
+fi
+if [ -z "$memory_manager" ]; then memory_manager=${saved_memory:-1}; fi
+if [ "$memory_manager" = 1 ] && [ "$(id -u)" -ne 0 ]; then
+    command -v sudo >/dev/null 2>&1 || die "sudo is required for zmem setup; use --no-memory-manager for a per-user-only install"
+fi
 desktop_path="$datahome/applications/oh-my-ztty.desktop"
 recorded_desktop=
 if [ "$desktop" = 0 ] && [ -f "$base/.desktop-path" ]; then
@@ -87,10 +104,12 @@ fi
 tmp=$(mktemp -d "${TMPDIR:-/tmp}/oh-my-ztty.XXXXXXXX")
 stage=
 preference_tmp=
+memory_preference_tmp=
 cleanup() {
     rm -rf -- "$tmp"
     [ -z "$stage" ] || rm -rf -- "$stage"
     [ -z "$preference_tmp" ] || rm -f -- "$preference_tmp"
+    [ -z "$memory_preference_tmp" ] || rm -f -- "$memory_preference_tmp"
     [ ! -d "$base" ] || rm -f -- "$base/.current.$$"
 }
 trap cleanup EXIT
@@ -131,8 +150,9 @@ payload="$tmp/oh-my-ztty"
 installed_version=$(cat "$payload/VERSION")
 valid_version "$installed_version" || die "bundle version is invalid"
 [ "$(cat "$payload/PLATFORM")" = "linux-$arch" ] || die "bundle architecture does not match this machine"
-for exe in omztty ztty ssmcp zdot zshard zfetch; do [ -x "$payload/bin/$exe" ] || die "bundle missing executable: $exe"; done
+for exe in omztty ztty ssmcp zdot zshard zfetch zmem; do [ -x "$payload/bin/$exe" ] || die "bundle missing executable: $exe"; done
 [ -f "$payload/components/zshard/zshard.zsh" ] || die "bundle missing zshard"
+[ -f "$payload/config/zmem/zmem.conf" ] || die "bundle missing zmem configuration"
 release_id="$installed_version-linux-$arch"
 release="$base/releases/$release_id"
 mkdir -p -- "$base/releases" "$bindir"
@@ -163,12 +183,22 @@ ZSHARD_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/oh-my-ztty/zshard/$release_id"
         typeset -g ZSHARD_HOME="$OMZTTY_ROOT/components/zshard"
         source "$ZSHARD_HOME/zshard.zsh" && zshard complete
     ' || die "completion cache preparation failed; active version was not changed"
+if [ "$memory_manager" = 1 ]; then
+    printf 'Setting up zmem as the system memory manager.\n'
+    if [ "$(id -u)" -eq 0 ]; then
+        "$release/bin/zmem" install --replace --config "$release/config/zmem/zmem.conf" ||
+            die "zmem setup failed; active suite version was not changed"
+    else
+        sudo -- "$release/bin/zmem" install --replace --config "$release/config/zmem/zmem.conf" ||
+            die "zmem setup failed; active suite version was not changed"
+    fi
+fi
 if [ ! -L "$base/current" ] || [ "$(readlink "$base/current")" != "releases/$release_id" ]; then
     [ ! -e "$base/current" ] || [ -L "$base/current" ] || die "current path is not a managed link"
     ln -s "releases/$release_id" "$base/.current.$$"
     mv -Tf -- "$base/.current.$$" "$base/current"
 fi
-for exe in omztty ztty ssmcp zdot zshard zfetch; do
+for exe in omztty ztty ssmcp zdot zshard zfetch zmem; do
     target="$base/current/bin/$exe"
     if [ -e "$bindir/$exe" ] || [ -L "$bindir/$exe" ]; then
         if [ -L "$bindir/$exe" ] && [ "$(readlink "$bindir/$exe")" = "$target" ]; then :; else
@@ -213,5 +243,14 @@ if [ "$saved_desktop" != "$desktop" ]; then
     mv -Tf -- "$preference_tmp" "$desktop_preference"
     preference_tmp=
 fi
+if [ "$saved_memory" != "$memory_manager" ]; then
+    memory_preference_tmp=$(mktemp "$base/.memory-manager-enabled.XXXXXXXX")
+    printf '%s\n' "$memory_manager" > "$memory_preference_tmp"
+    mv -Tf -- "$memory_preference_tmp" "$memory_preference"
+    memory_preference_tmp=
+fi
 printf 'Installed oh-my-ztty %s\nRun: %s shell\nOpen a window: %s terminal\nUninstall: %s uninstall\n' "$installed_version" "$bindir/omztty" "$bindir/omztty" "$bindir/omztty"
+if [ "$memory_manager" = 1 ]; then
+    printf 'Memory: %s memory status\nRestore previous managers: %s memory rollback\n' "$bindir/omztty" "$bindir/omztty"
+fi
 case ":$PATH:" in *":$bindir:"*) ;; *) printf 'Add %s to PATH to use the short command names.\n' "$bindir" ;; esac

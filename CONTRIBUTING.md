@@ -1,6 +1,6 @@
 # Development and releases
 
-The suite develops against the latest default branch of six independent repositories. Each synchronization records the observed source commits; a release builds that recorded combination.
+The suite develops against the latest default branch of seven independent repositories. Each synchronization records the observed source commits; a release builds that recorded combination.
 
 ## Start
 
@@ -14,7 +14,7 @@ python3 scripts/workspace.py check
 
 Development uses Git, Python 3, make, zsh and a current Rust toolchain. Installation from a release does not require Rust or Python. Run checks locally after changing the relevant component. Manual validation workflows are available; routine pushes do not run a duplicate test matrix.
 
-`workspace.py check` runs the zshard, zdot, zrc and zfetch checks, followed by the suite's installer and integration tests. Use `--component suite` for the suite checks alone. Full ztty and ssmcp test suites remain in their component repositories; the bundle build compiles their actual programs for integration verification.
+`workspace.py check` runs the zshard, zdot, zrc, zfetch and zmem checks, followed by the suite's installer and integration tests. Use `--component suite` for the suite checks alone. Full ztty and ssmcp test suites remain in their component repositories; the bundle build compiles their actual programs for integration verification.
 
 ## Change one component
 
@@ -40,7 +40,7 @@ git commit -m "Synchronize suite component sources"
 git push
 ```
 
-With no component argument, `sync` fetches all six repositories' current default-branch heads and updates their recursive submodules. `dependencies.lock.json` uses schema 2 and records each canonical GitHub URL, branch, commit and observation time. The lock is replaced after all selected source updates succeed.
+With no component argument, `sync` fetches all seven repositories' current default-branch heads and updates their recursive submodules. `dependencies.lock.json` uses schema 2 and records each canonical GitHub URL, branch, commit and observation time. The lock is replaced after all selected source updates succeed.
 
 To update one component after the source lock has been created:
 
@@ -61,7 +61,7 @@ python3 scripts/build_bundle.py
 python3 scripts/smoke_bundle.py "dist/oh-my-ztty-$(cat VERSION)-linux-$(uname -m).tar.gz"
 ```
 
-The build verifies all six source checkouts and every nested submodule against their recorded commits. It rejects uninitialized submodules and uncommitted files even when nested Git ignore settings hide them from the parent repository. It then compiles ztty, ssmcp, zdot and zfetch with `cargo build --locked --release`. ztty enables its Wayland feature; ssmcp's JavaScript helper and all component licenses come from the same source checkouts. The build records source commits, default branches and the lock's synchronization time in `BUILD.json`.
+The build verifies all seven source checkouts and every nested submodule against their recorded commits. It rejects uninitialized submodules and uncommitted files even when nested Git ignore settings hide them from the parent repository. It then compiles ztty, ssmcp, zdot, zfetch and zmem with `cargo build --locked --release`. ztty enables its Wayland feature; ssmcp's JavaScript helper and all component licenses come from the same source checkouts. The build records source commits, default branches and the lock's synchronization time in `BUILD.json`.
 
 Cargo uses the existing user configuration and `CARGO_TARGET_DIR`, including a shared target directory when configured. Native builds reuse Cargo's normal release outputs. `--arch aarch64` or `--arch x86_64` selects the bundle architecture; a different host architecture requires the corresponding Rust target, linker and system libraries. Each executable's ELF architecture is checked before packaging.
 
@@ -87,7 +87,7 @@ Tag workflows publish versioned artifacts. Synchronize component sources, valida
 
 ## Release record
 
-A release needs its exact source lock, six gitlinks, successful local tests, archive checksums and an installation lifecycle check. Exercise install twice, start the preset shell, run the native tools and both boot-report entrypoints, and uninstall in a temporary home. The graphical check also executes the boot report in the preset shell and captures its terminal output. Keep pre-existing commands and unrelated files in that test.
+A release needs its exact source lock, seven gitlinks, successful local tests, archive checksums and an installation lifecycle check. Use `--no-memory-manager` for temporary-home bundle tests; system adoption has its own zmem acceptance gate. Exercise install twice, start the preset shell, run the native tools and both boot-report entrypoints, and uninstall in a temporary home. The graphical check also executes the boot report in the preset shell and captures its terminal output. Keep pre-existing commands and unrelated files in that test.
 
 Record benchmarks with source revisions, OS and CPU, warm-up policy, samples and units. Report shell startup separately from first completion and terminal memory. Keep text measurements and artifact links in `docs/reports/`; store generated screenshots and release archives outside Git.
 

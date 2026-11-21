@@ -26,7 +26,7 @@ Status reads local repository state and makes no network request.
 python3 scripts/workspace.py check
 ```
 
-This runs the zshard, zdot, zrc and zfetch checks, then the suite's installer and integration tests. Use `--component suite` for the suite checks alone. Full ztty and ssmcp test suites remain in their own repositories; the bundle build compiles their programs and subsequent smoke tests exercise the integration.
+This runs the zshard, zdot, zrc, zfetch and zmem checks, then the suite's installer and integration tests. Use `--component suite` for the suite checks alone. Full ztty and ssmcp test suites remain in their own repositories; the bundle build compiles their programs and subsequent smoke tests exercise the integration.
 
 Run the relevant checks locally after a change. Manual validation workflows are available. Routine code pushes and pull requests do not start a duplicate daily test matrix.
 
@@ -45,7 +45,7 @@ Commit component changes and merge them into the repository's default branch bef
 
 ## Synchronize default branches
 
-Synchronize the current default-branch heads of all six components:
+Synchronize the current default-branch heads of all seven components:
 
 ```sh
 python3 scripts/workspace.py sync
@@ -79,7 +79,7 @@ python3 scripts/build_bundle.py
 python3 scripts/smoke_bundle.py "dist/oh-my-ztty-$(cat VERSION)-linux-$(uname -m).tar.gz"
 ```
 
-The build requires all six checkouts to be clean and match schema 2's recorded commits. It compiles ztty, ssmcp, zdot and zfetch with Cargo's `--locked --release` options. The ztty build enables Wayland, and ssmcp's JavaScript helper is copied from its matching source checkout. `BUILD.json` records the component commits, branch names and source-lock synchronization time.
+The build requires all seven checkouts to be clean and match schema 2's recorded commits. It compiles ztty, ssmcp, zdot, zfetch and zmem with Cargo's `--locked --release` options. The ztty build enables Wayland, and ssmcp's JavaScript helper is copied from its matching source checkout. `BUILD.json` records the component commits, branch names and source-lock synchronization time.
 
 Cargo discovers executable paths through its build output and respects the user's configured target directory, including shared output caches. Native builds use normal release outputs. A different `--arch` selects a cross target and requires its Rust standard library, linker and system development libraries. The resulting executable architecture is checked before packaging.
 
@@ -105,9 +105,9 @@ Synchronize component sources, validate the assembled bundle, then bump oh-my-zt
 
 ## Release evidence
 
-A release record should identify the source lock, six gitlinks, archive checksums, local check results and a full installation lifecycle. Store text measurements and artifact links in Git; keep generated screenshots and release archives in the artifact destination.
+A release record should identify the source lock, seven gitlinks, archive checksums, local check results and a full installation lifecycle. Store text measurements and artifact links in Git; keep generated screenshots and release archives in the artifact destination.
 
-Install twice in an isolated home, exercise the actual shell and bundled programs, then uninstall. Include pre-existing files so preservation checks test real data. Keep startup, first completion, live memory and active AI sessions as distinct measurement scopes.
+Use `--no-memory-manager` when testing in an isolated home so bundle tests leave the host services alone. Validate system adoption separately through zmem. Install twice in that home, exercise the actual shell and bundled programs, then uninstall. Include pre-existing files so preservation checks test real data. Keep startup, first completion, live memory and active AI sessions as distinct measurement scopes.
 
 The [0.1.1 report](https://github.com/LIghtJUNction/oh-my-ztty/blob/main/docs/reports/release-0.1.1.md) shows the evidence format. The [formal workflow](https://github.com/LIghtJUNction/oh-my-ztty/actions/runs/44609624654) and [public download audit](https://github.com/LIghtJUNction/oh-my-ztty/blob/main/docs/reports/public-release-0.1.1.json) verify the published result.
 
