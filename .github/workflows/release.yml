@@ -40,7 +40,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential pkg-config zsh xvfb xdotool imagemagick fonts-dejavu-core \
             libx11-dev libxft-dev libxrender-dev libfontconfig1-dev \
-            libwayland-dev libxkbcommon-dev libfreetype-dev libharfbuzz-dev \
+            libwayland-dev libwayland-bin wayland-protocols libxkbcommon-dev libfreetype-dev libharfbuzz-dev \
             libegl1-mesa-dev libgles2-mesa-dev libgcc-s1
           rustup toolchain install 1.100.0 --profile minimal
           rustup default 1.100.0
