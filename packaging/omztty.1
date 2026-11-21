@@ -7,7 +7,10 @@ omztty \- a lean Project Z terminal workspace
 .RI [ ARGS... ]
 .SH DESCRIPTION
 Launches a preset zsh environment in the current terminal or bundled ztty.
-The suite includes zshard, zdot and ssmcp. No service is started implicitly.
+Manage environment variables, PATH, zsh snippets and application profiles from
+one command. Shared configuration lives in the editable profile. A profile with
+its own Git repository records managed shared shell changes as local commits;
+push is explicit. Machine-specific values remain local.
 .SH COMMANDS
 .TP
 .B shell
@@ -16,11 +19,133 @@ Run zsh with the suite configuration. Additional arguments are passed to zsh.
 .B terminal
 Open ztty running the suite shell. Additional arguments are ztty options.
 .TP
+.B setup [\-\-local | \-\-repo NAME | \-\-from OWNER/NAME] [\-\-yes] [\-\-install-rc]
+Guide local configuration and optional private GitHub profile synchronization.
+The interactive wizard asks before connecting the normal zsh startup file or
+creating a remote repository. Remote setup uses the current GitHub CLI account.
+\-\-local initializes local configuration; \-\-repo creates a private repository;
+\-\-from restores an existing private repository into an absent profile location.
+\-\-install-rc explicitly installs the zsh loader block. \-\-yes requires an
+explicit local, create or restore choice.
+.TP
+.B env list [\-\-show]
+List saved variable names and scopes. Values are hidden unless requested.
+.TP
+.B env set NAME VALUE [\-\-shared]
+Save a machine-specific environment value. \-\-shared saves it in the profile.
+Local values take priority over shared values with the same name.
+.TP
+.B env get NAME
+Print the saved value explicitly.
+.TP
+.B env unset NAME [\-\-shared]
+Remove the saved definition in the selected scope.
+.TP
+.B env file [\-\-shared]
+Print the environment file's actual location.
+.TP
+.B env edit [\-\-shared]
+Open the environment file with the configured editor.
+.TP
+.B path list [\-\-effective]
+List saved PATH rules, or inspect the PATH inherited by this command.
+.TP
+.B path add DIR [\-\-prepend | \-\-append]
+Save a directory rule. Prepending is the default; appending places it after the
+inherited PATH. Paths under HOME are stored in portable form. Quote spaces.
+.TP
+.B path remove DIR
+Remove a saved rule. The same directory may still be supplied by another source.
+.TP
+.B path move DIR first|last
+Move a saved directory to the first or last position.
+.TP
+.B path file
+Print the PATH rules file's actual location.
+.TP
+.B path edit
+Open the PATH rules file with the configured editor.
+.TP
+.B rc init
+Prepare the standard profile and shell configuration layout.
+.TP
+.B rc status
+Print the rc entry, shared and local configuration paths, active history mode
+and an explicit reload command for the current zsh.
+.TP
+.B rc list
+List saved zsh snippets and their enabled state.
+.TP
+.B rc add NAME [\-\-from FILE]
+Create a snippet or import an existing zsh file.
+.TP
+.B rc edit NAME
+Edit a snippet with the configured editor.
+.TP
+.B rc show NAME
+Print a snippet's contents.
+.TP
+.B rc enable NAME | rc disable NAME | rc remove NAME
+Enable, disable or remove a saved snippet.
+.TP
+.B rc check
+Check saved shell configuration and snippet syntax without executing snippets.
+.TP
+.B rc file [NAME]
+Print the snippet directory or a named snippet's path.
+.TP
+.B rc install [\-\-dry-run]
+Add the managed loader block to ZDOTDIR/.zshrc, or HOME/.zshrc when ZDOTDIR is
+unset. Preserve the existing startup code. Repeated installation keeps one block.
+.TP
+.B rc uninstall [\-\-dry-run]
+Remove the managed loader block while retaining saved configuration.
+.TP
+.B rc backups
+List local file snapshots when the profile has no Git repository. With profile
+Git enabled, direct the user to sync history. New snapshots stop in Git mode.
+.TP
+.B rc restore BACKUP_ID
+Restore a selected local file snapshot before Git is enabled, preserving the
+current file first. An absence record removes the file created after that
+record. With profile Git enabled, use sync restore instead.
+.TP
+.B config
+Manage the application profile through zdot. Actions include init, plan, apply,
+status, remove, refresh, audit and path. Apply accepts \-\-backup to preserve
+existing configurations. Refresh updates unchanged shipped defaults.
+.TP
+.B sync init
+Initialize an independent Git repository in the existing profile and record its
+initial configuration, without creating a remote or pushing. Git becomes the
+history for managed shared shell changes, and new local file snapshots stop. Use setup for guided private GitHub creation or
+restoration. Configure Git user.name and user.email for local commits.
+.TP
+.B sync status|pull|push
+Inspect or synchronize the standard profile repository. Status is local.
+Pull requires a clean tree and only fast-forwards. Managed shared shell edits
+already have local commits; push also commits remaining allowed changes,
+including manual edits, and uploads them to the verified private repository.
+Only allowed text configuration is synchronized. Configuration is not executed
+or deployed by a sync operation. config sync is an alias.
+.TP
+.B sync history
+Show the latest 20 local commits with short identifiers, dates and subjects.
+No network operation is performed.
+.TP
+.B sync restore REV [PATH]
+Restore shared shell configuration from REV, or one allowed file named by its
+path relative to the profile. Without PATH the scope is shell/, including
+shared environment values, PATH rules and rc snippets. A clean working tree
+is required. Validate the selected configuration and record the restoration
+as a new local commit, without a backup or push. A currently tracked file
+absent from REV is removed when explicitly selected.
+.TP
 .B ai
 Connect the current directory using bundled ssmcp.
 .TP
 .B dot
-Run bundled zdot.
+Run bundled zdot for independently managed deployments.
 .TP
 .B zshard
 Manage shell plugins.
@@ -28,27 +153,81 @@ Manage shell plugins.
 .B doctor
 Check system and bundled components without connecting to a remote service.
 .TP
-.B update [\-\-desktop | \-\-no-desktop]
-Install the latest published release, verifying its checksum.
+.B update [\-\-desktop | \-\-no-desktop] [\-\-with-config]
+Install the latest published per-user release, verifying its checksum.
+\-\-with-config also pulls the configured profile repository.
 The saved desktop entry choice is preserved unless explicitly changed.
 \-\-desktop enables the managed entry; \-\-no-desktop removes only a link
 that still points to this suite. Foreign files and links are preserved.
 The preference is saved only after installation succeeds.
 .TP
+.B update \-\-config-only
+Pull the configured profile repository without replacing the suite runtime.
+.TP
 .B uninstall
 Remove suite-owned runtime files and links. Preserve user configuration and history.
+.SH EXAMPLES
+.nf
+omztty setup \-\-local
+omztty env set EDITOR nvim \-\-shared
+omztty path add "$HOME/.local/bin"
+omztty rc add aliases
+omztty rc edit aliases
+omztty rc check
+omztty rc install \-\-dry-run
+omztty rc install
+omztty shell
+.fi
+.PP
+New shell sessions load saved changes. To reload from an existing suite shell:
+.nf
+source "$OMZTTY_ROOT/config/zsh/settings.zsh"
+.fi
+.PP
+Reloading also runs enabled rc snippets again. A command cannot modify the
+parent shell's environment; use a fresh shell to check removed settings.
 .SH FILES
+The following paths use the default XDG roots. env file, path file, rc file and
+config path print the configured locations.
+.TP
+.I ~/.config/oh-my-ztty/profile/
+Editable profile repository, application configuration and profile.zdot mappings.
+.TP
+.I ~/.config/oh-my-ztty/profile/shell/env.tsv
+Shared environment values, one NAME, tab and literal VALUE per line.
+.TP
+.I ~/.config/oh-my-ztty/profile/shell/path.tsv
+Ordered PATH rules, one prepend or append, tab and directory per line.
+.TP
+.I ~/.config/oh-my-ztty/profile/shell/rc.d/
+Shared zsh snippets.
+.TP
+.I ~/.config/oh-my-ztty/local/env.tsv
+Machine-specific environment values, outside the synchronized profile.
+.TP
+.I ~/.config/oh-my-ztty/options.zsh
+Local options loaded before zshard initialization.
 .TP
 .I ~/.config/oh-my-ztty/local.zsh
-Optional user customization. XDG_CONFIG_HOME is respected.
+Existing local shell additions. XDG_CONFIG_HOME is respected.
 .TP
 .I ~/.local/share/oh-my-ztty
 Versioned runtime. XDG_DATA_HOME is respected.
 .TP
+.I ~/.local/state/oh-my-ztty/backups/
+File snapshots made before profile Git was enabled. Enabling Git retains old
+snapshots and stops new ones, including for machine-specific environment values
+and the home rc file. Those local files remain outside Git.
+XDG_STATE_HOME is respected.
+.TP
 .I ~/.local/state/oh-my-ztty/history
-Shell history. XDG_STATE_HOME is respected.
+Shell history.
+.TP
+.I ~/.local/state/zdot/oh-my-ztty/
+Application deployment journal and saved originals.
 .SH SEE ALSO
 .BR zsh (1),
 .BR git (1),
+.BR gh (1),
 .BR zdot (1),
 .BR ssmcp (1)

@@ -1,0 +1,529 @@
+#!/usr/bin/env zsh
+# Explicit management; inspecting or editing configuration never sources user rc.
+emulate -LR zsh
+setopt extendedglob pipefail
+umask 077
+root=${OMZTTY_ROOT:?run through omztty}
+config=${XDG_CONFIG_HOME:-$HOME/.config}/oh-my-ztty
+profile=$config/profile
+shell_dir=$profile/shell
+local_dir=$config/local
+backup_dir=${XDG_STATE_HOME:-$HOME/.local/state}/oh-my-ztty/backups
+source "$root/config/zsh/settings-lib.zsh" || exit 1
+typeset -a cleanup_files
+trap 'for item in "${cleanup_files[@]}"; do command rm -f -- "$item"; done' EXIT
+trap 'exit 130' INT
+trap 'exit 143' HUP TERM
+die() { print -ru2 -- "oh-my-ztty: $*"; exit 1; }
+usage() {
+    cat <<'EOF'
+Usage: omztty env list [--show] | get NAME | set NAME VALUE [--shared]
+       omztty env unset NAME [--shared] | edit [--shared] | file [--shared]
+       omztty path list [--effective] | add DIR [--prepend|--append]
+       omztty path remove DIR | move DIR first|last | edit | file
+       omztty rc init | status | list | add NAME [--from FILE]
+       omztty rc edit|show|enable|disable|remove NAME | file [NAME] | check
+       omztty rc install|uninstall [--dry-run] | backups | restore ID
+Shared data and rc snippets: ~/.config/oh-my-ztty/profile/shell/
+Machine-only variables: ~/.config/oh-my-ztty/local/env.tsv
+XDG_CONFIG_HOME and XDG_STATE_HOME are respected. Values are literal text.
+Changes load in new zsh sessions; rc status prints the current-shell reload command.
+EOF
+}
+for value in "$HOME" "${XDG_CONFIG_HOME:-$HOME/.config}" "${XDG_STATE_HOME:-$HOME/.local/state}"; do
+    [[ $value == /* && $value != *[$'\t\r\n']* ]] || die 'HOME and XDG locations must be absolute, single-line paths'
+done
+safe_directory() {
+    local destination=$1 probe=$1
+    while [[ $probe != / ]]; do
+        [[ ! -L $probe ]] || die "configuration directory is a symlink: $probe"
+        probe=${probe:h}
+    done
+    [[ ! -e $destination || -d $destination ]] || die "expected directory: $destination"
+}
+initialize() {
+    safe_directory "$profile"
+    "$root/bin/omztty" config init >/dev/null || return
+    safe_directory "$shell_dir/rc.d"
+    command mkdir -p -- "$shell_dir/rc.d" || return
+    if [[ ! -e $shell_dir/env.tsv && ! -L $shell_dir/env.tsv ]]; then
+        print -r -- '# NAME<TAB>literal value; shared through the profile repository' > "$shell_dir/env.tsv" || return
+    fi
+    if [[ ! -e $shell_dir/path.tsv && ! -L $shell_dir/path.tsv ]]; then
+        print -r -- '# prepend|append<TAB>directory; ~/ is expanded on this machine' > "$shell_dir/path.tsv" || return
+    fi
+}
+owned_profile() {
+    [[ -f $profile/.omztty-profile && ! -L $profile/.omztty-profile && $(<"$profile/.omztty-profile") == omztty-profile-v1 ]] ||
+        die 'no owned profile; run omztty setup --local'
+    safe_directory "$profile"
+}
+profile_git() (
+    unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_COMMON_DIR GIT_OBJECT_DIRECTORY GIT_ALTERNATE_OBJECT_DIRECTORIES
+    command git -c core.hooksPath=/dev/null -c commit.gpgsign=false -C "$profile" "$@"
+)
+git_mode() {
+    [[ -e $profile/.git || -L $profile/.git ]] || return 1
+    [[ -d $profile/.git && ! -L $profile/.git ]] || die 'profile Git metadata must be an independent directory'
+    local top
+    top=$(profile_git rev-parse --show-toplevel) || die 'invalid profile Git repository'
+    [[ ${top:A} == ${profile:A} ]] || die 'profile must have its own Git repository'
+}
+git_prepare() {
+    local destination=$1
+    git_mode || return 0
+    [[ $destination == "$profile/"* ]] || return 0
+    [[ -z $(profile_git ls-files -u) && ! -e $profile/.git/MERGE_HEAD && ! -d $profile/.git/rebase-merge && ! -d $profile/.git/rebase-apply ]] ||
+        die 'finish the current Git operation before editing managed configuration'
+    profile_git var GIT_AUTHOR_IDENT >/dev/null && profile_git var GIT_COMMITTER_IDENT >/dev/null ||
+        die 'set Git user.name and user.email before changing versioned configuration'
+    # Capture manual edits of this exact file before replacing them. Other staged
+    # paths remain staged; --only prevents bundling unrelated changes.
+    [[ ! -f $destination ]] || git_checkpoint "$destination"
+}
+git_checkpoint() {
+    git_mode || return 0
+    local destination relative
+    local -a changed
+    for destination in "$@"; do
+        [[ $destination == "$profile/"* ]] || continue
+        relative=${destination#$profile/}
+        if [[ -f $destination ]]; then
+            [[ ! -s $destination ]] || LC_ALL=C command grep -I '' "$destination" >/dev/null || die "refusing to version a binary file: $relative"
+            command iconv -f UTF-8 -t UTF-8 -- "$destination" >/dev/null 2>&1 || die "configuration must be UTF-8 text: $relative"
+            profile_git add -- "$relative" || return
+        elif profile_git ls-files --error-unmatch -- "$relative" >/dev/null 2>&1; then
+            profile_git add -u -- "$relative" || return
+        else continue
+        fi
+        changed+=("$relative")
+    done
+    (( ${#changed} )) || return 0
+    if ! profile_git rev-parse --verify HEAD >/dev/null 2>&1; then
+        owned_profile
+        profile_git add -- .omztty-profile || return
+        changed+=(.omztty-profile)
+    fi
+    if profile_git diff --cached --quiet -- "${changed[@]}"; then return 0; fi
+    profile_git commit --quiet --only -m 'Update managed shell configuration' -- "${changed[@]}" ||
+        die 'file saved but Git commit failed; review omztty sync status'
+    print -r -- 'Recorded in local Git history; omztty sync push uploads it.'
+}
+regular_target() {
+    safe_directory "${1:h}"
+    [[ ! -L $1 && ( ! -e $1 || -f $1 ) ]] || die "expected a regular file: $1"
+}
+snapshot() {
+    local destination=$1 category=${2:-config} id
+    # A Git profile uses commits exclusively, including for deletion and restore.
+    # Machine-local files stay outside Git and do not acquire duplicate snapshots.
+    if git_mode; then return 0; fi
+    safe_directory "$backup_dir"
+    command mkdir -p -- "$backup_dir" || return
+    id=$(command mktemp -d "$backup_dir/$(command date -u +%Y%m%dT%H%M%S).XXXXXXXX") || return
+    print -rn -- "$destination" > "$id/target" || return
+    print -r -- "$category" > "$id/kind" || return
+    if [[ -f $destination ]]; then
+        command cp -p -- "$destination" "$id/content" || return
+    else
+        : > "$id/absent" || return
+    fi
+    print -r -- "Backup: ${id:t}" >&2
+}
+publish() {
+    local destination=$1 source_file=$2 category=${3:-config} staged
+    regular_target "$destination"
+    if [[ -f $destination ]] && command cmp -s -- "$destination" "$source_file"; then
+        print -r -- "Unchanged: $destination"; return
+    fi
+    git_prepare "$destination" || return
+    command mkdir -p -- "${destination:h}" || return
+    staged=$(command mktemp "${destination:h}/.omztty.XXXXXXXX") || return
+    cleanup_files+=("$staged")
+    command cat -- "$source_file" > "$staged" || return
+    if [[ -f $destination ]]; then command chmod --reference="$destination" -- "$staged" || return; fi
+    snapshot "$destination" "$category" || return
+    command mv -f -- "$staged" "$destination" || return
+    git_checkpoint "$destination" || return
+    print -r -- "Saved: $destination"
+}
+temporary() {
+    REPLY=$(command mktemp "${TMPDIR:-/tmp}/omztty-settings.XXXXXXXX") || return
+    cleanup_files+=("$REPLY")
+}
+edit_file() {
+    local destination=$1 kind=$2 staged
+    local -a editor
+    temporary || return
+    staged=$REPLY
+    [[ ! -f $destination ]] || command cp -p -- "$destination" "$staged" || return
+    command chmod u+w -- "$staged" || return
+    editor=("${(@Q)${(z)${VISUAL:-${EDITOR:-vi}}}}")
+    (( ${#editor} )) || die 'EDITOR is empty'
+    command "${editor[@]}" "$staged" || die 'editor failed; configuration unchanged'
+    validate_file "$staged" "$kind" || die 'validation failed; configuration unchanged'
+    publish "$destination" "$staged"
+}
+validate_file() {
+    local -A _omztty_data
+    local -a _omztty_paths _omztty_places
+    case $2 in
+        env) _omztty_read_env "$1" ;;
+        path) _omztty_read_paths "$1" ;;
+        rc)
+            [[ ! -s $1 ]] || LC_ALL=C command grep -I '' "$1" >/dev/null || { print -ru2 -- 'rc snippets must be text files'; return 1; }
+            command iconv -f UTF-8 -t UTF-8 -- "$1" >/dev/null 2>&1 || { print -ru2 -- 'rc snippets must be UTF-8 text'; return 1; }
+            command zsh -dfn -- "$1" ;;
+    esac
+}
+write_env() {
+    local destination=$1 key staged
+    temporary || return
+    staged=$REPLY
+    {
+        print -r -- '# NAME<TAB>literal value; edit with omztty env edit'
+        for key in "${(@ok)_omztty_data}"; do print -r -- "$key"$'\t'"${_omztty_data[$key]}"; done
+    } > "$staged" || return
+    publish "$destination" "$staged"
+}
+write_paths() {
+    local staged
+    local -i i
+    temporary || return
+    staged=$REPLY
+    {
+        print -r -- '# prepend|append<TAB>directory; ~/ is expanded on this machine'
+        for (( i=1; i<=${#_omztty_paths}; ++i )); do print -r -- "${_omztty_places[$i]}"$'\t'"${_omztty_paths[$i]}"; done
+    } > "$staged" || return
+    publish "$shell_dir/path.tsv" "$staged"
+}
+normalize_path() {
+    local directory=$1
+    _omztty_valid_path "$directory" || die 'use an absolute directory or ~/path; colons and line breaks are not valid PATH entries'
+    [[ $directory == '~' ]] && directory=$HOME
+    [[ $directory == '~/'* ]] && directory=$HOME/${directory#'~/'}
+    directory=${directory:a}
+    if [[ $directory == $HOME ]]; then REPLY='~'
+    elif [[ $directory == "$HOME/"* ]]; then REPLY="~/${directory#$HOME/}"
+    else REPLY=$directory
+    fi
+}
+env_command() {
+    local action=${1:-list} destination=$local_dir/env.tsv key value scope=local show=0
+    local -A _omztty_data shared_data local_data
+    local -a args
+    (( $# == 0 )) || shift
+    # Flags are parsed only outside the NAME/VALUE positional pair; values may begin with --.
+    if [[ $action == set ]]; then
+        [[ $# == 2 || ( $# == 3 && $3 == --shared ) ]] || die 'usage: omztty env set NAME VALUE [--shared]'
+        [[ $# != 3 ]] || { destination=$shell_dir/env.tsv; scope=shared; }
+    else
+        for value in "$@"; do
+            case $value in
+                --shared) destination=$shell_dir/env.tsv; scope=shared ;;
+                --show) [[ $action == list ]] || die '--show is for env list'; show=1 ;;
+                *) args+=("$value") ;;
+            esac
+        done
+        set -- "${args[@]}"
+    fi
+    case $action in
+        file) (( $# == 0 )) || die 'env file takes only --shared'; print -r -- "$destination" ;;
+        list|get)
+            [[ $action != get || $# == 1 ]] || die 'usage: omztty env get NAME'
+            [[ $action != list || $# == 0 ]] || die 'usage: omztty env list [--show]'
+            _omztty_read_env "$shell_dir/env.tsv" || return
+            shared_data=("${(@kv)_omztty_data}")
+            _omztty_read_env "$local_dir/env.tsv" || return
+            local_data=("${(@kv)_omztty_data}")
+            _omztty_data=("${(@kv)shared_data}" "${(@kv)local_data}")
+            if [[ $action == get ]]; then
+                (( ${+_omztty_data[$1]} )) || die "no managed variable: $1"
+                print -r -- "${_omztty_data[$1]}"
+            else
+                print -r -- "Shared: $shell_dir/env.tsv" "Local:  $local_dir/env.tsv"
+                for key in "${(@ok)_omztty_data}"; do
+                    scope=shared; (( ${+local_data[$key]} )) && scope=local
+                    value='<set>'; (( show )) && value=${_omztty_data[$key]}
+                    printf '%s\t%s\t%s\n' "$key" "$scope" "$value"
+                done
+            fi ;;
+        set|unset)
+            [[ $action != unset || $# == 1 ]] || die 'usage: omztty env unset NAME [--shared]'
+            key=$1
+            _omztty_valid_env_name "$key" || die 'invalid or reserved environment name; use omztty path for PATH'
+            [[ $action != set || $2 != *[$'\t\r\n']* ]] || die 'environment values must be a single line without tabs'
+            _omztty_read_env "$destination" || return
+            if [[ $action == set ]]; then
+                if (( ${+_omztty_data[$key]} )) && [[ ${_omztty_data[$key]} == $2 ]]; then print -r -- "Unchanged: $key ($scope)"; return; fi
+                _omztty_data[$key]=$2
+            else
+                (( ${+_omztty_data[$key]} )) || { print -r -- "No saved $scope variable: $key"; return; }
+                unset "_omztty_data[$key]"
+            fi
+            if [[ $scope == shared ]]; then initialize || return; else safe_directory "$local_dir"; fi
+            write_env "$destination" ;;
+        edit)
+            (( $# == 0 )) || die 'usage: omztty env edit [--shared]'
+            if [[ $scope == shared ]]; then initialize || return; else safe_directory "$local_dir"; fi
+            regular_target "$destination"
+            edit_file "$destination" env ;;
+        *) usage; return 2 ;;
+    esac
+}
+path_command() {
+    local action=${1:-list} directory place=prepend item
+    local -a _omztty_paths _omztty_places
+    local -i i index
+    (( $# == 0 )) || shift
+    if [[ $action == file ]]; then (( $# == 0 )) || die 'path file takes no arguments'; print -r -- "$shell_dir/path.tsv"; return; fi
+    _omztty_read_paths "$shell_dir/path.tsv" || return
+    case $action in
+        list)
+            [[ $# == 0 || ( $# == 1 && $1 == --effective ) ]] || die 'usage: omztty path list [--effective]'
+            print -r -- "Rules: $shell_dir/path.tsv"
+            for (( i=1; i<=${#_omztty_paths}; ++i )); do printf '%s\t%s\t%s\n' "$i" "${_omztty_places[$i]}" "${_omztty_paths[$i]}"; done
+            if (( $# )); then
+                print -r -- 'Current process PATH (including inherited entries):'
+                i=0
+                for directory in "${path[@]}"; do (( ++i )); printf '%s\t%s\n' "$i" "${directory:-<current directory>}"; done
+            fi ;;
+        add|remove|move)
+            case $action in
+                add) [[ $# == 1 || ( $# == 2 && ( $2 == --append || $2 == --prepend ) ) ]] || die 'usage: omztty path add DIR [--append|--prepend]'; [[ ${2-} != --append ]] || place=append ;;
+                remove) (( $# == 1 )) || die 'usage: omztty path remove DIR' ;;
+                move) [[ $# == 2 && ( $2 == first || $2 == last ) ]] || die 'usage: omztty path move DIR first|last'; [[ $2 != last ]] || place=append ;;
+            esac
+            normalize_path "$1"; directory=$REPLY
+            index=${_omztty_paths[(Ie)$directory]}
+            if [[ $action == add && $index != 0 && ${_omztty_places[$index]} == $place ]]; then print -r -- "Already managed: $directory"; return; fi
+            if [[ $action != add && $index == 0 ]]; then
+                [[ $action == remove ]] || die "no managed PATH entry: $directory"
+                print -r -- "No saved rule: $directory (inherited PATH is unchanged)"; return
+            fi
+            if (( index )); then _omztty_paths[$index]=(); _omztty_places[$index]=(); fi
+            if [[ $action != remove ]]; then
+                if [[ $place == prepend ]]; then _omztty_paths=("$directory" "${_omztty_paths[@]}"); _omztty_places=(prepend "${_omztty_places[@]}")
+                else _omztty_paths+=("$directory"); _omztty_places+=(append)
+                fi
+            fi
+            initialize || return
+            write_paths || return
+            [[ $action != remove ]] || print -r -- 'Removed the saved rule; entries supplied by the system or another rc remain.' ;;
+        edit) (( $# == 0 )) || die 'path edit takes no arguments'; initialize || return; edit_file "$shell_dir/path.tsv" path ;;
+        *) usage; return 2 ;;
+    esac
+}
+rc_target() {
+    local directory=${OMZTTY_USER_ZDOTDIR-${ZDOTDIR-$HOME}}
+    [[ -n $directory ]] || directory=$PWD
+    directory=${directory:a}
+    [[ $directory != "$root/config/zsh" ]] || directory=$HOME
+    REPLY=$directory/.zshrc
+    [[ ! -L $REPLY || -f $REPLY ]] || die "broken rc symlink: $REPLY"
+    [[ ! -L $REPLY ]] || REPLY=${REPLY:A}
+}
+snippet_file() {
+    local name=${1%.zsh}
+    [[ $name == [A-Za-z0-9][A-Za-z0-9_.-]# && $name != *..* ]] || die 'rc name must use letters, digits, dots, underscores or hyphens'
+    REPLY=$shell_dir/rc.d/$name.zsh
+}
+strip_rc_block() {
+    local data=$1 start='# >>> oh-my-ztty shell >>>' end='# <<< oh-my-ztty shell <<<' before after middle
+    REPLY=$data
+    if [[ $data != *$start* && $data != *$end* ]]; then return 0; fi
+    [[ $data == *$start* && $data == *$end* ]] || die 'incomplete oh-my-ztty rc block; repair its markers first'
+    before=${data%%$start*}; middle=${data#*$start}
+    [[ $before != *$end* && $middle != *$start* ]] || die 'duplicate or reversed oh-my-ztty rc markers'
+    after=${middle#*$end}
+    [[ $middle == *$end* && $after != *$end* && $middle == $'\n'* && $after == $'\n'* ]] || die 'malformed oh-my-ztty rc block'
+    [[ -z $before || $before == *$'\n' ]] || die 'rc marker must occupy its own line'
+    [[ -z $before ]] || before=${before%$'\n'}
+    after=${after#$'\n'}
+    REPLY=$before$after
+}
+rc_hook() {
+    cat <<'EOF'
+# >>> oh-my-ztty shell >>>
+if [[ -z ${_OMZTTY_SETTINGS_LOADED:-} ]]; then
+    if (( $+commands[omztty] )) && [[ -r "${commands[omztty]:A:h:h}/config/zsh/settings.zsh" ]]; then
+        source "${commands[omztty]:A:h:h}/config/zsh/settings.zsh"
+    elif [[ -r "${XDG_DATA_HOME:-$HOME/.local/share}/oh-my-ztty/current/config/zsh/settings.zsh" ]]; then
+        source "${XDG_DATA_HOME:-$HOME/.local/share}/oh-my-ztty/current/config/zsh/settings.zsh"
+EOF
+    # A source checkout may coexist with an older installed launcher.
+    printf '    elif [[ -r %q ]]; then\n        source %q\n' "$root/config/zsh/settings.zsh" "$root/config/zsh/settings.zsh"
+    cat <<'EOF'
+    fi
+fi
+# <<< oh-my-ztty shell <<<
+EOF
+}
+rc_install() {
+    local action=$1 destination data='' staged dry=0
+    shift
+    [[ $# == 0 || ( $# == 1 && $1 == --dry-run ) ]] || die "usage: omztty rc $action [--dry-run]"
+    (( $# == 0 )) || dry=1
+    rc_target; destination=$REPLY
+    [[ ! -e $destination || -f $destination ]] || die "expected rc file: $destination"
+    [[ ! -f $destination ]] || IFS= read -r -d '' data < "$destination"
+    strip_rc_block "$data"
+    if [[ $action == install ]]; then
+        if [[ $data == *'# Managed by oh-my-ztty and zdot.'* && $data != *'# >>> oh-my-ztty shell >>>'* ]]; then
+            print -r -- "The adopted suite rc already loads these settings: $destination"; return
+        fi
+        if (( dry )); then print -r -- "Would install the managed source block: $destination"; return; fi
+        initialize || return
+        temporary || return; staged=$REPLY
+        # Each appended block owns its leading newline, so uninstall is byte-preserving.
+        strip_rc_block "$data"
+        { print -rn -- "$REPLY"; print; rc_hook; } > "$staged" || return
+    else
+        [[ $REPLY != $data ]] || { print -r -- "No managed source block: $destination"; return; }
+        if (( dry )); then print -r -- "Would remove only the managed source block: $destination"; return; fi
+        data=$REPLY
+        temporary || return; staged=$REPLY
+        print -rn -- "$data" > "$staged" || return
+    fi
+    command zsh -dfn -- "$staged" || die 'rc syntax check failed; original unchanged'
+    publish "$destination" "$staged" rc
+}
+restore_backup() {
+    if git_mode; then die 'Git manages versions; use omztty sync history and omztty sync restore REV [PATH]'; fi
+    local id=$1 record=$backup_dir/$1 destination kind staged
+    [[ $id == [A-Za-z0-9_.-]## && $id != *..* ]] || die 'invalid backup ID'
+    [[ -d $record && ! -L $record && -f $record/target && ! -L $record/target && -f $record/kind && ! -L $record/kind ]] || die 'backup not found'
+    destination=$(<"$record/target"); kind=$(<"$record/kind")
+    [[ $destination == /* && $destination != *[$'\t\r\n']* && $destination == ${destination:a} ]] || die 'invalid backup target'
+    if [[ $kind == rc ]]; then
+        rc_target; [[ $destination == $REPLY ]] || die 'backup belongs to another ZDOTDIR; select that rc directory before restoring'
+    else
+        [[ $destination == "$shell_dir/"* || $destination == "$local_dir/env.tsv" ]] || die 'backup is outside managed configuration'
+    fi
+    regular_target "$destination"
+    if [[ -f $record/absent && ! -L $record/absent ]]; then
+        [[ -e $destination ]] || { print -r -- 'Already absent'; return; }
+        snapshot "$destination" "$kind" || return
+        command rm -- "$destination" || return
+        print -r -- "Restored absence: $destination"
+    else
+        [[ -f $record/content && ! -L $record/content ]] || die 'backup content is missing'
+        case $destination in
+            */env.tsv) validate_file "$record/content" env || return ;;
+            */path.tsv) validate_file "$record/content" path || return ;;
+            *.zsh|*.zsh.disabled|*/.zshrc) validate_file "$record/content" rc || return ;;
+            *) die 'unsupported backup target' ;;
+        esac
+        publish "$destination" "$record/content" "$kind" || return
+        command chmod --reference="$record/content" -- "$destination" || return
+    fi
+}
+rc_command() {
+    local action=${1:-status} destination source_file item data label
+    (( $# == 0 )) || shift
+    case $action in
+        init) (( $# == 0 )) || die 'rc init takes no arguments'; initialize || return; print -r -- "Shell configuration: $shell_dir" ;;
+        status)
+            (( $# == 0 )) || die 'rc status takes no arguments'
+            rc_target
+            print -r -- "Shell: zsh" "RC entry: $REPLY" "Shared: $shell_dir" "Local variables: $local_dir/env.tsv"
+            if git_mode; then print -r -- "Versioning: Git at $profile (local files stay outside Git)"
+            else print -r -- "Backups: $backup_dir"
+            fi
+            print -r -- "Reload in the current zsh (runs enabled rc snippets):" "source ${(q)root}/config/zsh/settings.zsh" ;;
+        file)
+            (( $# <= 1 )) || die 'usage: omztty rc file [NAME]'
+            if (( $# )); then
+                snippet_file "$1"
+                [[ -f $REPLY || ! -f $REPLY.disabled ]] || REPLY+=.disabled
+                print -r -- "$REPLY"
+            else print -r -- "$shell_dir/rc.d"
+            fi ;;
+        list)
+            (( $# == 0 )) || die 'rc list takes no arguments'
+            print -r -- "Snippets: $shell_dir/rc.d"
+            for item in "$shell_dir"/rc.d/*.zsh(N) "$shell_dir"/rc.d/*.zsh.disabled(N); do
+                label=enabled; [[ $item != *.disabled ]] || label=disabled
+                printf '%s\t%s\t%s\n' "${${${item:t}%.disabled}%.zsh}" "$label" "$item"
+            done ;;
+        check)
+            (( $# == 0 )) || die 'rc check takes no arguments'
+            validate_file "$shell_dir/env.tsv" env && validate_file "$local_dir/env.tsv" env && validate_file "$shell_dir/path.tsv" path || return
+            for item in "$shell_dir"/rc.d/*.zsh(N) "$shell_dir"/rc.d/*.zsh.disabled(N); do
+                [[ -f $item && ! -L $item ]] || die "expected regular snippet: $item"
+                validate_file "$item" rc || return
+            done
+            print -r -- 'Environment, PATH and rc syntax are valid; no user code was executed.' ;;
+        install|uninstall) rc_install "$action" "$@" ;;
+        backups)
+            (( $# == 0 )) || die 'rc backups takes no arguments'
+            if git_mode; then
+                print -r -- 'Git manages versions; no new file backups are created.' 'Use: omztty sync history'
+                return
+            fi
+            print -r -- "Backups: $backup_dir"
+            for item in "$backup_dir"/*(N/); do
+                [[ -f $item/target && ! -L $item/target ]] || continue
+                printf '%s\t%s\n' "${item:t}" "$(<"$item/target")"
+            done ;;
+        restore) (( $# == 1 )) || die 'usage: omztty rc restore ID'; restore_backup "$1" ;;
+        add|edit|show|enable|disable|remove)
+            (( $# >= 1 )) || die "rc $action requires a name"
+            snippet_file "$1"; destination=$REPLY
+            if [[ $action == add ]]; then
+                [[ $# == 1 || ( $# == 3 && $2 == --from ) ]] || die 'usage: omztty rc add NAME [--from FILE]'
+            else (( $# == 1 )) || die "rc $action takes one name"
+            fi
+            if [[ ! -f $destination && -f $destination.disabled ]]; then destination+=.disabled; fi
+            regular_target "$destination"
+            case $action in
+                add)
+                    [[ ! -e $destination ]] || die 'snippet already exists'
+                    if (( $# == 3 )); then
+                        source_file=$3
+                        [[ -f $source_file ]] || die 'source file not found'
+                        validate_file "$source_file" rc || return
+                    else
+                        temporary || return; source_file=$REPLY
+                        print -r -- "# $1 — personal zsh configuration" > "$source_file"
+                    fi
+                    initialize || return
+                    publish "$destination" "$source_file" ;;
+                show) [[ -f $destination ]] || die 'snippet not found'; command cat -- "$destination" ;;
+                edit) [[ -f $destination ]] || die 'snippet not found; use rc add first'; edit_file "$destination" rc ;;
+                enable|disable)
+                    [[ -f $destination ]] || die 'snippet not found'
+                    if [[ $action == enable ]]; then
+                        [[ $destination == *.disabled ]] || { print -r -- 'Already enabled'; return; }
+                        source_file=${destination%.disabled}
+                    else
+                        [[ $destination != *.disabled ]] || { print -r -- 'Already disabled'; return; }
+                        source_file=$destination.disabled
+                    fi
+                    [[ ! -e $source_file && ! -L $source_file ]] || die 'both enabled and disabled versions exist'
+                    validate_file "$destination" rc || return
+                    git_prepare "$destination" || return
+                    snapshot "$destination" || return
+                    command mv -- "$destination" "$source_file" || return
+                    git_checkpoint "$destination" "$source_file" || return
+                    print -r -- "${action}: $source_file" ;;
+                remove)
+                    [[ -f $destination ]] || die 'snippet not found'
+                    git_prepare "$destination" || return
+                    snapshot "$destination" || return
+                    command rm -- "$destination" || return
+                    git_checkpoint "$destination" || return
+                    print -r -- "Removed: $destination" ;;
+            esac ;;
+        *) usage; return 2 ;;
+    esac
+}
+group=${1:-help}
+(( $# == 0 )) || shift
+[[ ${1-} != --help && ${1-} != -h ]] || { usage; exit 0; }
+case $group in
+    env) env_command "$@" ;;
+    path) path_command "$@" ;;
+    rc) rc_command "$@" ;;
+    *) usage; exit 2 ;;
+esac

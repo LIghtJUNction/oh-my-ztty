@@ -97,7 +97,8 @@ class BundleTests(unittest.TestCase):
     def suite_fixture(self):
         lock = self.source_fixture()
         for name in ["install.sh", "uninstall.sh", "LICENSE", "bin/omztty",
-                     "bin/omztty-config", "bin/zshard", "config/ztty/config",
+                     "bin/omztty-config", "bin/omztty-manage", "bin/omztty-setup",
+                     "bin/omztty-sync", "bin/zshard", "config/ztty/config",
                      "packaging/omztty.1"]:
             path = self.root / name
             path.parent.mkdir(parents=True, exist_ok=True)

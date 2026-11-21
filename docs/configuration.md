@@ -2,6 +2,34 @@
 
 The Ink profile puts the shell, Neovim and everyday terminal tools under one zdot deployment. zrc provides the native application configuration; zdot previews changes, creates links and restores original files.
 
+## Set up shell configuration
+
+Run `omztty setup` to prepare an editable profile, connect an existing zsh startup file and optionally create a private GitHub dotfiles repository. `omztty setup --local` prepares configuration without a remote repository. Application deployment remains available through `config apply` below.
+
+```sh
+omztty setup --local
+omztty env set EDITOR nvim --shared
+omztty env set API_BASE_URL https://api.example.invalid
+omztty path add "$HOME/.local/bin"
+omztty path add "$HOME/dev tools/bin" --append
+omztty rc add aliases
+omztty rc edit aliases
+omztty rc check
+omztty shell
+```
+
+An environment variable is a named value passed to programs the shell starts. `env set` saves a machine-specific value; `--shared` saves a value in the profile repository. Local values override shared values with the same name. `env list` shows names and sources, while `env get NAME` and `env list --show` explicitly show values. `env unset NAME` removes a local definition; add `--shared` to remove a shared definition.
+
+PATH is the ordered list of directories searched for commands. `path add` adds a directory at the front; `--append` places it after the inherited PATH. `path move DIR first|last` changes its priority, and `path remove DIR` removes its saved rule. Home-relative paths are portable between machines. `path list` shows rules; `path list --effective` shows the environment inherited by the command. The profile stores selected rules instead of copying a session's full PATH.
+
+Rc snippets hold ordinary zsh code such as aliases and functions. Use `rc add NAME`, `rc edit NAME`, `rc show NAME`, `rc enable NAME`, `rc disable NAME` and `rc remove NAME`. `rc add NAME --from FILE` imports an existing snippet. `rc check` checks syntax without executing snippets.
+
+For an ordinary zsh session to load these settings, run `omztty rc install --dry-run`, then `omztty rc install`. The loader block is added to `$ZDOTDIR/.zshrc` when set, otherwise `~/.zshrc`, preserving the existing startup code. `omztty rc uninstall` removes that block. Both install and uninstall accept `--dry-run`.
+
+A new shell loads the saved settings. In an existing suite shell, `source "$OMZTTY_ROOT/config/zsh/settings.zsh"` reloads them and runs enabled snippets again. Programs cannot change their parent shell's environment; saving a rule does not immediately alter the shell that ran the command. Use a fresh session to check removed settings.
+
+For a complete command walkthrough, see the [shell guide](../site/content/shell.md).
+
 ## Adopt the defaults
 
 ```sh
@@ -17,14 +45,25 @@ The profile covers zsh, ztty, Neovim, Kitty, Foot, Ghostty, tmux, fzf, bat, ripg
 
 | Location | Purpose |
 | --- | --- |
-| `~/.config/oh-my-ztty/profile/` | Editable application files and one `profile.zdot` manifest |
-| `~/.config/oh-my-ztty/options.zsh` | Options read before zshard initializes |
-| `~/.config/oh-my-ztty/local.zsh` | Personal shell additions |
-| `~/.local/state/zdot/oh-my-ztty/` | Deployment journal and original files |
+| `~/.config/oh-my-ztty/profile/` | Shared profile repository, application files and `profile.zdot` |
+| `~/.config/oh-my-ztty/profile/shell/env.tsv` | Shared environment values |
+| `~/.config/oh-my-ztty/profile/shell/path.tsv` | Ordered, portable PATH rules |
+| `~/.config/oh-my-ztty/profile/shell/rc.d/` | Shared zsh snippets |
+| `~/.config/oh-my-ztty/local/env.tsv` | Machine-specific environment values, outside profile sync |
+| `~/.config/oh-my-ztty/options.zsh` | Local options read before zshard initializes |
+| `~/.config/oh-my-ztty/local.zsh` | Existing local shell additions |
+| `~/.local/state/oh-my-ztty/backups/` | File snapshots created before profile Git is enabled |
+| `~/.local/state/zdot/oh-my-ztty/` | Application deployment journal and original files |
 | `~/.local/state/oh-my-ztty/history` | Interactive shell history |
 | `~/.config/oh-my-ztty/completions/` | Personal completion files loaded on demand |
 
 The corresponding XDG variables change these roots; XDG_CONFIG_HOME must be inside HOME for a home deployment. `omztty config path` prints the profile directory. Repeating `init` and updating the suite preserve the editable profile.
+
+Print the actual paths with `omztty env file`, `omztty env file --shared`, `omztty path file` and `omztty rc file NAME`. Open them through `env edit`, `path edit` or `rc edit NAME`, or use your editor directly. Keep the data-file format intact and run `omztty rc check` after manual edits.
+
+When the profile has its own Git repository, shared shell edits made through the CLI create local commits. They are pushed only on request. Use `omztty sync history` to review those commits and `omztty sync restore COMMIT [PATH]` to restore shared shell configuration or a selected profile file. Git identity must be configured before a managed shared edit; otherwise the edit stops before writing.
+
+Before Git is enabled, `omztty rc backups` and `omztty rc restore BACKUP_ID` manage local file snapshots. Enabling profile Git stops new snapshots, including for machine-specific variables and the ordinary home rc file; those local files stay outside Git. Existing snapshots are retained locally. In Git mode, the rc backup commands direct you to Git history and restore.
 
 ## Refresh defaults after an upgrade
 
@@ -36,9 +75,9 @@ omztty config refresh
 
 `refresh` compares the editable profile with the defaults from its recorded suite version, then updates files that you have left unchanged. Customized files, removed files, source symlinks, extra personal files and the existing deployment manifest stay in place. It prints each updated or preserved path. Restart the affected application to load its refreshed configuration.
 
-The profile keeps a verified snapshot of shipped defaults in `.baseline/`, separate from your editable files. Refresh replaces that snapshot with the new shipped defaults after updating the profile; it never copies your personal changes into the snapshot. This keeps refresh usable when a system package replaces the runtime in place or an obsolete suite release is removed.
+The profile keeps a verified reference copy of shipped defaults in `.baseline/`, separate from your editable files. Refresh replaces that reference with the new shipped defaults after updating the profile; it never copies your personal changes into it. This keeps refresh usable when a system package replaces the runtime in place or an obsolete suite release is removed.
 
-Profiles created before snapshots were introduced use the recorded installed release once, then save a snapshot on successful refresh. Keep that old release until the first refresh completes. A missing, modified or mismatched baseline stops refresh before any profile changes. Repeating refresh at the same suite version does nothing. Refresh handles changes to existing defaults; a changed default file layout or mapping requires a deliberate profile review and is rejected without edits.
+Profiles created before the baseline copy was introduced use the recorded installed release once, then save that reference on successful refresh. Keep that old release until the first refresh completes. A missing, modified or mismatched baseline stops refresh before any profile changes. Repeating refresh at the same suite version does nothing. Refresh handles changes to existing defaults; a changed default file layout or mapping requires a deliberate profile review and is rejected without edits.
 
 ## Native completion
 
@@ -115,13 +154,15 @@ Git's module contains display settings only. Activate it once if desired:
 git config --global --add include.path "${XDG_CONFIG_HOME:-$HOME/.config}/zrc/git.inc"
 ```
 
-Identity, credentials and signing settings remain in the user's existing Git configuration. The suite does not publish personal profiles or choose a Git remote. After initializing a profile repository and configuring its remote, synchronization is explicit:
+Identity, credentials and signing settings remain in the user's existing Git configuration. `omztty setup` can help create a private profile repository under your own GitHub account. Synchronization runs when you request it:
 
 ```sh
-omztty config sync status
-omztty config sync pull
-omztty config sync push
+omztty sync status
+omztty sync pull
+omztty sync push
 ```
+
+`omztty config sync` is an alias for these profile-sync commands. `omztty update --config-only` updates your configured profile repository; `omztty update --with-config` updates both a per-user suite installation and its profile repository. Plain `omztty update` updates the suite. Local variables, shell history and existing restoration records remain outside the profile repository. Shared shell edits use Git commits once profile Git is enabled; manual edits can be reviewed and committed by `omztty sync push`.
 
 ## Restore and maintain
 

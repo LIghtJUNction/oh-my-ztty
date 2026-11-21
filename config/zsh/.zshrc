@@ -7,6 +7,7 @@ typeset -g ZSHARD_HOME="$OMZTTY_ROOT/components/zshard"
 typeset -g ZSHARD_SHELL_INTEGRATION=1
 typeset -gU path
 path=("$OMZTTY_ROOT/bin" "$HOME/.local/bin" "${path[@]}")
+[[ ! -r "$OMZTTY_ROOT/config/zsh/settings.zsh" ]] || source "$OMZTTY_ROOT/config/zsh/settings.zsh" --env
 typeset -g ZSHARD_CACHE_DIR=${ZSHARD_CACHE_DIR:-${XDG_CACHE_HOME:-$HOME/.cache}/oh-my-ztty/zshard/${OMZTTY_ROOT:t}}
 typeset -g HISTFILE=${XDG_STATE_HOME:-$HOME/.local/state}/oh-my-ztty/history
 [[ -d ${HISTFILE:h} ]] || (umask 077; command mkdir -p -- "${HISTFILE:h}")
@@ -24,3 +25,4 @@ fi
 if [[ -r "${XDG_CONFIG_HOME:-$HOME/.config}/oh-my-ztty/local.zsh" ]]; then
     source "${XDG_CONFIG_HOME:-$HOME/.config}/oh-my-ztty/local.zsh"
 fi
+[[ ! -r "$OMZTTY_ROOT/config/zsh/settings.zsh" ]] || source "$OMZTTY_ROOT/config/zsh/settings.zsh" --rc

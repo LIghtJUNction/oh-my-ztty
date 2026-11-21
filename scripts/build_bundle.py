@@ -135,7 +135,7 @@ def main(argv=None):
     with tempfile.TemporaryDirectory(prefix="bundle-", dir=ROOT / ".cache") as temp:
         stage = Path(temp) / "oh-my-ztty"
         stage.mkdir()
-        for path in ["install.sh", "uninstall.sh", "LICENSE", "VERSION", "dependencies.lock.json", "bin/omztty", "bin/omztty-config", "bin/zshard"]:
+        for path in ["install.sh", "uninstall.sh", "LICENSE", "VERSION", "dependencies.lock.json", "bin/omztty", "bin/omztty-config", "bin/omztty-manage", "bin/omztty-setup", "bin/omztty-sync", "bin/zshard"]:
             copy(ROOT / path, stage / path)
         for folder in ["config", "packaging"]:
             for source in sorted((ROOT / folder).rglob("*")):
@@ -151,7 +151,7 @@ def main(argv=None):
             binary.chmod(0o755)
             check_elf(binary, args.arch)
         copy(ROOT / "components/ssmcp/src/code_mode.js", stage / "bin/code-mode.js")
-        for name in ["omztty", "omztty-config", "zshard"]:
+        for name in ["omztty", "omztty-config", "omztty-manage", "omztty-setup", "omztty-sync", "zshard"]:
             (stage / "bin" / name).chmod(0o755)
         (stage / "install.sh").chmod(0o755)
         (stage / "uninstall.sh").chmod(0o755)

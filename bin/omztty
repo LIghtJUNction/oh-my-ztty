@@ -12,13 +12,18 @@ Usage: omztty COMMAND [ARGS...]
   terminal    Open ztty with the preset zsh (accepts ztty options)
   ai          Connect this directory through bundled ssmcp
   config      Manage the unified zrc profile through zdot
+  setup       Set up shell settings and optional private GitHub sync
+  env         Manage local or shared environment variables
+  path        Manage ordered PATH entries
+  rc          Manage zsh snippets, startup hooks and backups
+  sync        Synchronize your private configuration repository
   dot         Run bundled zdot
   zshard      Manage shell plugins
   ztty|ssmcp  Run a bundled component directly
   info        Show the lightweight native system overview
   doctor      Check installed components and system dependencies
   version     Show the suite version
-  update      Install the latest suite [--desktop | --no-desktop]
+  update      Update suite [--with-config] or only config [--config-only]
   uninstall   Remove suite-owned files and links
 No daemon or connection is started until you explicitly request it.
 EOF
@@ -56,6 +61,7 @@ case "$cmd" in
     shell|terminal)
         command -v zsh >/dev/null 2>&1 || { printf 'zsh is required\n' >&2; exit 1; }
         export PATH="$root/bin:$PATH"
+        export OMZTTY_USER_ZDOTDIR="${OMZTTY_USER_ZDOTDIR-${ZDOTDIR-$HOME}}"
         export ZDOTDIR="$root/config/zsh"
         export ZSHARD_HOME="$root/components/zshard"
         export ZSHARD_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/oh-my-ztty/zshard/${root##*/}"
@@ -84,6 +90,8 @@ case "$cmd" in
     info|zfetch) exec "$root/bin/zfetch" "$@" ;;
     ssmcp) exec "$root/bin/ssmcp" "$@" ;;
     config) exec sh "$root/bin/omztty-config" "$@" ;;
+    env|path|rc) exec zsh -df "$root/bin/omztty-manage" "$cmd" "$@" ;;
+    setup|sync) exec zsh -df "$root/bin/omztty-$cmd" "$@" ;;
     dot|zdot) exec "$root/bin/zdot" "$@" ;;
     zshard) exec "$root/components/zshard/bin/zshard" "$@" ;;
     ztty) suite_socket; exec "$root/bin/ztty" "$@" ;;
@@ -106,16 +114,29 @@ case "$cmd" in
         printf 'No connection or background service was started.\n'
         exit "$failed" ;;
     update)
+        config_only=0
+        with_config=0
+        desktop_option=
+        for option in "$@"; do
+            case "$option" in
+                --config-only) config_only=1 ;;
+                --with-config) with_config=1 ;;
+                --desktop|--no-desktop) desktop_option=$option ;;
+                *) printf 'usage: omztty update [--desktop | --no-desktop] [--with-config] | --config-only\n' >&2; exit 2 ;;
+            esac
+        done
+        if [ "$config_only" -eq 1 ]; then
+            [ "$with_config" -eq 0 ] && [ -z "$desktop_option" ] || {
+                printf '%s\n' '--config-only cannot be combined with suite update options' >&2; exit 2;
+            }
+            exec zsh -df "$root/bin/omztty-sync" pull
+        fi
         if [ -f "$root/PACKAGE_MANAGER" ]; then
             printf 'This installation is managed by pacman.\nUpdate with: yay -Syu oh-my-ztty-bin\n' >&2
             exit 2
         fi
-        for option in "$@"; do
-            case "$option" in
-                --desktop|--no-desktop) ;;
-                *) printf 'usage: omztty update [--desktop | --no-desktop]\n' >&2; exit 2 ;;
-            esac
-        done
+        # Reject local config conflicts before spending time on a suite download.
+        if [ "$with_config" -eq 1 ]; then zsh -df "$root/bin/omztty-sync" pull; fi
         tmp=$(mktemp -d "${TMPDIR:-/tmp}/oh-my-ztty-update.XXXXXXXX")
         trap 'rm -rf -- "$tmp"' EXIT
         trap 'exit 130' INT
@@ -126,6 +147,8 @@ case "$cmd" in
         (cd "$tmp" && sha256sum -c install.sh.sha256)
         base=$(CDPATH= cd -- "$root/../.." && pwd -P)
         [ -f "$base/.owner" ] || { printf 'Update requires an installed suite\n' >&2; exit 1; }
+        set --
+        [ -z "$desktop_option" ] || set -- "$desktop_option"
         XDG_DATA_HOME=$(dirname -- "$base") OMZTTY_BIN_DIR=$(cat "$base/.bin-dir") sh "$tmp/install.sh" "$@" ;;
     uninstall)
         if [ -f "$root/PACKAGE_MANAGER" ]; then

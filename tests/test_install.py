@@ -42,6 +42,8 @@ class Installation(unittest.TestCase):
         stage = self.work / ("stage-" + version) / "oh-my-ztty"
         stage.mkdir(parents=True)
         for rel in ["install.sh", "uninstall.sh", "bin/omztty", "bin/zshard",
+                    "bin/omztty-config", "bin/omztty-manage", "bin/omztty-setup", "bin/omztty-sync",
+                    "config/zsh/settings-lib.zsh", "config/zsh/settings.zsh",
                     "config/zsh/.zshrc", "config/zsh/completion-paths.zsh", "config/zsh/ink.zsh", "packaging/oh-my-ztty.svg", "packaging/omztty.1"]:
             out = stage / rel
             out.parent.mkdir(parents=True, exist_ok=True)
@@ -163,6 +165,33 @@ shutil.copyfile(sources[urls[0]], args[args.index("-o") + 1])
         self.assertTrue(desktop.is_symlink())
         if shutil.which("desktop-file-validate"):
             self.run_command(["desktop-file-validate", desktop])
+
+    def test_uninstall_removes_only_the_managed_shell_hook(self):
+        self.install()
+        profile = Path(self.env["XDG_CONFIG_HOME"]) / "oh-my-ztty/profile"
+        profile.mkdir(parents=True)
+        (profile / ".omztty-profile").write_text("omztty-profile-v1\n")
+        original = (self.home / ".zshrc").read_bytes()
+        self.cli("rc", "install")
+        self.assertIn("# >>> oh-my-ztty shell >>>", (self.home / ".zshrc").read_text())
+        self.cli("uninstall")
+        self.assertEqual((self.home / ".zshrc").read_bytes(), original)
+        self.assertFalse(self.base.exists())
+
+    def test_uninstall_uses_the_portable_deployment_journal(self):
+        self.install()
+        profile = Path(self.env["XDG_CONFIG_HOME"]) / "oh-my-ztty/profile"
+        profile.mkdir(parents=True)
+        (profile / ".omztty-profile").write_text("omztty-profile-v1\n")
+        (profile / ".config-layout").write_text("canonical-v1\n")
+        journal = Path(self.env["XDG_STATE_HOME"]) / "zdot/oh-my-ztty/fixture"
+        journal.mkdir(parents=True)
+        (journal / "owner").write_text("fixture journal\n")
+        executable = self.base / "current/bin/zdot"
+        executable.write_text('#!/bin/sh\nprintf "%s\\n" "$@" > "$HOME/remove-args"\n')
+        self.cli("uninstall")
+        args = (self.home / "remove-args").read_text().splitlines()
+        self.assertEqual(args[args.index("--profile") + 1], ".omztty-target.zdot")
 
     def assert_real_completion_cache_reused(self, completion=None):
         settings = Path(self.env["XDG_CONFIG_HOME"]) / "oh-my-ztty"

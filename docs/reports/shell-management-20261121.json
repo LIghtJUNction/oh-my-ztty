@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "feature": "shell-settings-and-private-profile-sync",
+  "base_commit": "f2a11a9df1fea066986acec021578418d9060a3f",
+  "runtime": "zsh",
+  "commands": [
+    "setup",
+    "env",
+    "path",
+    "rc",
+    "sync",
+    "update --config-only",
+    "update --with-config"
+  ],
+  "storage": {
+    "shared": "${XDG_CONFIG_HOME:-$HOME/.config}/oh-my-ztty/profile/shell",
+    "local_environment": "${XDG_CONFIG_HOME:-$HOME/.config}/oh-my-ztty/local/env.tsv",
+    "versioning": "file snapshots without Git; local commits after independent profile Git initialization",
+    "binary_policy": "only allowed UTF-8 text configuration is staged and synchronized; incoming and outgoing Git trees are validated"
+  },
+  "validation": {
+    "suite": {
+      "command": "make check",
+      "tests": 180,
+      "result": "passed",
+      "duration_seconds": 168.038
+    },
+    "native_zdot": {
+      "result": "passed",
+      "steps": [
+        "install",
+        "config init",
+        "config plan --json",
+        "config apply --backup",
+        "config status",
+        "uninstall"
+      ],
+      "original_rc_restored": true
+    },
+    "real_shell_setup": {
+      "result": "passed",
+      "actual_zrc_defaults": true,
+      "actual_zsh": true,
+      "git_restore": true,
+      "git_mode_creates_no_new_file_snapshots": true,
+      "machine_environment_stays_outside_git": true,
+      "rc_install_uninstall_preserves_original": true
+    },
+    "github_wizard": {
+      "test_backend": "local Git/bare remotes and gh stubs",
+      "created_real_remote_repository": false
+    },
+    "website": {
+      "result": "passed",
+      "pages": 10,
+      "local_links_checked": 607,
+      "desktop_viewport": [
+        1280,
+        960
+      ],
+      "mobile_viewport": [
+        390,
+        844
+      ],
+      "screenshots_reviewed": true
+    },
+    "source_checkout_followup": {
+      "command": "python3 -m unittest discover -s tests -p test_shell_management.py -v",
+      "tests": 34,
+      "result": "passed",
+      "duration_seconds": 2.739,
+      "older_installed_launcher_fallback": true
+    }
+  },
+  "artifacts": {
+    "generated_binaries_committed": false,
+    "screenshots": "kept outside tracked source",
+    "component_gitlinks_changed": false
+  },
+  "validated_at": "2026-11-21T09:46:10.818291+00:00"
+}
