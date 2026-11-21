@@ -346,10 +346,14 @@ rc_hook() {
     cat <<'EOF'
 # >>> oh-my-ztty shell >>>
 if [[ -z ${_OMZTTY_SETTINGS_LOADED:-} ]]; then
-    if (( $+commands[omztty] )); then
+    if (( $+commands[omztty] )) && [[ -r "${commands[omztty]:A:h:h}/config/zsh/settings.zsh" ]]; then
         source "${commands[omztty]:A:h:h}/config/zsh/settings.zsh"
     elif [[ -r "${XDG_DATA_HOME:-$HOME/.local/share}/oh-my-ztty/current/config/zsh/settings.zsh" ]]; then
         source "${XDG_DATA_HOME:-$HOME/.local/share}/oh-my-ztty/current/config/zsh/settings.zsh"
+EOF
+    # A source checkout may coexist with an older installed launcher.
+    printf '    elif [[ -r %q ]]; then\n        source %q\n' "$root/config/zsh/settings.zsh" "$root/config/zsh/settings.zsh"
+    cat <<'EOF'
     fi
 fi
 # <<< oh-my-ztty shell <<<

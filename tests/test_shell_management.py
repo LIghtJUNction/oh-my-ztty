@@ -343,6 +343,21 @@ class ShellManagement(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(result.stdout, "loaded\n")
 
+    def test_source_hook_works_alongside_an_older_installed_launcher(self):
+        self.cli("env", "set", "OMZTEST_SOURCE", "source settings")
+        old_bin = self.work / "old suite/bin"
+        old_bin.mkdir(parents=True)
+        launcher = old_bin / "omztty"
+        launcher.write_text("#!/bin/sh\nexit 99\n")
+        launcher.chmod(0o755)
+        self.cli("rc", "install")
+        env = self.env | {"PATH": str(old_bin) + ":/usr/bin:/bin", "ZDOTDIR": str(self.home)}
+        result = subprocess.run([ZSH, "-di", "-c", 'print -r -- "$OMZTEST_SOURCE"'],
+                                env=env, capture_output=True, text=True, timeout=10)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout, "source settings\n")
+        self.assertEqual(result.stderr, "")
+
     def test_backup_restore_preserves_mode_and_current_version(self):
         self.cli("env", "set", "OMZTEST_VALUE", "first")
         target = self.local / "env.tsv"

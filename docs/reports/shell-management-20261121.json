@@ -63,6 +63,13 @@
         844
       ],
       "screenshots_reviewed": true
+    },
+    "source_checkout_followup": {
+      "command": "python3 -m unittest discover -s tests -p test_shell_management.py -v",
+      "tests": 34,
+      "result": "passed",
+      "duration_seconds": 2.739,
+      "older_installed_launcher_fallback": true
     }
   },
   "artifacts": {
