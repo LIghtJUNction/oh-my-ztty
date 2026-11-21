@@ -111,6 +111,27 @@ _ssmcp_account() {
     _arguments "$options[@]"
 }
 
+_ssmcp_computer() {
+    local action
+    local -i index
+    local -a options=('--json[Emit the complete result as JSON]')
+    local -a positionals=('1:Zuse lifecycle action:(version download install uninstall)')
+    for (( index = 2; index < CURRENT; ++index )); do
+        [[ $words[index] == --json ]] && continue
+        action=$words[index]
+        break
+    done
+    case $action in
+        '') options+=('(-h --help)'{-h,--help}'[Show help]') ;;
+        version) ;;
+        download) positionals+=('2:release version:') ;;
+        install) positionals+=('2:managed download identifier:') ;;
+        uninstall) positionals+=('2:managed installation identifier:') ;;
+        *) return 1 ;;
+    esac
+    _arguments "$options[@]" "$positionals[@]"
+}
+
 _ssmcp_sessions() {
     local kind=${1:-normal} action=${words[2]}
     local -a operations=(list status start stop close restart logs auth remove create)
@@ -157,7 +178,8 @@ _ssmcp() {
         'login:Sign in' 'whoami:Show account identity' 'logout:Remove the selected login'
         'local:Run a local MCP session on Linux'
         'config:Manage client settings' 'trust:Manage relay trust pins'
-        'setup:Configure account or browser access' 'ui:Configure and preview the interface'
+        'setup:Configure account access' 'ui:Configure and preview the interface'
+        'computer:Manage the standalone Zuse CLI'
         'sessions:Manage saved local sessions' 'attach:Attach to a saved session'
         'service:Manage the background service' '007:Manage Linux recovery'
         'update:Update the installed client'
@@ -173,7 +195,7 @@ _ssmcp() {
             --name|--title|--server|--username|--allow|--context-root|--listen|--public-url|\
             --shell|--tty|--reconnect-delay|--log-format|--ui-config|\
             --theme|--max-inline-output|--client|--terminal|--state-dir|\
-            --user|--cwd|--public-key|--pin|--playwright-mcp|--lines|\
+            --user|--cwd|--public-key|--pin|--lines|\
             --rows|--cols)
                 if (( index + 1 < CURRENT )) && [[ $words[index+1] == -* ]]; then
                     words[index+1]=__ssmcp_option_value__
@@ -187,7 +209,7 @@ _ssmcp() {
     if (( CURRENT > 2 )); then
         case $action in
             invite|join) return 1 ;;
-            login|whoami|logout|list|ls|local|config|trust|setup|ui|sessions|attach|service|007|update)
+            login|whoami|logout|list|ls|local|config|trust|setup|computer|ui|sessions|attach|service|007|update)
                 shift words
                 (( --CURRENT ))
                 ;;
@@ -226,28 +248,8 @@ _ssmcp() {
             esac
             _arguments "$options[@]"
             ;;
-        setup)
-            if [[ $words[2] == browser ]] && (( CURRENT > 2 )); then
-                shift words
-                (( --CURRENT ))
-                _arguments \
-                    '(-h --help)'{-h,--help}'[Show help]' \
-                    '(--install --playwright-mcp --background --foreground)--native[Check native browser dependencies]' \
-                    '(--install --playwright-mcp --background --foreground)--check[Check without changing settings]' \
-                    '(--native --check --playwright-mcp)--install[Install the Playwright MCP integration]' \
-                    '(--native --check --install)--playwright-mcp[Select an installed MCP entry]:entry file:_files' \
-                    '(--native --check --foreground)--background[Control in the background]' \
-                    '(--native --check --background)--foreground[Allow window activation]' \
-                    '--json[Emit JSON]'
-            elif (( CURRENT == 2 )); then
-                _arguments '(-h --help)'{-h,--help}'[Show help]' \
-                    '--server[Select the HTTPS relay]:HTTPS origin:' \
-                    '--no-browser[Print the authorization link]' '--name[Display name]:name:' \
-                    '1:setup action:(browser)'
-            else
-                _ssmcp_account setup
-            fi
-            ;;
+        setup) _ssmcp_account setup ;;
+        computer) _ssmcp_computer ;;
         ui)
             local -a options=('(-h --help)'{-h,--help}'[Show help]'
                               '1:UI action:(show check init preview)'

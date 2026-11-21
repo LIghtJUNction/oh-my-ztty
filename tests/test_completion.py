@@ -286,8 +286,20 @@ class InteractiveCompletion(unittest.TestCase):
             "ssmcp config se": "ssmcp config set",
             "ssmcp config set ser": "ssmcp config set server",
             "ssmcp trust add --pub": "ssmcp trust add --public-key",
-            "ssmcp setup bro": "ssmcp setup browser",
-            "ssmcp setup browser --play": "ssmcp setup browser --playwright-mcp",
+            "ssmcp setup bro": "ssmcp setup bro",
+            "ssmcp setup browser --play": "ssmcp setup browser --play",
+            "ssmcp setup --no-b": "ssmcp setup --no-browser",
+            "ssmcp com": "ssmcp computer",
+            "ssmcp computer ver": "ssmcp computer version",
+            "ssmcp computer dow": "ssmcp computer download",
+            "ssmcp computer ins": "ssmcp computer install",
+            "ssmcp computer uni": "ssmcp computer uninstall",
+            "ssmcp computer --json ins": "ssmcp computer --json install",
+            "ssmcp computer version --j": "ssmcp computer version --json",
+            "ssmcp computer install download-fixture --j":
+                "ssmcp computer install download-fixture --json",
+            "ssmcp computer to": "ssmcp computer to",
+            "ssmcp computer sta": "ssmcp computer sta",
             "ssmcp ui prev": "ssmcp ui preview",
             "ssmcp ui preview --theme min": "ssmcp ui preview --theme minimal",
             "ssmcp sessions lo": "ssmcp sessions logs",
@@ -337,7 +349,6 @@ class InteractiveCompletion(unittest.TestCase):
             ("ssmcp --context-root direc", "directory with spaces 中文/"),
             ("ssmcp --ui-config file", "file with spaces 中文.txt"),
             ("ssmcp trust add --public-key file", "file with spaces 中文.txt"),
-            ("ssmcp setup browser --playwright-mcp file", "file with spaces 中文.txt"),
             ("ssmcp sessions create fixture --cwd direc", "directory with spaces 中文/"),
             ("ssmcp service install --state-dir direc", "directory with spaces 中文/"),
         ]:
@@ -348,6 +359,11 @@ class InteractiveCompletion(unittest.TestCase):
             "ssmcp --name file": "ssmcp --name file",
             "ssmcp --server file": "ssmcp --server file",
             "ssmcp sessions logs file": "ssmcp sessions logs file",
+            "ssmcp setup browser --playwright-mcp file":
+                "ssmcp setup browser --playwright-mcp file",
+            "ssmcp computer download file": "ssmcp computer download file",
+            "ssmcp computer install file": "ssmcp computer install file",
+            "ssmcp computer uninstall file": "ssmcp computer uninstall file",
         })
 
     def test_ssmcp_through_suite_and_ai_entrypoints(self):
@@ -361,6 +377,8 @@ class InteractiveCompletion(unittest.TestCase):
                                  shlex.split(prefix + " sessions logs"))
                 self.assertEqual(self.complete(prefix + " --account-co"),
                                  shlex.split(prefix + " --account-compat"))
+                self.assertEqual(self.complete(prefix + " computer ver"),
+                                 shlex.split(prefix + " computer version"))
 
     def test_framework_nested_arguments(self):
         plugins = Path(self.env["XDG_DATA_HOME"]) / "zshard/plugins"
