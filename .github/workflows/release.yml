@@ -26,6 +26,9 @@ jobs:
     runs-on: ${{ matrix.runner }}
     env:
       RELEASE_TAG: ${{ github.event.inputs.tag || github.ref_name }}
+      # Keep final outputs and Cargo 1.100 intermediate artifacts in explicit cache roots.
+      CARGO_TARGET_DIR: ${{ github.workspace }}/.cache/cargo-target/${{ matrix.arch }}
+      CARGO_BUILD_BUILD_DIR: ${{ github.workspace }}/.cache/cargo-build/${{ matrix.arch }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -34,8 +37,12 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - name: Match immutable tag to suite version
-        run: test "$RELEASE_TAG" = "v$(cat VERSION)"
+        id: release_source
+        run: |
+          test "$RELEASE_TAG" = "v$(cat VERSION)"
+          printf 'commit=%s\n' "$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       - name: Install build and shell prerequisites
+        id: rust_toolchain
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential pkg-config zsh xvfb xdotool imagemagick fonts-dejavu-core \
@@ -44,6 +51,27 @@ jobs:
             libegl1-mesa-dev libgles2-mesa-dev libgcc-s1
           rustup toolchain install 1.100.0 --profile minimal
           rustup default 1.100.0
+          rustc -Vv > "$RUNNER_TEMP/oh-my-ztty-rustc.txt"
+          printf 'fingerprint=%s\n' "$(sha256sum "$RUNNER_TEMP/oh-my-ztty-rustc.txt" | cut -d ' ' -f 1)" >> "$GITHUB_OUTPUT"
+          printf 'cargo_home=%s\n' "${CARGO_HOME:-$HOME/.cargo}" >> "$GITHUB_OUTPUT"
+      - name: Restore Cargo downloads and compiled artifacts
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        continue-on-error: true
+        with:
+          # Cache only public dependency downloads and disposable compiler output.
+          path: |
+            ${{ steps.rust_toolchain.outputs.cargo_home }}/registry/cache
+            ${{ steps.rust_toolchain.outputs.cargo_home }}/registry/index
+            ${{ steps.rust_toolchain.outputs.cargo_home }}/registry/src
+            ${{ steps.rust_toolchain.outputs.cargo_home }}/git/db
+            ${{ steps.rust_toolchain.outputs.cargo_home }}/git/checkouts
+            ${{ env.CARGO_TARGET_DIR }}
+            ${{ env.CARGO_BUILD_BUILD_DIR }}
+          key: oh-my-ztty-release-v1-${{ matrix.runner }}-${{ runner.os }}-${{ runner.arch }}-${{ matrix.arch }}-rust-1.100.0-${{ steps.rust_toolchain.outputs.fingerprint }}-${{ hashFiles('dependencies.lock.json', 'components/**/Cargo.lock', 'components/**/Cargo.toml') }}-${{ steps.release_source.outputs.commit }}
+          # Cargo must revalidate restored fingerprints; every check below still runs.
+          restore-keys: |
+            oh-my-ztty-release-v1-${{ matrix.runner }}-${{ runner.os }}-${{ runner.arch }}-${{ matrix.arch }}-rust-1.100.0-${{ steps.rust_toolchain.outputs.fingerprint }}-${{ hashFiles('dependencies.lock.json', 'components/**/Cargo.lock', 'components/**/Cargo.toml') }}-
+            oh-my-ztty-release-v1-${{ matrix.runner }}-${{ runner.os }}-${{ runner.arch }}-${{ matrix.arch }}-rust-1.100.0-${{ steps.rust_toolchain.outputs.fingerprint }}-
       - name: Check installer lifecycle
         run: make check
       - name: Build complete source-locked bundle

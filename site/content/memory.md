@@ -42,6 +42,28 @@ omztty memory run --class background -- cargo build
 
 Interactive work can use `--class interactive`. The `disposable` class is for work you explicitly allow to encounter a hard memory limit. Use the class before starting the process so the kernel accounts for its memory in the intended group.
 
+### Wait before starting more heavy work
+
+With zmem 0.4, background and disposable commands check available RAM and memory PSI before execution. The default wait is 60 seconds. A timeout returns exit code 75 without starting the target; an interactive command bypasses admission. The suite's managed Cargo entry points inherit this behavior when the installed manager is upgraded.
+
+```sh
+# Allow a batch job up to five minutes to find sufficient headroom.
+omztty memory run --class background --wait-timeout 300 -- cargo build --release --locked
+
+# Check once and leave the command unstarted if conditions are unsuitable.
+omztty memory run --class background --wait-timeout 0 -- YOUR_COMMAND
+```
+
+A healthy first observation can pass immediately. After pressure or a missing observation, memory must satisfy stricter recovery conditions for three seconds. Launch reservations by the same user are spaced by at least three seconds to limit a simultaneous burst; scheduling can still change actual execution timing. Waiting emits JSON events on stderr, keeps stdout for the command, and can be cancelled with SIGINT or SIGTERM. This is not a persistent FIFO queue or a prediction of a program's peak memory.
+
+Admission does not install a permanent CPU quota or storage bandwidth cap. The [zmem admission guide](https://github.com/LIghtJUNction/zmem/blob/main/docs/background-admission.md) describes the launch reserve, thresholds and exit codes. Existing running programs outside the managed groups retain their placement; arbitrary terminal commands are not automatically intercepted.
+
+### Reuse compilation work
+
+Keep the shared Cargo target directory when repeating local checks. Fresh temporary target directories cannot reuse that directory's earlier compiled artifacts. The source helpers retain the existing outer build lock and do not move Cargo metadata queries into admission.
+
+Official releases cache Cargo downloads, unpacked registry and Git dependency sources, final outputs and intermediate build artifacts. The cache is separated by architecture, runner and actual Rust toolchain identity, with source and lock identities in the key. Cargo still checks restored fingerprints, and installer, source-lock, smoke and graphical checks continue to run. The first run populates the cache; a warm-cache speedup has not yet been measured. See the [Cargo build-cache documentation](https://doc.rust-lang.org/cargo/reference/build-cache.html) for the separate target and build directories.
+
 Background jobs inherit the managed aggregate's dynamic budget. Starting a background job adds no fixed half-RAM limit to its child scope. During pressure, the daemon calculates the aggregate from current managed usage, available RAM and the configured reserve plus a safety margin. Populated groups share the budget; empty groups receive no share. Existing external limits remain in force.
 
 Changes tighten groups before relaxing any limits. A failed tightening blocks that batch's relaxations, and a failed relaxation stops the remaining ones. Incomplete observations hold existing controls; only kernel readback confirms the resulting budget. Measured spare headroom allows gradual recovery even while the current `memory.high` limit produces PSI stalls, so work can regain capacity as room becomes available. Healthy policy removes the temporary restriction.
