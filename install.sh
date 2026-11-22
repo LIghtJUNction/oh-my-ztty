@@ -1,7 +1,7 @@
 #!/bin/sh
 # Per-user suite with a separately installed system zmem service.
 set -eu
-VERSION=0.2.11
+VERSION=0.2.12
 die() { printf 'oh-my-ztty: %s\n' "$*" >&2; exit 1; }
 usage() {
     cat <<'EOF'

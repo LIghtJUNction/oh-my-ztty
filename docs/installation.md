@@ -140,10 +140,10 @@ Configure an installed AI provider's executable and arguments as the `ZSHARD_AI_
 
 ## Offline installation
 
-Download the archive and its matching `.sha256` file from the same published release. The following example uses the x86_64 archive for [v0.2.6](https://github.com/LIghtJUNction/oh-my-ztty/releases/tag/v0.2.11) once that release is published.
+Download the archive and its matching `.sha256` file from the same published release. The following example uses the x86_64 archive for [v0.2.6](https://github.com/LIghtJUNction/oh-my-ztty/releases/tag/v0.2.12) once that release is published.
 
 ```sh
-sh install.sh --from ./oh-my-ztty-0.2.11-linux-x86_64.tar.gz
+sh install.sh --from ./oh-my-ztty-0.2.12-linux-x86_64.tar.gz
 ```
 
 Use the aarch64 archive on ARM64. An explicit `--sha256 HEX` can replace the sidecar file when the digest has already been obtained from the release record.
