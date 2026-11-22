@@ -7,15 +7,30 @@ zmem is the suite's default system memory manager. The release installer sets it
 ```sh
 omztty memory
 omztty memory status --json --processes
+omztty memory status --live --json
 omztty memory plan --json
 omztty memory doctor --json
 ```
 
-Status reports available RAM, Swap, pressure and process usage. The plan explains the current policy decision. JSON output gives AI tools the same measurements and decisions as the command line. `omztty doctor` also shows whether the system memory service is active.
+`status` uses the report of the active zmem daemon after checking its process identity. The report retains that daemon's policy history, measured paging rates, worker state and errors. `--processes` adds a current process list. The `observation` fields identify the report source, sampling age and stale data; process measurements have their own timestamp. `omztty doctor` also shows whether the system memory service is active.
 
-zmem observes how long tasks wait for memory, alongside available RAM and Swap. Under pressure it can prepare more disk Swap and lower the memory high-water mark of managed background jobs. It protects session memory and avoids repeatedly changing policy when pressure fluctuates.
+`status --live` and `plan` take an independent sample and show a proposed action without applying it. They begin with a new policy state, and paging rates are `null` until measurements are available. If the daemon report cannot be used, ordinary `status` labels its fallback as an independent snapshot and records the cache error. AI clients should check this provenance before interpreting a decision as a daemon report.
+
+## Read pressure, controls and coverage
+
+Memory pressure and IO congestion are separate signals. zmem observes available RAM, memory stalls, file-page refaults and swap activity to decide whether to adjust memory budgets or Swap capacity. Busy IO alone does not lower its swappiness preference. Measured disk-swap pressure can lower it; file pages being evicted and used again can favor retaining file cache when the paging evidence supports that choice.
+
+The `controls` object reports requested and actual swappiness, its reason, the actual page-cluster value, the protection budget and the count of successfully protected scopes. `managed` reports background groups, populated groups, task counts, memory usage and eligible reclaim candidates. The `protection_complete` and `coverage_complete` flags expose incomplete control operations or observations. A plan's requested bytes describe an intended action; observed reclaim progress is reported separately.
+
+The `background` object reports `requested_budget_bytes`, `actual_budget_bytes` and per-group limits. The actual aggregate comes from reading back the limits of populated groups; `plan_available`, `readback_complete` and `applied_complete` identify available plans, complete observations and successful application. With complete information, a `null` budget means no temporary requested ceiling or an unlimited observed group; otherwise it is unavailable. `plan.background_high_percent` remains a pressure-severity hint. Use the byte fields to inspect requested and actual quotas.
+
+An empty background scope has no work to constrain or reclaim. zmem applies background budgets to jobs started in its managed class. Existing applications outside those groups keep their current placement. Interactive protection follows recognized desktop, terminal and remote-access processes into their nested cgroups and distributes a bounded budget through the hierarchy. Recursive kernel protection can pass an ancestor's budget to children even when a child's local `memory.low` is zero.
 
 ## Keep background jobs manageable
+
+The suite's source-bundle builder, direct Cargo commands in its component checker, and Project Z's build coordinator automatically start new Cargo builds, checks, tests, benchmarks, Clippy, documentation and compiler jobs in zmem's background class when an active, identity-verified zmem 0.2 or newer is available. This gives the daemon a separate group to budget before the job allocates memory. The existing outer Cargo build lock still coordinates shared build files.
+
+If the required Linux systemd manager or verified zmem daemon is unavailable, the build entry point reports the reason and runs the command normally. Set `ZMEM_BUILD_BACKGROUND=0` for a build batch to keep the caller's current classification. This automatic routing applies to those source entry points' direct Cargo invocations; other background commands can use the explicit form below.
 
 Start a build or other background job through the managed scope:
 
@@ -24,6 +39,12 @@ omztty memory run --class background -- cargo build
 ```
 
 Interactive work can use `--class interactive`. The `disposable` class is for work you explicitly allow to encounter a hard memory limit. Use the class before starting the process so the kernel accounts for its memory in the intended group.
+
+Background jobs inherit the managed aggregate's dynamic budget. Starting a background job adds no fixed half-RAM limit to its child scope. During pressure, the daemon calculates the aggregate from current managed usage, available RAM and the configured reserve plus a safety margin. Populated groups share the budget; empty groups receive no share. Existing external limits remain in force.
+
+Changes tighten groups before relaxing any limits. A failed tightening blocks that batch's relaxations, and a failed relaxation stops the remaining ones. Incomplete observations hold existing controls; only kernel readback confirms the resulting budget. Measured spare headroom allows gradual recovery even while the current `memory.high` limit produces PSI stalls, so work can regain capacity as room becomes available. Healthy policy removes the temporary restriction.
+
+Proactive reclaim selects populated managed groups with eligible clean file pages. Empty groups and groups without suitable pages are skipped; requests that produce no observed progress trigger a retry backoff. The current coverage and progress reports show which work this policy can affect.
 
 The default policy preserves processes. It does not discard application data, clear the entire page cache or provide application checkpoints. Applications remain responsible for saving their documents and progress.
 

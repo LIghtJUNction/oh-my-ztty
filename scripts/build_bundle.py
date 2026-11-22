@@ -14,6 +14,8 @@ import sys
 import tarfile
 import tempfile
 
+from managed_build import background_command
+
 ROOT = Path(__file__).resolve().parents[1]
 ARCHES = {"x86_64": 62, "aarch64": 183}
 COMPONENTS = ("ztty", "ssmcp", "zshard", "zdot", "zrc", "zfetch", "zmem")
@@ -85,7 +87,7 @@ def build_component(name, arch):
     if name == "ztty":
         command.extend(["--features", "wayland"])
     # Cargo owns output placement, including the user's shared target directory.
-    result = subprocess.run(command, cwd=source, check=True, text=True,
+    result = subprocess.run(background_command(command), cwd=source, check=True, text=True,
                             stdout=subprocess.PIPE)
     executables = set()
     for line in result.stdout.splitlines():
@@ -121,7 +123,9 @@ def tracked_component(name, destination):
             copy(source / entry, destination / entry)
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description=__doc__, epilog=
+        "Builds use an available verified zmem >=0.2 background class; "
+        "set ZMEM_BUILD_BACKGROUND=0 to keep the caller's classification.")
     parser.add_argument("--arch", choices=ARCHES, default=platform.machine())
     parser.add_argument("--output", type=Path, default=ROOT / "dist")
     args = parser.parse_args(argv)

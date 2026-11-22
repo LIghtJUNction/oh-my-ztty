@@ -3,14 +3,17 @@ from contextlib import redirect_stdout
 import importlib.util
 import io
 import json
+import os
 from pathlib import Path
 import subprocess
+import sys
 import tarfile
 import tempfile
 import unittest
 from unittest.mock import patch
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts/build_bundle.py"
+sys.path.insert(0, str(SCRIPT.parent))
 SPEC = importlib.util.spec_from_file_location("suite_build_bundle", SCRIPT)
 BUNDLE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(BUNDLE)
@@ -33,6 +36,9 @@ def artifact(name, path, manifest):
 
 class BundleTests(unittest.TestCase):
     def setUp(self):
+        environment = patch.dict(os.environ, {"ZMEM_BUILD_BACKGROUND": "0"})
+        environment.start()
+        self.addCleanup(environment.stop)
         self.temporary = tempfile.TemporaryDirectory(prefix="suite source build ")
         self.addCleanup(self.temporary.cleanup)
         self.base = Path(self.temporary.name)
@@ -217,6 +223,19 @@ class BundleTests(unittest.TestCase):
         with patch.object(BUNDLE.subprocess, "run", return_value=result), \
                 self.assertRaisesRegex(RuntimeError, "exactly one ssmcp executable"):
             BUNDLE.build_component("ssmcp", "x86_64")
+
+    def test_background_route_retains_cargo_json_and_component_workdir(self):
+        binary = executable(self.base / "shared/release/zmem")
+        manifest = self.root / "components/zmem/Cargo.toml"
+        result = subprocess.CompletedProcess([], 0, json.dumps(artifact("zmem", binary, manifest)))
+        prefix = ["/installed/zmem", "run", "--class", "background", "--"]
+        with patch.object(BUNDLE, "background_command", side_effect=lambda command: prefix + command), \
+                patch.object(BUNDLE.subprocess, "run", return_value=result) as invoke:
+            self.assertEqual(BUNDLE.build_component("zmem", "x86_64"), binary)
+        self.assertEqual(invoke.call_args.args[0][:6], prefix + ["cargo"])
+        self.assertEqual(invoke.call_args.kwargs["cwd"], manifest.parent)
+        self.assertEqual(invoke.call_args.kwargs["stdout"], subprocess.PIPE)
+        self.assertNotIn("env", invoke.call_args.kwargs)
 
     def fake_cargo(self, calls):
         real_run = subprocess.run

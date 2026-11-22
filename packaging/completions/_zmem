@@ -4,7 +4,7 @@ _zmem() {
     local context state state_descr line
     typeset -A opt_args
     local -a commands=(
-        'status:Show memory, Swap and pressure' 'plan:Explain the policy decision'
+        'status:Read daemon memory, Swap and pressure state' 'plan:Preview an independent policy decision'
         'doctor:Check system support' 'schema:Describe the AI interface'
         'run:Start a managed workload' 'daemon:Run the memory manager'
         'once:Evaluate one policy cycle' 'install:Install the system service'
@@ -17,7 +17,7 @@ _zmem() {
         return
     fi
     case $words[2] in
-        status) _arguments '1:command:(status)' '--json[Emit structured status]' '--processes[Include process usage]' ;;
+        status) _arguments '1:command:(status)' '--json[Emit structured status]' '--processes[Add current process usage]' '--live[Preview an independent sample without applying changes]' ;;
         plan|doctor) _arguments '1:command:(plan doctor)' '--json[Emit structured output]' ;;
         daemon) _arguments '1:command:(daemon)' '--observe[Observe without applying decisions]' '--config[Configuration file]:file:_files' ;;
         once) _arguments '1:command:(once)' '--apply[Apply the selected policy]' ;;

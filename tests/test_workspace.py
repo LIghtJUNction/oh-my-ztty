@@ -60,6 +60,7 @@ class WorkspaceFixture:
         self.root = self.repo("suite with spaces")
         (self.root / "scripts").mkdir()
         shutil.copy2(SCRIPT, self.root / "scripts/workspace.py")
+        shutil.copy2(SCRIPT.with_name("managed_build.py"), self.root / "scripts/managed_build.py")
         (self.root / ".gitignore").write_text(".cache/\n")
         self.lock_path = self.root / "dependencies.lock.json"
         lock = {"schema": 2, "updated_at": "2026-11-21T00:00:00+00:00",

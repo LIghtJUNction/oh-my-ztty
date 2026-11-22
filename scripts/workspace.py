@@ -11,11 +11,14 @@ import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
+from managed_build import background_command
+
 ROOT = Path(__file__).resolve().parent.parent
 COMPONENTS = ("ztty", "ssmcp", "zshard", "zdot", "zrc", "zfetch", "zmem")
 
 def run(*args, cwd=ROOT, capture=False):
-    result = subprocess.run(args, cwd=cwd, check=True, text=True,
+    command = background_command(args) if args[:1] == ("cargo",) else args
+    result = subprocess.run(command, cwd=cwd, check=True, text=True,
                             stdout=subprocess.PIPE if capture else None)
     return result.stdout.strip() if capture else ""
 

@@ -34,7 +34,7 @@ class InteractiveCompletion(unittest.TestCase):
                         ignore=shutil.ignore_patterns(".git", ".github", "tests", "scripts", "docs"))
         (self.runtime / "bin").mkdir()
         shutil.copy2(ROOT / "bin/omztty", self.runtime / "bin/omztty")
-        for name in ("ztty", "ssmcp", "zdot", "zfetch", "codex", "claude", "gemini",
+        for name in ("ztty", "ssmcp", "zdot", "zfetch", "zmem", "codex", "claude", "gemini",
                      "opencode", "pi", "amp", "go", "npx", "yarn", "rustc", "rustup", "node", "cmake",
                      "zcalld", "ztype", "zuse", "ssmcpd", "zmcl", "onim", "lmm", "mechrevo-console",
                      "wgt", "douyin", "lightjunction", "coolapk", "binance-cli"):
@@ -163,6 +163,16 @@ class InteractiveCompletion(unittest.TestCase):
             "omztty rc install --dry": "omztty rc install --dry-run",
             "omztty rc back": "omztty rc backups",
             "omztty sync his": "omztty sync history",
+        })
+
+    def test_memory_status_and_preview_routes(self):
+        self.start()
+        self.cases({
+            "zmem status --li": "zmem status --live",
+            "omztty memory status --li": "omztty memory status --live",
+            "omztty zmem status --li": "omztty zmem status --live",
+            "omztty memory status --pro": "omztty memory status --processes",
+            "omztty memory plan --j": "omztty memory plan --json",
         })
 
     def test_terminal_options_and_command_boundaries(self):
