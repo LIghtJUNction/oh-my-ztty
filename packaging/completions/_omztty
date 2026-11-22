@@ -2,6 +2,22 @@
 
 autoload -Uz _omztty_zdot _omztty_terminal
 
+_omztty_completion() {
+    local -a actions=('list:List command completion sources' 'check:Check source and executable fingerprints'
+        'refresh:Validate and publish a local completion snapshot' 'path:Print the managed cache path'
+        'help:Show completion management help')
+    if (( CURRENT == 2 )); then _describe 'completion operation' actions; return; fi
+    case $words[2] in
+        list|check|refresh)
+            _arguments '--json[Emit structured output]' \
+                '--binary[Use an explicit SSMCP executable for check or refresh]:executable:_files -g "*(*)"' \
+                '1:operation:(list check refresh)' '2:command:_command_names'
+            ;;
+        path) _arguments '1:operation:(path)' '--json[Emit structured output]' ;;
+        *) return 1 ;;
+    esac
+}
+
 _omztty_config() {
     local -a actions=(
         'init:Prepare an editable profile' 'plan:Preview configuration deployment'
@@ -85,6 +101,7 @@ _omztty() {
         'ai:Use explicit AI actions' 'config:Manage the unified profile'
         'setup:Set up shell settings and private GitHub sync' 'env:Manage environment variables'
         'path:Manage PATH priority' 'rc:Manage shell snippets and backups' 'sync:Synchronize personal configuration'
+        'completion:List, check and refresh command completions'
         'dot:Run zdot' 'zdot:Run zdot' 'zshard:Manage shell plugins'
         'ztty:Run ztty' 'ssmcp:Run ssmcp'
         'info:Show system information' 'zfetch:Run zfetch'
@@ -108,6 +125,7 @@ _omztty() {
     case $command in
         config) _omztty_config ;;
         env|path|rc) _omztty_settings ;;
+        completion|completions) _omztty_completion ;;
         sync)
             if (( CURRENT == 2 )); then _arguments '1:operation:(status pull push init history restore)'
             elif [[ $words[2] == restore && CURRENT == 3 ]]; then _message 'Git commit or revision'
@@ -152,7 +170,11 @@ _omztty() {
                 _normal
             fi ;;
         shell) words[1]=zsh; service=zsh; _normal ;;
-        zshard|ssmcp) _normal ;;
+        zshard) _normal ;;
+        ssmcp)
+            local _OMZTTY_COMPLETION_BINARY=$OMZTTY_ROOT/bin/ssmcp
+            _normal
+            ;;
         ai)
             if (( CURRENT == 2 )); then
                 _arguments '1:action:(context connect ask propose help)'
@@ -161,6 +183,7 @@ _omztty() {
                 (( --CURRENT ))
                 words[1]=ssmcp
                 service=ssmcp
+                local _OMZTTY_COMPLETION_BINARY=$OMZTTY_ROOT/bin/ssmcp
                 _normal
             elif [[ $words[2] == (ask|propose) ]]; then
                 _message 'request text'

@@ -104,7 +104,7 @@ class BundleTests(unittest.TestCase):
         lock = self.source_fixture()
         for name in ["install.sh", "uninstall.sh", "LICENSE", "bin/omztty",
                      "bin/omztty-config", "bin/omztty-manage", "bin/omztty-setup",
-                     "bin/omztty-sync", "bin/zshard", "config/ztty/config",
+                     "bin/omztty-sync", "bin/omztty-completion", "bin/zshard", "config/ztty/config",
                      "packaging/omztty.1"]:
             path = self.root / name
             path.parent.mkdir(parents=True, exist_ok=True)
@@ -273,6 +273,9 @@ class BundleTests(unittest.TestCase):
                 self.assertTrue(contents.endswith((name + " source binary").encode()))
             self.assertEqual(stream.extractfile("oh-my-ztty/bin/code-mode.js").read(),
                              b"// source-matched code mode\n")
+            self.assertEqual(stream.extractfile("oh-my-ztty/bin/omztty-completion").read(),
+                             b"fixture bin/omztty-completion\n")
+            self.assertEqual(stream.getmember("oh-my-ztty/bin/omztty-completion").mode, 0o755)
             for name in BUNDLE.COMPONENTS:
                 self.assertEqual(stream.extractfile(f"oh-my-ztty/licenses/{name}.txt").read(),
                                  f"{name} license\n".encode())

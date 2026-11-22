@@ -34,6 +34,7 @@ class InteractiveCompletion(unittest.TestCase):
                         ignore=shutil.ignore_patterns(".git", ".github", "tests", "scripts", "docs"))
         (self.runtime / "bin").mkdir()
         shutil.copy2(ROOT / "bin/omztty", self.runtime / "bin/omztty")
+        shutil.copy2(ROOT / "bin/omztty-completion", self.runtime / "bin/omztty-completion")
         for name in ("ztty", "ssmcp", "zdot", "zfetch", "zmem", "codex", "claude", "gemini",
                      "opencode", "pi", "amp", "go", "npx", "yarn", "rustc", "rustup", "node", "cmake",
                      "zcalld", "ztype", "zuse", "ssmcpd", "zmcl", "onim", "lmm", "mechrevo-console",
@@ -233,6 +234,51 @@ class InteractiveCompletion(unittest.TestCase):
         (self.personal / "_omztty").write_text("#compdef omztty\ncompadd -- personal-completion\n")
         self.start()
         self.assertEqual(self.complete("omztty personal"), ["omztty", "personal-completion"])
+
+    def test_managed_ssmcp_snapshot_is_used_without_running_it_on_tab(self):
+        from test_completion_manager import HELP
+        binary = self.runtime / "bin/ssmcp"
+        binary.write_text("#!/usr/bin/python3\nimport sys\n"
+                          "print('ssmcp 0.10.27' if sys.argv[1] == '--version' else " + repr(HELP) + ")\n")
+        binary.chmod(0o755)
+        result = subprocess.run(
+            ["python3", "-I", str(self.runtime / "bin/omztty-completion"),
+             "refresh", "ssmcp", "--binary", str(binary)], env=self.env,
+            capture_output=True, text=True, timeout=15)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.start()
+        self.cases({"ssmcp --future-o": "ssmcp --future-option",
+                    "ssmcp autom": "ssmcp automation",
+                    "omztty ssmcp --future-o": "omztty ssmcp --future-option",
+                    "omztty ai connect --future-o": "omztty ai connect --future-option",
+                    "ssmcp automation --unknown": "ssmcp automation --unknown",
+                    "omztty completion ref": "omztty completion refresh",
+                    "omztty completion check ssmcp --j": "omztty completion check ssmcp --json"})
+        # Atomic binary upgrades cannot silently use the old observed options.
+        replacement = binary.with_suffix(".new")
+        replacement.write_text('#!/bin/sh\nprintf called > "$PROBE_EXECUTED"\nexit 99\n')
+        replacement.chmod(0o755)
+        replacement.replace(binary)
+        self.assertEqual(self.complete("ssmcp --future-o"), ["ssmcp", "--future-o"])
+
+    def test_refresh_rebuilds_same_name_personal_compdef_mapping(self):
+        personal = self.personal / "_fixture"
+        personal.write_text("#compdef fixture-first\ncompadd -- personal-choice\n")
+        refresh = ["python3", "-I", str(self.runtime / "bin/omztty-completion"), "refresh", "omztty"]
+        first = subprocess.run(refresh, env=self.env, capture_output=True, text=True, timeout=15)
+        self.assertEqual(first.returncode, 0, first.stdout + first.stderr)
+        self.start()
+        self.assertEqual(self.complete("fixture-first pers"), ["fixture-first", "personal-choice"])
+        os.write(self.master, b"\x1b[26~exit\n")
+        self.process.wait(timeout=2)
+        os.close(self.master)
+        self.process = self.master = None
+        personal.write_text("#compdef fixture-second\ncompadd -- personal-choice\n")
+        second = subprocess.run(refresh, env=self.env, capture_output=True, text=True, timeout=15)
+        self.assertEqual(second.returncode, 0, second.stdout + second.stderr)
+        self.start()
+        self.assertEqual(self.complete("fixture-second pers"), ["fixture-second", "personal-choice"])
+        self.assertEqual(self.complete("fixture-first pers"), ["fixture-first", "pers"])
 
     def test_delegate_receives_shifted_words(self):
         (self.personal / "_ztty").write_text(

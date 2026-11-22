@@ -1,5 +1,5 @@
 #compdef ssmcp
-# Native grammar follows the suite's pinned ssmcp release.
+# Reviewed nested grammar, optionally extended by an explicit local help snapshot.
 # Tab never runs ssmcp, reads account/session manifests or contacts a relay.
 
 _ssmcp_directories() {
@@ -32,6 +32,7 @@ _ssmcp_connection() {
         '--max-inline-output[Limit inline output]:lines (1-10000):'
         '--no-color[Disable ANSI colors]'
     )
+    [[ $mode == local ]] || options+=("${_omztty_installed_options[@]}")
     if [[ $mode == local ]]; then
         options+=(
             '--name[Display name]:name:'
@@ -173,6 +174,8 @@ _ssmcp() {
     typeset -A opt_args
     local -a words=("$words[@]")
     local -i CURRENT=$CURRENT index=2
+    local -a _omztty_installed_options=() _omztty_installed_commands=()
+    # omztty:installed-ssmcp-snapshot
     local -a actions=(
         'list:List remote clients'
         'login:Sign in' 'whoami:Show account identity' 'logout:Remove the selected login'
@@ -184,6 +187,10 @@ _ssmcp() {
         'service:Manage the background service' '007:Manage Linux recovery'
         'update:Update the installed client'
     )
+    local discovered
+    for discovered in "${_omztty_installed_commands[@]}"; do
+        (( ${#${(M)actions:#${discovered}:*}} )) || actions+=("$discovered:Installed SSMCP command")
+    done
     # Only this global prefix is normalized ahead of account subcommands by
     # ssmcp itself. An option value named "sessions" is never a subcommand.
     if (( CURRENT > 4 )) && [[ $words[2] == --server && $words[4] == (login|logout|whoami|list|ls) ]]; then
@@ -213,7 +220,14 @@ _ssmcp() {
                 shift words
                 (( --CURRENT ))
                 ;;
-            *) _ssmcp_connection; return ;;
+            *)
+                if (( ${_omztty_installed_commands[(Ie)$action]} )); then
+                    # Help reports this command, but its argument grammar has
+                    # not been reviewed. Do not guess flags or run it on Tab.
+                    return 1
+                fi
+                _ssmcp_connection; return
+                ;;
         esac
     else
         _ssmcp_connection
