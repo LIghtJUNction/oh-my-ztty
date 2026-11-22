@@ -86,7 +86,7 @@ def catalog():
             continue
         data = read_file(path)
         files[path.name] = data
-        first = data.decode("utf-8").splitlines()[0]
+        first = next(iter(data.decode("utf-8").splitlines()), "")
         if first.startswith("#compdef "):
             for name in first.split()[1:]:
                 if NAME.fullmatch(name):
@@ -116,6 +116,20 @@ def fingerprint(path):
 def selected_binary(explicit=None):
     value = explicit or shutil.which("ssmcp")
     return fingerprint(value) if value else None
+
+
+def personal_inputs(directory):
+    # Personal code is not copied, executed or changed. Its contents still affect
+    # compinit's command mapping, including same-name #compdef edits.
+    result = {}
+    for path in sorted(directory.glob("_*")) if directory.is_dir() else []:
+        if path.is_symlink():
+            target = path.resolve()
+            result[path.name] = {"link": os.readlink(path),
+                                 "sha256": digest(read_file(target)) if target.is_file() else None}
+        elif path.is_file():
+            result[path.name] = {"sha256": digest(read_file(path))}
+    return result
 
 
 def read_active(base):
@@ -275,7 +289,7 @@ def validate(payload, directory):
             raise ValueError(f"invalid zsh syntax in {name}; previous completion retained")
 
 
-def refresh(base, sources, names, selected, binary):
+def refresh(base, sources, names, selected, binary, personal):
     ensure_directory(base)
     ensure_directory(base / "generations")
     fd = os.open(base / ".lock", os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
@@ -287,10 +301,11 @@ def refresh(base, sources, names, selected, binary):
             raise ValueError("another completion refresh is running") from error
         old = read_active(base)
         source_hashes = {name: digest(data) for name, data in sources.items()}
+        personal_hashes = personal_inputs(personal)
         observe = "ssmcp" in selected and binary is not None
         if selected == ["ssmcp"] and binary is None:
             raise ValueError("ssmcp is not on PATH; use --binary /absolute/path/to/ssmcp")
-        if old and old[1]["sources"] == source_hashes:
+        if old and old[1]["sources"] == source_hashes and old[1].get("personal") == personal_hashes:
             prior = old[1].get("ssmcp")
             if not observe or prior and prior["binary"] == binary:
                 return {"changed": False, "generation": old[0].name, "directory": str(old[0])}
@@ -310,6 +325,7 @@ def refresh(base, sources, names, selected, binary):
                     payload[names["ssmcp"]] = old[2][names["ssmcp"]]
             validate(payload, generated)
             manifest = {"schema": 1, "root": str(ROOT), "sources": source_hashes,
+                        "personal": personal_hashes,
                         "files": {name: digest(data) for name, data in payload.items()},
                         "ssmcp": observation}
             raw = json_bytes(manifest)
@@ -324,14 +340,16 @@ def refresh(base, sources, names, selected, binary):
                     raise ValueError("existing generation differs; preserving all existing files")
             else:
                 generated.rename(destination)
-            if catalog()[0] != sources:
-                raise ValueError("bundled completion sources changed during refresh; previous completion retained")
+            if catalog()[0] != sources or personal_inputs(personal) != personal_hashes:
+                raise ValueError("completion sources changed during refresh; previous completion retained")
             pointer = stage / "current"
             with pointer.open("xb") as stream:
                 stream.write((generation + "\n").encode())
                 stream.flush()
                 os.fsync(stream.fileno())
             pointer.chmod(0o600)
+            if observe and fingerprint(binary["path"]) != binary:
+                raise ValueError("SSMCP changed before publication; previous completion retained")
             os.replace(pointer, base / "current")
         return {"changed": True, "generation": generation, "directory": str(destination)}
     finally:
@@ -340,6 +358,7 @@ def refresh(base, sources, names, selected, binary):
 
 def rows(sources, names, personal, active, selected, binary):
     result = []
+    personal_changed = active is not None and active[1].get("personal") != personal_inputs(personal)
     for name in selected:
         filename = names[name]
         source = ROOT / "packaging/completions" / filename
@@ -347,7 +366,7 @@ def rows(sources, names, personal, active, selected, binary):
         # A #compdef may live in a differently named personal file.
         for path in sorted(personal.glob("_*")) if personal.is_dir() else []:
             if path.is_file() and not path.is_symlink():
-                first = read_file(path).decode("utf-8").splitlines()[0]
+                first = next(iter(read_file(path).decode("utf-8").splitlines()), "")
                 if first.startswith("#compdef ") and name in first.split()[1:]:
                     override = path
                     break
@@ -355,6 +374,8 @@ def rows(sources, names, personal, active, selected, binary):
         observed = None
         if active:
             state = "current" if active[1]["sources"].get(filename) == digest(sources[filename]) else "stale-source"
+            if state == "current" and personal_changed:
+                state = "stale-personal"
             observed = active[1].get("ssmcp") if name == "ssmcp" else None
             if name == "ssmcp":
                 if observed is None:
@@ -389,7 +410,7 @@ def main():
         parser.error("unknown bundled command; use omztty completion list")
     personal, base = locations()
     binary = selected_binary(args.binary) if "ssmcp" in selected else None
-    changed = refresh(base, sources, names, selected, binary) if args.action == "refresh" else None
+    changed = refresh(base, sources, names, selected, binary, personal) if args.action == "refresh" else None
     active = read_active(base)
     output = {"schema": 1, "action": args.action, "root": str(ROOT), "state_directory": str(base),
               "personal_directory": str(personal), "active_directory": str(active[0]) if active else None,

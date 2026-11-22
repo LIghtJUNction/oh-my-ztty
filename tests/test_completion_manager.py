@@ -118,6 +118,7 @@ class CompletionManager(unittest.TestCase):
     def test_same_name_source_edit_changes_generation_and_preserves_personal(self):
         personal = self.home / "config/oh-my-ztty/completions/_my_ssmcp"
         personal.parent.mkdir(parents=True)
+        (personal.parent / "_empty").write_bytes(b"")
         personal.write_text("#compdef ssmcp\ncompadd -- personal\n")
         first = self.refresh()
         before = self.current()
@@ -130,6 +131,37 @@ class CompletionManager(unittest.TestCase):
         self.assertEqual(after["entries"][0]["personal_override"], str(personal))
         self.assertEqual(personal.read_text(), "#compdef ssmcp\ncompadd -- personal\n")
         self.assertTrue(Path(first["active_directory"]).is_dir())
+        generation = self.current()
+        personal.write_text("#compdef another-command\ncompadd -- personal\n")
+        stale = json.loads(self.run_manager("check", "ssmcp", "--json", success=False).stdout)
+        self.assertEqual(stale["entries"][0]["state"], "stale-personal")
+        self.refresh()
+        self.assertNotEqual(self.current(), generation)
+        self.assertEqual(personal.read_text(), "#compdef another-command\ncompadd -- personal\n")
+
+    def test_upgrade_during_validation_preserves_previous_pointer(self):
+        first = self.refresh()
+        pointer = (self.state / "current").read_bytes()
+        original = (Path(first["active_directory"]) / "_ssmcp").read_bytes()
+        self.write_binary("0.10.27")
+        real_zsh = shutil.which("zsh")
+        validator = self.root / "bin/zsh"
+        validator.write_text(
+            "#!/usr/bin/python3\nimport os,sys\nfrom pathlib import Path\n"
+            f"path=Path({str(self.binary)!r})\n"
+            "text=path.read_text()\n"
+            "if 'ssmcp 0.10.27' in text:\n"
+            " new=path.with_suffix('.upgrade')\n"
+            " new.write_text(text.replace('ssmcp 0.10.27','ssmcp 0.10.28'))\n"
+            " new.chmod(0o755)\n"
+            " new.replace(path)\n"
+            f"os.execv({real_zsh!r},[{real_zsh!r},*sys.argv[1:]])\n")
+        validator.chmod(0o755)
+        result = self.run_manager("refresh", "ssmcp", success=False)
+        self.assertIn("changed before publication", result.stderr)
+        self.assertIn("ssmcp 0.10.28", self.binary.read_text())
+        self.assertEqual((self.state / "current").read_bytes(), pointer)
+        self.assertEqual((Path(first["active_directory"]) / "_ssmcp").read_bytes(), original)
 
     def test_no_code_evaluation_from_help_and_unrecognized_help_rejected(self):
         sentinel = self.work / "should-not-exist"

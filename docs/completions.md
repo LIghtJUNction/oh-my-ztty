@@ -10,7 +10,7 @@ The shell searches personal definitions, the active managed snapshot, suite defi
 
 ## Check and refresh installed commands
 
-`omztty completion` manages local completion snapshots. Python 3 and zsh are required for management; shell startup does not run the manager.
+`omztty completion` manages local completion snapshots. Python 3.11 or newer and zsh are required for management; shell startup does not run the manager.
 
 ```sh
 omztty completion list
@@ -31,7 +31,7 @@ omztty completion check ssmcp --binary /absolute/path/to/ssmcp --json
 
 The help parser reads command names and option declarations as data. It generates quoted completion arguments, then checks their syntax with `zsh -n`; it never sources the help output. New top-level commands and connection options can therefore follow an installed SSMCP upgrade. Nested argument grammars still come from the reviewed bundled definition. A newly discovered subcommand is offered by name, without inventing its arguments. Other command providers use their bundled static definitions and do not execute their applications during refresh.
 
-Refresh writes a new private generation and atomically changes a small pointer only after validation succeeds. The generation name includes the source and executable fingerprints. A same-name definition edit therefore changes `fpath`, causing the existing audited zshard cache to rebuild. Failed probes, invalid syntax and changed sources keep the previous pointer and files. Existing shells retain their current functions; open a new shell to load the new generation. Old generations remain available to shells that already reference them.
+Refresh writes a new private generation and atomically changes a small pointer only after validation succeeds. The generation name includes the bundled source, personal definition and executable fingerprints. A same-name definition or personal `#compdef` edit therefore changes `fpath`, causing the existing audited zshard cache to rebuild. Personal files are only fingerprinted; the manager does not evaluate or copy them. Failed probes, invalid managed syntax and changed sources keep the previous pointer and files. Existing shells retain their current functions; open a new shell to load the new generation. Old generations remain available to shells that already reference them.
 
 The observed SSMCP additions apply only while the resolved executable and its local file identity match that snapshot. Replacing the executable falls back to bundled grammar until the next explicit refresh. `check` additionally hashes the complete executable to detect in-place changes. Neither shell startup nor Tab runs a version command, generator or network request.
 

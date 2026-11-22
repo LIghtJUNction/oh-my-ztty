@@ -1,6 +1,6 @@
 # Installation
 
-The release bundle includes ztty, zshard, zrc, zdot, zfetch, ssmcp and zmem. Installation and configuration commands from a release do not require Rust or Python. Install system zsh 5.9 or newer first.
+The release bundle includes ztty, zshard, zrc, zdot, zfetch, ssmcp and zmem. Installation and existing configuration commands from a release do not require Rust or Python. The optional completion manager requires Python 3.11 or newer. Install system zsh 5.9 or newer first.
 
 The suite window runs on X11 or XWayland. The pinned ztty 0.5.2 executable links X11, Xrender, Xft, Fontconfig, Wayland, xkbcommon, FreeType, HarfBuzz, EGL and GLES. These runtime libraries are required even when you select the X11 backend.
 
@@ -33,7 +33,7 @@ cd oh-my-ztty-bin
 makepkg -si
 ```
 
-This package uses prebuilt release binaries. Runtime and configuration commands need no Rust or Python. Use your AUR helper to upgrade it; the system package manager owns installed files. Adopt the home profile explicitly with the commands below. After upgrading an adopted profile, run `omztty config refresh` to bring forward unchanged defaults.
+This package uses prebuilt release binaries. Runtime and existing configuration commands need no Rust or Python. Use Python 3.11 or newer for `omztty completion`. Use your AUR helper to upgrade it; the system package manager owns installed files. Adopt the home profile explicitly with the commands below. After upgrading an adopted profile, run `omztty config refresh` to bring forward unchanged defaults.
 
 Restore adopted configurations before removing the package:
 

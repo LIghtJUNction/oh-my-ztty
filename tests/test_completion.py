@@ -251,6 +251,25 @@ class InteractiveCompletion(unittest.TestCase):
         replacement.replace(binary)
         self.assertEqual(self.complete("ssmcp --future-o"), ["ssmcp", "--future-o"])
 
+    def test_refresh_rebuilds_same_name_personal_compdef_mapping(self):
+        personal = self.personal / "_fixture"
+        personal.write_text("#compdef fixture-first\ncompadd -- personal-choice\n")
+        refresh = ["python3", "-I", str(self.runtime / "bin/omztty-completion"), "refresh", "omztty"]
+        first = subprocess.run(refresh, env=self.env, capture_output=True, text=True, timeout=15)
+        self.assertEqual(first.returncode, 0, first.stdout + first.stderr)
+        self.start()
+        self.assertEqual(self.complete("fixture-first pers"), ["fixture-first", "personal-choice"])
+        os.write(self.master, b"\x1b[26~exit\n")
+        self.process.wait(timeout=2)
+        os.close(self.master)
+        self.process = self.master = None
+        personal.write_text("#compdef fixture-second\ncompadd -- personal-choice\n")
+        second = subprocess.run(refresh, env=self.env, capture_output=True, text=True, timeout=15)
+        self.assertEqual(second.returncode, 0, second.stdout + second.stderr)
+        self.start()
+        self.assertEqual(self.complete("fixture-second pers"), ["fixture-second", "personal-choice"])
+        self.assertEqual(self.complete("fixture-first pers"), ["fixture-first", "pers"])
+
     def test_delegate_receives_shifted_words(self):
         (self.personal / "_ztty").write_text(
             "#compdef ztty\n"
