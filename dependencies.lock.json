@@ -41,8 +41,8 @@
     "zmem": {
       "repository": "https://github.com/LIghtJUNction/zmem.git",
       "branch": "main",
-      "commit": "24951ae66df31387f736f61b34d21a1963df9730",
-      "observed_at": "2026-11-22T11:26:06+00:00"
+      "commit": "39a450a24dc77a066a964ee038f889b18213db77",
+      "observed_at": "2026-11-22T18:41:16+00:00"
     }
   }
 }
