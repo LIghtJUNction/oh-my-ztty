@@ -18,7 +18,9 @@ omztty memory doctor --json
 
 ## Read pressure, controls and coverage
 
-Memory pressure and IO congestion are separate signals. zmem observes available RAM, memory stalls, file-page refaults and swap activity to decide whether to adjust memory budgets or Swap capacity. Busy IO alone does not lower its swappiness preference. Measured disk-swap pressure can lower it; file pages being evicted and used again can favor retaining file cache when the paging evidence supports that choice.
+Memory pressure and IO congestion are separate signals. zmem observes available RAM, memory stalls, file-page refaults and swap activity to decide whether to adjust memory budgets or Swap capacity. Busy IO alone does not establish the cost of disk Swap. Without confirmed disk Swap reads, file-refault evidence can favor retaining file cache; otherwise zmem uses a neutral paging preference with hysteresis. That neutral preference can lower an earlier elevated setting. Confirmed disk Swap read pressure follows a separate reduction path.
+
+From zmem 0.3.1, `reclaim_latency_guard` blocks automatic promotion when memory full stalls reach 1%, direct scans reach 64 MiB/s and anonymous refaults reach 4 MiB/s in the same warmed observation. It requests a ceiling of 60 and preserves an actual value already below that ceiling. The guard uses the ordinary adjustment rules: 10 seconds of supporting evidence, 30-second spacing between confirmed changes and steps of at most 20. These are conservative control thresholds, not measurements of input latency. If the current swappiness cannot be read, zmem reports `readback_unavailable`, leaves the requested value `null` and skips the sysctl write.
 
 The `controls` object reports requested and actual swappiness, its reason, the actual page-cluster value, the protection budget and the count of successfully protected scopes. `protection_sampled_at_unix` and `protection_errors` retain the most recent protection check's time and diagnostics between checks. `managed` reports background groups, populated groups, task counts, memory usage and eligible reclaim candidates. The `protection_complete` and `coverage_complete` flags expose incomplete control operations or observations. A plan's requested bytes describe an intended action; observed reclaim progress is reported separately.
 
@@ -47,6 +49,21 @@ Changes tighten groups before relaxing any limits. A failed tightening blocks th
 Proactive reclaim selects populated managed groups with eligible clean file pages. Empty groups and groups without suitable pages are skipped; requests that produce no observed progress trigger a retry backoff. The current coverage and progress reports show which work this policy can affect.
 
 The default policy preserves processes. It does not discard application data, clear the entire page cache or provide application checkpoints. Applications remain responsible for saving their documents and progress.
+
+## Enable IO controls for user jobs
+
+Setup with zmem 0.3.1 adds IO delegation and accounting to `user@.service` through `/etc/systemd/system/user@.service.d/50-zmem-io.conf`. The drop-in appends `Delegate=io` and enables `IOAccounting=yes`, preserving existing CPU, memory and PID delegation. An existing external file at the same path is kept, even if its contents match. A separate ownership journal lets rollback remove only an unchanged file that zmem created; changed or replaced files are preserved.
+
+Existing user managers may report `user_io.state = needs_refresh`. Installation does not restart user sessions or refresh every user's manager automatically. In the affected user's session, reload the manager's executable while keeping its processes:
+
+```sh
+systemctl --user daemon-reexec
+omztty memory doctor --json
+```
+
+Check `user_io.io_available` and `io_enabled_for_children`, then inspect the returned `manager_cgroup`: `cgroup.controllers` and `cgroup.subtree_control` should include `io`, and `io.stat` should exist. Managed child groups also need the relevant `io.weight` or `io.max` files. Unavailable observations remain `null`; the report checks the caller's manager, or the originating user when invoked through sudo.
+
+Delegation makes these controls available; a configured `IOWeight` does not establish its scheduling effect. Weight control also needs a supporting device backend, such as BFQ or enabled IO cost control, and kernel readback. `io_weight_effective` stays `null` because those configuration checks do not measure workload impact. The [zmem 0.3.1 acceptance record](https://github.com/LIghtJUNction/zmem/blob/main/docs/acceptance-0.3.1.md) separates host-specific observations from general policy. No fixed IO limit or desktop responsiveness gain is implied for another machine.
 
 ## Automatic Swap maintenance
 

@@ -1,6 +1,6 @@
 {
   "schema": 2,
-  "updated_at": "2026-11-22T09:13:53+00:00",
+  "updated_at": "2026-11-22T10:15:41+00:00",
   "components": {
     "ztty": {
       "repository": "https://github.com/LIghtJUNction/ztty.git",
@@ -41,8 +41,8 @@
     "zmem": {
       "repository": "https://github.com/LIghtJUNction/zmem.git",
       "branch": "main",
-      "commit": "94343545e1e918ca528a3032d764b70ae14c018f",
-      "observed_at": "2026-11-22T09:05:23+00:00"
+      "commit": "6b756269a78d4d44bca2a019e47575174e40c0b1",
+      "observed_at": "2026-11-22T10:15:40+00:00"
     }
   }
 }
