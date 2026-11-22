@@ -29,8 +29,24 @@ _zmem() {
                 (( CURRENT -= boundary ))
                 _normal
             else
-                _arguments '1:command:(run)' '--class[Workload policy]:class:(background interactive disposable)' \
-                    '--max-memory[Hard memory limit in MiB]:MiB:' '*:command:_command_names'
+                local workload_class=background classes='background interactive disposable'
+                local -i index dedup_selected=0
+                for (( index=3; index < boundary && index <= $#words; ++index )); do
+                    case $words[index] in
+                        --class) (( ++index )); workload_class=${words[index]-} ;;
+                        --max-memory) (( ++index )) ;;
+                        --dedup) dedup_selected=1 ;;
+                    esac
+                done
+                (( dedup_selected )) && classes='background disposable'
+                local -a run_options=(
+                    "--class[Workload policy]:class:($classes)"
+                    '--max-memory[Hard memory limit in MiB]:MiB:'
+                )
+                if [[ $workload_class == (background|disposable) ]]; then
+                    run_options+=('--dedup[Register a trusted job for system-wide KSM matching]')
+                fi
+                _arguments '1:command:(run)' "${run_options[@]}" '*:command:_command_names'
             fi ;;
     esac
 }

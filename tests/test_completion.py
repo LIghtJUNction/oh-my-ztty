@@ -176,6 +176,29 @@ class InteractiveCompletion(unittest.TestCase):
             "omztty memory plan --j": "omztty memory plan --json",
         })
 
+    def test_memory_dedup_respects_class_and_command_boundary(self):
+        self.start()
+        self.cases({
+            "zmem run --de": "zmem run --dedup",
+            "zmem run --class background --de": "zmem run --class background --dedup",
+            "zmem run --class disposable --de": "zmem run --class disposable --dedup",
+            "zmem run --class interactive --de": "zmem run --class interactive --de",
+            "zmem run --class unknown --de": "zmem run --class unknown --de",
+            "zmem run --dedup --class back": "zmem run --dedup --class background",
+            "zmem run --dedup --class disp": "zmem run --dedup --class disposable",
+            "zmem run --dedup --class inter": "zmem run --dedup --class inter",
+            "zmem run --class background --dedup -- git checko":
+                "zmem run --class background --dedup -- git checkout",
+            "omztty memory run --class background --de":
+                "omztty memory run --class background --dedup",
+            "omztty memory run --class interactive --de":
+                "omztty memory run --class interactive --de",
+            "omztty zmem run --class disposable --de":
+                "omztty zmem run --class disposable --dedup",
+            "omztty memory run --class background --dedup -- git checko":
+                "omztty memory run --class background --dedup -- git checkout",
+        })
+
     def test_terminal_options_and_command_boundaries(self):
         self.start()
         self.cases({
