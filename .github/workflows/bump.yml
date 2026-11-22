@@ -31,4 +31,4 @@ jobs:
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           python3 scripts/bump.py "$PART" --release
       - name: Dispatch official build for the new tag
-        run: gh workflow run release.yml --ref "v$(cat VERSION)" -f "tag=v$(cat VERSION)"
+        run: gh workflow run release.yml --ref main -f "tag=v$(cat VERSION)"
