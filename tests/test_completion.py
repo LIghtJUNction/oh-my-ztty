@@ -411,6 +411,75 @@ class InteractiveCompletion(unittest.TestCase):
             "ssmcp 007 upgrade --ser": "ssmcp 007 upgrade --ser",
         })
 
+    def test_ssmcp_paths_names_and_exclusive_formats(self):
+        self.start()
+        self.cases({
+            "ssmcp pat": "ssmcp paths",
+            "ssmcp paths conf": "ssmcp paths config",
+            "ssmcp paths ui-c": "ssmcp paths ui-config",
+            "ssmcp paths au": "ssmcp paths auth",
+            "ssmcp paths tr": "ssmcp paths trust",
+            "ssmcp paths rc": "ssmcp paths rc",
+            "ssmcp paths too": "ssmcp paths tools",
+            "ssmcp paths his": "ssmcp paths history",
+            "ssmcp paths sess": "ssmcp paths sessions",
+            "ssmcp paths cw": "ssmcp paths cwd",
+            "ssmcp paths exe": "ssmcp paths executable",
+            "ssmcp paths cwd tr": "ssmcp paths cwd trust",
+            "ssmcp paths config --j": "ssmcp paths config --json",
+            "ssmcp paths --list --pl": "ssmcp paths --list --plain",
+            "ssmcp paths --json --li": "ssmcp paths --json --list",
+            "ssmcp paths --json --pl": "ssmcp paths --json --pl",
+            "ssmcp paths --plain --j": "ssmcp paths --plain --j",
+            "ssmcp paths config --li": "ssmcp paths config --li",
+            "ssmcp paths --list conf": "ssmcp paths --list conf",
+            "ssmcp paths --he": "ssmcp paths --help",
+            "ssmcp paths --json --he": "ssmcp paths --json --he",
+            "ssmcp paths --help --pl": "ssmcp paths --help --pl",
+            "ssmcp paths file": "ssmcp paths file",
+            "ssmcp --name paths --th": "ssmcp --name paths --theme",
+        })
+
+    def test_ssmcp_worker_agent_choices_and_option_values(self):
+        self.start()
+        self.cases({
+            "ssmcp --work": "ssmcp --worker=",
+            "ssmcp --worker 2 --agent rem": "ssmcp --worker 2 --agent remote",
+            "ssmcp --worker=2 --agent rem": "ssmcp --worker=2 --agent remote",
+            "ssmcp --worker=2 --agent=rem": "ssmcp --worker=2 --agent=remote",
+            "ssmcp --worker 2 --agent nex": "ssmcp --worker 2 --agent next-caller",
+            "ssmcp --worker 2 --agent cod": "ssmcp --worker 2 --agent codex",
+            "ssmcp --worker 2 --agent ssm": "ssmcp --worker 2 --agent ssm",
+            "ssmcp --agent rem": "ssmcp --agent rem",
+            "ssmcp --agent nex": "ssmcp --agent next-caller",
+            "ssmcp --agent ssm": "ssmcp --agent ssmcp",
+            "ssmcp --worker 2 --worker-k 0.5 --th": "ssmcp --worker 2 --worker-k 0.5 --theme",
+            "ssmcp --worker --theme --th": "ssmcp --worker --theme --theme",
+            "ssmcp --title --worker --agent rem": "ssmcp --title --worker --agent rem",
+            "ssmcp sessions create fixture --worker 2 --agent rem":
+                "ssmcp sessions create fixture --worker 2 --agent remote",
+        })
+
+    def test_ssmcp_version_is_top_level_and_new_routes_delegate(self):
+        self.start()
+        self.cases({
+            "ssmcp --vers": "ssmcp --version",
+            "ssmcp --version --al": "ssmcp --version --all",
+            "ssmcp -V --al": "ssmcp -V --all",
+            "ssmcp --all --vers": "ssmcp --all --version",
+            "ssmcp --version --th": "ssmcp --version --th",
+            "ssmcp --theme nord --vers": "ssmcp --theme nord --vers",
+            "ssmcp local --vers": "ssmcp local --vers",
+            "ssmcp paths --vers": "ssmcp paths --vers",
+        })
+        for prefix in ("omztty ssmcp", "omztty ai connect", "zai connect"):
+            with self.subTest(prefix=prefix):
+                self.cases({
+                    prefix + " paths sess": prefix + " paths sessions",
+                    prefix + " --worker 2 --agent rem": prefix + " --worker 2 --agent remote",
+                    prefix + " --version --al": prefix + " --version --all",
+                })
+
     def test_reload_executable_paths_are_absolute_and_never_executed(self):
         self.start()
         for prefix in ("ztty", "omztty ztty"):

@@ -8,13 +8,31 @@ _ssmcp_directories() {
     _wanted directories expl directory _path_files -/ "$@"
 }
 
+_ssmcp_paths() {
+    local -i index has_name=0 has_list=0
+    local -a options=('(--plain)--json[Emit a JSON object]'
+                      '(--json)--plain[Print one path or catalog name per line]')
+    for (( index=2; index < CURRENT; ++index )); do
+        case $words[index] in
+            -h|--help) return 1 ;;
+            --list) has_list=1 ;;
+            --json|--plain) ;;
+            *) has_name=1 ;;
+        esac
+    done
+    (( CURRENT == 2 )) && options+=('(-h --help)'{-h,--help}'[Show paths help without other arguments]')
+    (( has_name )) || options+=('--list[List names without resolving paths]')
+    local -a positionals=()
+    (( has_list )) || positionals+=('*:path name:(config ui-config auth trust rc tools history sessions cwd executable)')
+    _arguments "${options[@]}" "${positionals[@]}"
+}
+
 _ssmcp_connection() {
     local mode=${1:-connect} context state state_descr line
     typeset -A opt_args
     local -a options=(
         '(-h --help)'{-h,--help}'[Show help]'
         '--help-full[Show all connection options]'
-        '(-V --version)'{-V,--version}'[Show version]'
         '--title=[Session title]:title:'
         '*--context-root[Add a read-only instruction directory]:directory:_ssmcp_directories'
         '--shell[Use an absolute shell executable path]:shell executable:_files -g "*(*)"'
@@ -32,6 +50,10 @@ _ssmcp_connection() {
         '--max-inline-output[Limit inline output]:lines (1-10000):'
         '--no-color[Disable ANSI colors]'
     )
+    if [[ $mode == connect ]] && (( CURRENT == 2 )); then
+        options+=('(-V --version)'{-V,--version}'[Show version without starting a connection]'
+                  '--all[Include the locked dependency tree; requires --version]')
+    fi
     [[ $mode == local ]] || options+=("${_omztty_installed_options[@]}")
     if [[ $mode == local ]]; then
         options+=(
@@ -42,6 +64,13 @@ _ssmcp_connection() {
         _arguments "$options[@]"
         return
     fi
+    local agents='next-caller codex claude opencode exec ssmcp'
+    if (( _ssmcp_worker_mode )); then
+        agents='remote next-caller codex claude opencode exec'
+        options+=('--worker-k=[Resource share for an explicit local executor]:multiplier:')
+    fi
+    options+=('--worker=[Open a remote task pool by default]:task slots (1-128):'
+              "--agent=[Recipient; chat defaults to next-caller, workers to remote]:recipient:($agents)")
     options+=(
         '--no-browser[Print the authorization link without opening a browser]'
         '--server[Select the HTTPS relay]:HTTPS origin:'
@@ -173,7 +202,7 @@ _ssmcp() {
     local context state state_descr line action
     typeset -A opt_args
     local -a words=("$words[@]")
-    local -i CURRENT=$CURRENT index=2
+    local -i CURRENT=$CURRENT index=2 _ssmcp_worker_mode=0
     local -a _omztty_installed_options=() _omztty_installed_commands=()
     # omztty:installed-ssmcp-snapshot
     local -a actions=(
@@ -181,6 +210,7 @@ _ssmcp() {
         'login:Sign in' 'whoami:Show account identity' 'logout:Remove the selected login'
         'local:Run a local MCP session on Linux'
         'config:Manage client settings' 'trust:Manage relay trust pins'
+        'paths:Show configuration and state paths without startup'
         'setup:Configure account access' 'ui:Configure and preview the interface'
         'computer:Manage the standalone Zuse CLI'
         'sessions:Manage saved local sessions' 'attach:Attach to a saved session'
@@ -191,6 +221,11 @@ _ssmcp() {
     for discovered in "${_omztty_installed_commands[@]}"; do
         (( ${#${(M)actions:#${discovered}:*}} )) || actions+=("$discovered:Installed SSMCP command")
     done
+    if [[ $words[2] == (-V|--version|--all) ]]; then
+        _arguments '(-V --version)'{-V,--version}'[Show version without starting a connection]' \
+            '--all[Include the locked dependency tree]'
+        return
+    fi
     # Only this global prefix is normalized ahead of account subcommands by
     # ssmcp itself. An option value named "sessions" is never a subcommand.
     if (( CURRENT > 4 )) && [[ $words[2] == --server && $words[4] == (login|logout|whoami|list|ls) ]]; then
@@ -203,12 +238,14 @@ _ssmcp() {
             --shell|--tty|--reconnect-delay|--log-format|--ui-config|\
             --theme|--max-inline-output|--client|--terminal|--state-dir|\
             --user|--cwd|--public-key|--pin|--lines|\
-            --rows|--cols)
+            --rows|--cols|--worker|--worker-k|--agent)
+                [[ $words[index] == --worker ]] && _ssmcp_worker_mode=1
                 if (( index + 1 < CURRENT )) && [[ $words[index+1] == -* ]]; then
                     words[index+1]=__ssmcp_option_value__
                 fi
                 (( index += 2 ))
                 ;;
+            --worker=*) _ssmcp_worker_mode=1; (( ++index )) ;;
             *) (( ++index )) ;;
         esac
     done
@@ -216,7 +253,7 @@ _ssmcp() {
     if (( CURRENT > 2 )); then
         case $action in
             invite|join) return 1 ;;
-            login|whoami|logout|list|ls|local|config|trust|setup|computer|ui|sessions|attach|service|007|update)
+            login|whoami|logout|list|ls|local|config|paths|trust|setup|computer|ui|sessions|attach|service|007|update)
                 shift words
                 (( --CURRENT ))
                 ;;
@@ -236,6 +273,7 @@ _ssmcp() {
     case $action in
         login|whoami|logout|list|ls) _ssmcp_account "$action" ;;
         local) _ssmcp_connection local ;;
+        paths) _ssmcp_paths ;;
         config)
             case $words[2] in
                 set|get)
