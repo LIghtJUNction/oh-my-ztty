@@ -1,0 +1,441 @@
+#!/usr/bin/env python3
+"""Explicit, local completion snapshots. Never imported by shell startup."""
+from __future__ import annotations
+
+import argparse
+import fcntl
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import selectors
+import shutil
+import signal
+import stat
+import subprocess
+import sys
+import tempfile
+import time
+
+ROOT = Path(__file__).resolve().parents[1]
+NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.+-]*\Z")
+GENERATION = re.compile(r"[0-9a-f]{64}\Z")
+MAX_FILE = 1024 * 1024
+MAX_HELP = 128 * 1024
+HELP_TIMEOUT = 5
+SNAPSHOT_MARKER = "    # omztty:installed-ssmcp-snapshot"
+
+
+def digest(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def json_bytes(value):
+    return (json.dumps(value, ensure_ascii=False, sort_keys=True, indent=2) + "\n").encode()
+
+
+def checked_path(value):
+    path = Path(value)
+    if not path.is_absolute() or any(ord(c) < 32 or ord(c) == 127 for c in str(path)):
+        raise ValueError("paths must be absolute and contain no control characters")
+    return path
+
+
+def private(path, directory=False):
+    info = path.lstat()
+    kind = stat.S_ISDIR if directory else stat.S_ISREG
+    if not kind(info.st_mode) or info.st_uid != os.getuid() or info.st_mode & 0o022:
+        raise ValueError(f"not a private owned {'directory' if directory else 'file'}: {path}")
+    return info
+
+
+def ensure_directory(path):
+    # Do not redirect manager writes through an existing symlink.
+    for parent in reversed([path, *path.parents]):
+        if parent.is_symlink():
+            raise ValueError(f"completion state path is a symlink: {parent}")
+    path.mkdir(parents=True, exist_ok=True, mode=0o700)
+    private(path, True)
+
+
+def read_file(path, owned=False):
+    if owned:
+        private(path)
+    info = path.lstat()
+    if not stat.S_ISREG(info.st_mode) or info.st_size > MAX_FILE:
+        raise ValueError(f"expected a bounded regular file: {path}")
+    with path.open("rb") as stream:
+        data = stream.read(MAX_FILE + 1)
+    if len(data) > MAX_FILE:
+        raise ValueError(f"completion file is too large: {path}")
+    return data
+
+
+def locations():
+    home = checked_path(os.environ["HOME"])
+    config = checked_path(os.environ.get("XDG_CONFIG_HOME", str(home / ".config")))
+    cache = checked_path(os.environ.get("XDG_CACHE_HOME", str(home / ".cache")))
+    return config / "oh-my-ztty/completions", cache / "oh-my-ztty/completions" / ROOT.name
+
+
+def catalog():
+    files, names = {}, {}
+    for path in sorted((ROOT / "packaging/completions").iterdir()):
+        if not path.name.startswith("_"):
+            continue
+        data = read_file(path)
+        files[path.name] = data
+        first = next(iter(data.decode("utf-8").splitlines()), "")
+        if first.startswith("#compdef "):
+            for name in first.split()[1:]:
+                if NAME.fullmatch(name):
+                    names[name] = path.name
+    return files, names
+
+
+def fingerprint(path):
+    requested = checked_path(str(path))
+    resolved = requested.resolve(strict=True)
+    with resolved.open("rb") as stream:
+        before = os.fstat(stream.fileno())
+        if not stat.S_ISREG(before.st_mode) or not before.st_mode & 0o111:
+            raise ValueError(f"not an executable regular file: {requested}")
+        if before.st_uid not in (0, os.getuid()) or before.st_mode & 0o022:
+            raise ValueError(f"executable is not owned by you/root or is group/world writable: {requested}")
+        sha = hashlib.file_digest(stream, "sha256").hexdigest()
+        after = os.fstat(stream.fileno())
+    identity = lambda s: (s.st_dev, s.st_ino, s.st_size, s.st_mtime_ns, s.st_ctime_ns)
+    if identity(before) != identity(after) or identity(after) != identity(requested.stat()):
+        raise ValueError("executable changed while it was being inspected")
+    return {"path": str(requested), "resolved": str(resolved), "sha256": sha,
+            "device": before.st_dev, "inode": before.st_ino, "bytes": before.st_size,
+            "mtime_ns": before.st_mtime_ns, "ctime_ns": before.st_ctime_ns}
+
+
+def selected_binary(explicit=None):
+    value = explicit or shutil.which("ssmcp")
+    return fingerprint(value) if value else None
+
+
+def personal_inputs(directory):
+    # Personal code is not copied, executed or changed. Its contents still affect
+    # compinit's command mapping, including same-name #compdef edits.
+    result = {}
+    for path in sorted(directory.glob("_*")) if directory.is_dir() else []:
+        if path.is_symlink():
+            target = path.resolve()
+            result[path.name] = {"link": os.readlink(path),
+                                 "sha256": digest(read_file(target)) if target.is_file() else None}
+        elif path.is_file():
+            result[path.name] = {"sha256": digest(read_file(path))}
+    return result
+
+
+def read_active(base):
+    if not base.exists():
+        return None
+    private(base, True)
+    pointer = base / "current"
+    if not pointer.exists():
+        return None
+    generation = read_file(pointer, True).decode("ascii").strip()
+    if not GENERATION.fullmatch(generation):
+        raise ValueError("invalid completion generation pointer; no files were changed")
+    directory = base / "generations" / generation
+    private(base / "generations", True)
+    private(directory, True)
+    raw = read_file(directory / "manifest.json", True)
+    if digest(raw) != generation:
+        raise ValueError("completion manifest fingerprint changed; preserving it")
+    manifest = json.loads(raw)
+    if (not isinstance(manifest, dict) or manifest.get("schema") != 1
+            or manifest.get("root") != str(ROOT)
+            or not isinstance(manifest.get("files"), dict)
+            or not isinstance(manifest.get("sources"), dict)):
+        raise ValueError("invalid completion manifest; no files were changed")
+    payload = {}
+    for name, expected in manifest["files"].items():
+        if not re.fullmatch(r"_[A-Za-z0-9_.+-]+", name) or not isinstance(expected, str):
+            raise ValueError("invalid completion manifest member")
+        data = read_file(directory / name, True)
+        if digest(data) != expected:
+            raise ValueError(f"managed completion was changed: {name}; preserving it")
+        payload[name] = data
+    return directory, manifest, payload
+
+
+def run_help(binary, option, home):
+    # Only the explicit SSMCP provider has executable probes. No arbitrary
+    # generator command, remote shell script, user rc or downloaded code runs.
+    env = {"PATH": os.environ.get("PATH", "/usr/bin:/bin"), "HOME": str(home),
+           "XDG_CONFIG_HOME": str(home / "config"), "XDG_DATA_HOME": str(home / "data"),
+           "XDG_STATE_HOME": str(home / "state"), "XDG_CACHE_HOME": str(home / "cache"),
+           "LC_ALL": "C.UTF-8", "NO_COLOR": "1", "TERM": "dumb"}
+    process = subprocess.Popen([binary["resolved"], option], env=env, cwd=home,
+                               stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE, start_new_session=True)
+    selector = selectors.DefaultSelector()
+    chunks = {"stdout": bytearray(), "stderr": bytearray()}
+    deadline = time.monotonic() + HELP_TIMEOUT
+    waited = False
+    try:
+        for label, pipe in (("stdout", process.stdout), ("stderr", process.stderr)):
+            os.set_blocking(pipe.fileno(), False)
+            selector.register(pipe, selectors.EVENT_READ, label)
+        while selector.get_map():
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise ValueError(f"ssmcp {option} exceeded {HELP_TIMEOUT} seconds")
+            for key, _ in selector.select(min(remaining, 0.1)):
+                data = os.read(key.fd, 16384)
+                if not data:
+                    selector.unregister(key.fileobj)
+                else:
+                    chunks[key.data].extend(data)
+                    if sum(map(len, chunks.values())) > MAX_HELP:
+                        raise ValueError(f"ssmcp {option} output exceeded the size limit")
+        code = process.wait(timeout=max(0.01, deadline - time.monotonic()))
+        waited = True
+        if code:
+            raise ValueError(f"ssmcp {option} exited {code}; previous completion retained")
+        return chunks["stdout"].decode("utf-8")
+    finally:
+        selector.close()
+        # Also stop descendants holding inherited pipes on a failed/late probe.
+        if not waited:
+            try:
+                os.killpg(process.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+        process.wait(timeout=2)
+        process.stdout.close()
+        process.stderr.close()
+
+
+def help_facts(short, full):
+    if not all("Usage: ssmcp" in text for text in (short, full)):
+        raise ValueError("unrecognized SSMCP help format; previous completion retained")
+    commands, options = set(), {}
+    for text in (short, full):
+        for line in text.splitlines():
+            command = re.match(r"\s+(?:ssmcp) ([a-z0-9][a-z0-9|-]*)(?:\s|$)", line)
+            if command:
+                commands.update(command[1].split("|"))
+            # Read declarations only, never options mentioned in descriptions.
+            declaration = re.match(r"\s{2,}(-\S.*?)(?:\s{2,}|$)", line)
+            if not declaration:
+                continue
+            for match in re.finditer(r"(--[a-z][a-z0-9-]*)(?:[ =]([A-Z][A-Z0-9_:.-]*|/path))?", declaration[1]):
+                options[match[1]] = bool(match[2])
+    if len(options) < 8 or not {"--name", "--server", "--input"} <= options.keys():
+        raise ValueError("incomplete SSMCP help declarations; previous completion retained")
+    return {"commands": sorted(commands), "options": options}
+
+
+def zquote(value):
+    return "'" + value.replace("'", "'\\''") + "'"
+
+
+def render_ssmcp(source, binary, version, facts):
+    text = source.decode("utf-8")
+    if text.count(SNAPSHOT_MARKER) != 1:
+        raise ValueError("SSMCP completion template has no unique snapshot slot")
+    # The guarded data extends the reviewed nested grammar. Unknown subcommands
+    # are offered at the top level, but their argument grammar is not guessed.
+    existing_options = set(re.findall(r"--[a-z][a-z0-9-]*", text))
+    extra_options = [flag + "[Installed SSMCP option]" + (":value:" if takes_value else "")
+                     for flag, takes_value in sorted(facts["options"].items())
+                     if flag not in existing_options]
+    lines = ["    local -A _omztty_binary_stat",
+             "    local _omztty_binary=${_OMZTTY_COMPLETION_BINARY:-${commands[ssmcp]-}}",
+             "    if [[ -n $_omztty_binary && ${_omztty_binary:A} == " + zquote(binary["resolved"]) + " ]] &&",
+             "       zmodload -F zsh/stat b:zstat && zstat -H _omztty_binary_stat -- \"$_omztty_binary\" 2>/dev/null &&",
+             f"       (( _omztty_binary_stat[device] == {binary['device']} && _omztty_binary_stat[inode] == {binary['inode']} &&",
+             f"          _omztty_binary_stat[size] == {binary['bytes']} && _omztty_binary_stat[mtime] == {binary['mtime_ns'] // 1000000000} )); then",
+             "        _omztty_installed_options=(" + " ".join(map(zquote, extra_options)) + ")",
+             "        _omztty_installed_commands=(" + " ".join(map(zquote, facts["commands"])) + ")",
+             "    fi"]
+    return text.replace(SNAPSHOT_MARKER, "\n".join(lines)).encode()
+
+
+def observe_ssmcp(source, binary, home):
+    version = run_help(binary, "--version", home).strip()
+    if not re.fullmatch(r"ssmcp v?\d+\.\d+\.\d+(?:[-+][A-Za-z0-9.-]+)?", version):
+        raise ValueError("unrecognized SSMCP version; previous completion retained")
+    short, full = (run_help(binary, flag, home) for flag in ("--help", "--help-full"))
+    if fingerprint(binary["path"]) != binary:
+        raise ValueError("SSMCP changed during refresh; previous completion retained")
+    facts = help_facts(short, full)
+    return render_ssmcp(source, binary, version, facts), {
+        "binary": binary, "version": version, "facts": facts,
+        "help_sha256": {"short": digest(short.encode()), "full": digest(full.encode())}}
+
+
+def validate(payload, directory):
+    zsh = shutil.which("zsh")
+    if not zsh:
+        raise ValueError("zsh is required to validate completions")
+    for name, data in payload.items():
+        path = directory / name
+        with path.open("xb") as stream:
+            stream.write(data)
+            stream.flush()
+            os.fsync(stream.fileno())
+        path.chmod(0o600)
+        result = subprocess.run([zsh, "-d", "-f", "-n", str(path)], stdin=subprocess.DEVNULL,
+                                capture_output=True, timeout=5)
+        if result.returncode:
+            raise ValueError(f"invalid zsh syntax in {name}; previous completion retained")
+
+
+def refresh(base, sources, names, selected, binary, personal):
+    ensure_directory(base)
+    ensure_directory(base / "generations")
+    fd = os.open(base / ".lock", os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
+    try:
+        private(base / ".lock")
+        try:
+            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError as error:
+            raise ValueError("another completion refresh is running") from error
+        old = read_active(base)
+        source_hashes = {name: digest(data) for name, data in sources.items()}
+        personal_hashes = personal_inputs(personal)
+        observe = "ssmcp" in selected and binary is not None
+        if selected == ["ssmcp"] and binary is None:
+            raise ValueError("ssmcp is not on PATH; use --binary /absolute/path/to/ssmcp")
+        if old and old[1]["sources"] == source_hashes and old[1].get("personal") == personal_hashes:
+            prior = old[1].get("ssmcp")
+            if not observe or prior and prior["binary"] == binary:
+                return {"changed": False, "generation": old[0].name, "directory": str(old[0])}
+        payload = dict(sources)
+        observation = None
+        with tempfile.TemporaryDirectory(prefix=".stage-", dir=base) as temp:
+            stage = Path(temp)
+            generated = stage / "generation"
+            generated.mkdir(mode=0o700)
+            if observe:
+                home = stage / "probe-home"
+                home.mkdir(mode=0o700)
+                payload[names["ssmcp"]], observation = observe_ssmcp(sources[names["ssmcp"]], binary, home)
+            elif old and old[1]["sources"].get(names["ssmcp"]) == source_hashes[names["ssmcp"]]:
+                observation = old[1].get("ssmcp")
+                if observation:
+                    payload[names["ssmcp"]] = old[2][names["ssmcp"]]
+            validate(payload, generated)
+            manifest = {"schema": 1, "root": str(ROOT), "sources": source_hashes,
+                        "personal": personal_hashes,
+                        "files": {name: digest(data) for name, data in payload.items()},
+                        "ssmcp": observation}
+            raw = json_bytes(manifest)
+            generation = digest(raw)
+            (generated / "manifest.json").write_bytes(raw)
+            (generated / "manifest.json").chmod(0o600)
+            destination = base / "generations" / generation
+            if destination.exists():
+                private(destination, True)
+                if (read_file(destination / "manifest.json", True) != raw
+                        or any(read_file(destination / name, True) != data for name, data in payload.items())):
+                    raise ValueError("existing generation differs; preserving all existing files")
+            else:
+                generated.rename(destination)
+            if catalog()[0] != sources or personal_inputs(personal) != personal_hashes:
+                raise ValueError("completion sources changed during refresh; previous completion retained")
+            pointer = stage / "current"
+            with pointer.open("xb") as stream:
+                stream.write((generation + "\n").encode())
+                stream.flush()
+                os.fsync(stream.fileno())
+            pointer.chmod(0o600)
+            if observe and fingerprint(binary["path"]) != binary:
+                raise ValueError("SSMCP changed before publication; previous completion retained")
+            os.replace(pointer, base / "current")
+        return {"changed": True, "generation": generation, "directory": str(destination)}
+    finally:
+        os.close(fd)
+
+
+def rows(sources, names, personal, active, selected, binary):
+    result = []
+    personal_changed = active is not None and active[1].get("personal") != personal_inputs(personal)
+    for name in selected:
+        filename = names[name]
+        source = ROOT / "packaging/completions" / filename
+        override = personal / filename
+        # A #compdef may live in a differently named personal file.
+        for path in sorted(personal.glob("_*")) if personal.is_dir() else []:
+            if path.is_file() and not path.is_symlink():
+                first = next(iter(read_file(path).decode("utf-8").splitlines()), "")
+                if first.startswith("#compdef ") and name in first.split()[1:]:
+                    override = path
+                    break
+        state = "not-refreshed"
+        observed = None
+        if active:
+            state = "current" if active[1]["sources"].get(filename) == digest(sources[filename]) else "stale-source"
+            if state == "current" and personal_changed:
+                state = "stale-personal"
+            observed = active[1].get("ssmcp") if name == "ssmcp" else None
+            if name == "ssmcp":
+                if observed is None:
+                    state = "not-observed"
+                elif binary != observed["binary"]:
+                    state = "stale-binary"
+        row = {"command": name, "provider": "ssmcp-help" if name == "ssmcp" else "bundled-static",
+               "state": state, "bundled": str(source), "source_sha256": digest(sources[filename]),
+               "active": str(active[0] / filename) if active else str(source),
+               "personal_override": str(override) if override.exists() else None}
+        if name == "ssmcp":
+            row.update(binary=binary, observed_version=observed["version"] if observed else None,
+                       bundled_binary=str(ROOT / "bin/ssmcp"))
+        result.append(row)
+    return result
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__, prog="omztty completion")
+    parser.add_argument("action", nargs="?", default="list", choices=("list", "check", "refresh", "path"))
+    parser.add_argument("name", nargs="?")
+    parser.add_argument("--json", action="store_true", help="emit structured output")
+    parser.add_argument("--binary", help="explicit SSMCP executable (refresh/check ssmcp only)")
+    args = parser.parse_args(["--help"] if sys.argv[1:] == ["help"] else None)
+    if args.binary and (args.name != "ssmcp" or args.action not in ("refresh", "check")):
+        parser.error("--binary requires refresh ssmcp or check ssmcp")
+    if args.action == "path" and args.name:
+        parser.error("path does not take a command name")
+    sources, names = catalog()
+    selected = [args.name] if args.name else sorted(names)
+    if any(name not in names for name in selected):
+        parser.error("unknown bundled command; use omztty completion list")
+    personal, base = locations()
+    binary = selected_binary(args.binary) if "ssmcp" in selected else None
+    changed = refresh(base, sources, names, selected, binary, personal) if args.action == "refresh" else None
+    active = read_active(base)
+    output = {"schema": 1, "action": args.action, "root": str(ROOT), "state_directory": str(base),
+              "personal_directory": str(personal), "active_directory": str(active[0]) if active else None,
+              "entries": rows(sources, names, personal, active, selected, binary)}
+    if changed is not None:
+        output["refresh"] = changed
+    if args.json:
+        print(json.dumps(output, ensure_ascii=False, indent=2))
+    elif args.action == "path":
+        print(base)
+    else:
+        for row in output["entries"]:
+            suffix = " (personal override)" if row["personal_override"] else ""
+            print(f"{row['command']:20} {row['state']:16} {row['provider']}{suffix}")
+        if args.action == "refresh":
+            print("Refresh complete. Open a new shell to load it; existing shells are left unchanged.")
+        if "ssmcp" in selected:
+            print("SSMCP uses the selected PATH executable; omztty ssmcp / ai connect use the bundled executable.")
+            print("Use check/refresh ssmcp --binary /absolute/path/to/ssmcp to select that binary explicitly.")
+    return int(args.action == "check" and any(row["state"] != "current" for row in output["entries"]))
+
+
+if __name__ == "__main__":
+    try:
+        raise SystemExit(main())
+    except (OSError, ValueError, KeyError, TypeError, UnicodeError, subprocess.SubprocessError) as error:
+        print(f"oh-my-ztty completion: {error}", file=sys.stderr)
+        raise SystemExit(1)
