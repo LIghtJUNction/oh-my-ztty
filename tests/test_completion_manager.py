@@ -1,6 +1,7 @@
 """Exercise explicit refresh, fingerprint changes and last-good publication."""
 from pathlib import Path
 import fcntl
+import hashlib
 import json
 import os
 import shutil
@@ -138,6 +139,34 @@ class CompletionManager(unittest.TestCase):
         self.refresh()
         self.assertNotEqual(self.current(), generation)
         self.assertEqual(personal.read_text(), "#compdef another-command\ncompadd -- personal\n")
+
+    def test_large_personal_completion_is_preserved_and_fully_fingerprinted(self):
+        personal = self.home / "config/oh-my-ztty/completions/_binance-cli"
+        personal.parent.mkdir(parents=True)
+        content = b"#compdef ssmcp\n#" + b"x" * 1919209 + b"\n"
+        personal.write_bytes(content)
+        personal.chmod(0o600)
+        before = personal.stat()
+        first = self.refresh()
+        checked = json.loads(self.run_manager("check", "ssmcp", "--json").stdout)
+        self.assertEqual(checked["entries"][0]["state"], "current")
+        self.assertEqual(checked["entries"][0]["personal_override"], str(personal))
+        manifest = json.loads((Path(first["active_directory"]) / "manifest.json").read_text())
+        self.assertEqual(manifest["personal"][personal.name]["sha256"], hashlib.sha256(content).hexdigest())
+        self.assertEqual(personal.read_bytes(), content)
+        after = personal.stat()
+        self.assertEqual((after.st_ino, after.st_mode, after.st_mtime_ns, after.st_ctime_ns),
+                         (before.st_ino, before.st_mode, before.st_mtime_ns, before.st_ctime_ns))
+        generation = self.current()
+        changed = content[:-2] + b"y\n"
+        personal.write_bytes(changed)
+        stale = json.loads(self.run_manager("check", "ssmcp", "--json", success=False).stdout)
+        self.assertEqual(stale["entries"][0]["state"], "stale-personal")
+        refreshed = self.refresh()
+        self.assertNotEqual(self.current(), generation)
+        self.assertEqual(refreshed["entries"][0]["personal_override"], str(personal))
+        self.assertEqual(personal.read_bytes(), changed)
+        self.assertEqual(personal.stat().st_mode & 0o777, 0o600)
 
     def test_upgrade_during_validation_preserves_previous_pointer(self):
         first = self.refresh()

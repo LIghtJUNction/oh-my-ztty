@@ -118,6 +118,35 @@ def selected_binary(explicit=None):
     return fingerprint(value) if value else None
 
 
+def personal_digest(path):
+    # Personal definitions can be generated and much larger than managed files.
+    # Hash their complete contents with bounded memory, without sourcing them.
+    before = path.lstat()
+    if not stat.S_ISREG(before.st_mode):
+        raise ValueError(f"expected a regular personal completion: {path}")
+    identity = lambda s: (s.st_dev, s.st_ino, s.st_size, s.st_mtime_ns, s.st_ctime_ns)
+    with path.open("rb") as stream:
+        opened = os.fstat(stream.fileno())
+        if identity(before) != identity(opened):
+            raise ValueError(f"personal completion changed while opening: {path}")
+        result = hashlib.file_digest(stream, "sha256").hexdigest()
+        after = os.fstat(stream.fileno())
+    if identity(opened) != identity(after) or identity(after) != identity(path.stat()):
+        raise ValueError(f"personal completion changed while reading: {path}")
+    return result
+
+
+def personal_first_line(path):
+    # Only the declaration determines command mapping; do not load the body.
+    with path.open("rb") as stream:
+        if not stat.S_ISREG(os.fstat(stream.fileno()).st_mode):
+            raise ValueError(f"expected a regular personal completion: {path}")
+        first = stream.readline(MAX_FILE + 1)
+    if len(first) > MAX_FILE:
+        raise ValueError(f"personal completion declaration is too large: {path}")
+    return first.decode("utf-8").rstrip("\r\n")
+
+
 def personal_inputs(directory):
     # Personal code is not copied, executed or changed. Its contents still affect
     # compinit's command mapping, including same-name #compdef edits.
@@ -126,9 +155,9 @@ def personal_inputs(directory):
         if path.is_symlink():
             target = path.resolve()
             result[path.name] = {"link": os.readlink(path),
-                                 "sha256": digest(read_file(target)) if target.is_file() else None}
+                                 "sha256": personal_digest(target) if target.is_file() else None}
         elif path.is_file():
-            result[path.name] = {"sha256": digest(read_file(path))}
+            result[path.name] = {"sha256": personal_digest(path)}
     return result
 
 
@@ -366,7 +395,7 @@ def rows(sources, names, personal, active, selected, binary):
         # A #compdef may live in a differently named personal file.
         for path in sorted(personal.glob("_*")) if personal.is_dir() else []:
             if path.is_file() and not path.is_symlink():
-                first = next(iter(read_file(path).decode("utf-8").splitlines()), "")
+                first = personal_first_line(path)
                 if first.startswith("#compdef ") and name in first.split()[1:]:
                     override = path
                     break
