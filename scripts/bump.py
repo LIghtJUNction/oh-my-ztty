@@ -11,7 +11,7 @@ def git(*args):
     return subprocess.check_output(["git", *args], cwd=ROOT, text=True).strip()
 
 
-def planned_files(current, version):
+def planned_files(current, version, source_only=False):
     """Update current-release guidance while preserving historical evidence."""
     changes = {ROOT / "VERSION": version + "\n"}
     installer = ROOT / "install.sh"
@@ -20,16 +20,20 @@ def planned_files(current, version):
     if count != 1:
         raise SystemExit("Installer must contain one matching VERSION assignment")
     changes[installer] = text
+    if source_only:
+        return changes
 
     overview = ROOT / "site/content/index.md"
-    old = f"The current suite release is **{current}**"
     text = overview.read_text()
-    if text.count(old) != 1:
+    published = re.findall(r"The current suite release is \*\*([0-9]+\.[0-9]+\.[0-9]+)\*\*", text)
+    if len(published) != 1:
         raise SystemExit("Overview must declare the current suite release once")
+    published = published[0]
+    old = f"The current suite release is **{published}**"
     changes[overview] = text.replace(old, f"The current suite release is **{version}**")
 
-    old_tag = f"https://github.com/LIghtJUNction/oh-my-ztty/releases/tag/v{current}"
-    old_archive = f"oh-my-ztty-{current}-linux-"
+    old_tag = f"https://github.com/LIghtJUNction/oh-my-ztty/releases/tag/v{published}"
+    old_archive = f"oh-my-ztty-{published}-linux-"
     for name in ("docs/installation.md", "site/content/installation.md"):
         guide = ROOT / name
         text = guide.read_text()
@@ -42,7 +46,10 @@ def planned_files(current, version):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("part", choices=["major", "minor", "patch"])
-    parser.add_argument("--release", action="store_true")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--release", action="store_true")
+    mode.add_argument("--source-only", action="store_true",
+                      help="Update VERSION and installer without changing published-release guidance")
     args = parser.parse_args()
     current = (ROOT / "VERSION").read_text().strip()
     if not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", current):
@@ -62,7 +69,7 @@ def main():
             raise SystemExit(f"Tag already exists: {tag}")
         if git("ls-remote", "--tags", "origin", "refs/tags/" + tag):
             raise SystemExit(f"Remote tag already exists: {tag}")
-    changes = planned_files(current, version)
+    changes = planned_files(current, version, source_only=args.source_only)
     for path, text in changes.items():
         path.write_text(text)
     if args.release:
@@ -72,6 +79,8 @@ def main():
         git("tag", "-a", tag, "-m", "oh-my-ztty " + version)
         subprocess.run(["git", "push", "--atomic", "origin", "HEAD:refs/heads/" + branch, "refs/tags/" + tag], cwd=ROOT, check=True)
         print(f"Pushed {tag}; the formal release workflow builds and publishes both Linux architectures.")
+    elif args.source_only:
+        print(f"{current} -> {version}; VERSION and installer updated. Published-release docs unchanged. Run make check before committing.")
     else:
         print(f"{current} -> {version}; VERSION, installer and current-release docs updated. Run make check before committing.")
 

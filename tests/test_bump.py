@@ -58,25 +58,48 @@ class VersionPublication(unittest.TestCase):
     def bump(self, *extra, ok=True):
         return self.command("python3", "scripts/bump.py", "patch", *extra, ok=ok)
 
-    def assert_current_docs(self):
-        self.assertEqual((self.root / "VERSION").read_text(), "0.1.2\n")
-        self.assertIn("VERSION=0.1.2\n", (self.root / "install.sh").read_text())
+    def assert_current_docs(self, version="0.1.2"):
+        self.assertEqual((self.root / "VERSION").read_text(), version + "\n")
+        self.assertIn("VERSION=" + version + "\n", (self.root / "install.sh").read_text())
         overview = (self.root / "site/content/index.md").read_text()
-        self.assertIn("The current suite release is **0.1.2**", overview)
+        self.assertIn(f"The current suite release is **{version}**", overview)
         self.assertIn("release-0.1.1.md", overview)
         for name in ("docs/installation.md", "site/content/installation.md"):
             with self.subTest(guide=name):
                 guide = (self.root / name).read_text()
-                self.assertIn("releases/tag/v0.1.2", guide)
-                self.assertIn("oh-my-ztty-0.1.2-linux-x86_64.tar.gz", guide)
+                self.assertIn(f"releases/tag/v{version}", guide)
+                self.assertIn(f"oh-my-ztty-{version}-linux-x86_64.tar.gz", guide)
                 self.assertNotIn("oh-my-ztty-0.1.1-linux-", guide)
                 self.assertIn("public-release-0.1.1.json", guide)
-        self.assertIn("oh-my-ztty-0.1.2-linux-aarch64.tar.gz",
+        self.assertIn(f"oh-my-ztty-{version}-linux-aarch64.tar.gz",
                       (self.root / "docs/installation.md").read_text())
 
     def test_bump_updates_current_guidance_and_keeps_historical_evidence(self):
         self.bump()
         self.assert_current_docs()
+
+    def test_source_only_bump_preserves_published_release_guidance(self):
+        before = {path: path.read_bytes() for path in self.root.rglob("*") if path.is_file()}
+        self.bump("--source-only")
+        after = {path: path.read_bytes() for path in self.root.rglob("*") if path.is_file()}
+        self.assertEqual(before.keys(), after.keys())
+        self.assertEqual({path.relative_to(self.root).as_posix()
+                          for path in before if before[path] != after[path]},
+                         {"VERSION", "install.sh"})
+        self.assertEqual((self.root / "VERSION").read_text(), "0.1.2\n")
+        self.assertIn("VERSION=0.1.2\n", (self.root / "install.sh").read_text())
+
+    def test_normal_bump_after_source_only_uses_published_version(self):
+        self.bump("--source-only")
+        self.bump()
+        self.assert_current_docs("0.1.3")
+
+    def test_source_only_cannot_publish_a_release(self):
+        before = {path: path.read_bytes() for path in self.root.rglob("*") if path.is_file()}
+        result = self.bump("--source-only", "--release", ok=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("not allowed with argument", result.stderr)
+        self.assertEqual(before, {path: path.read_bytes() for path in self.root.rglob("*") if path.is_file()})
 
     def test_document_mismatch_does_not_partially_bump(self):
         for name in ("docs/installation.md", "site/content/installation.md"):
