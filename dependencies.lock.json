@@ -1,48 +1,48 @@
 {
   "schema": 2,
-  "updated_at": "2026-11-23T11:21:01+00:00",
+  "updated_at": "2026-11-23T16:00:56+00:00",
   "components": {
     "ztty": {
       "repository": "https://github.com/LIghtJUNction/ztty.git",
       "branch": "main",
-      "commit": "c0f195d9b93065040b4efef35f3615831db11b38",
-      "observed_at": "2026-11-21T21:22:07+00:00"
+      "commit": "963afbd7f9463f6de61a96e1968fdf26d3bc8990",
+      "observed_at": "2026-11-23T16:00:48+00:00"
     },
     "ssmcp": {
       "repository": "https://github.com/LIghtJUNction/ssmcp.git",
       "branch": "main",
-      "commit": "87c4a17faf0dd2c140cb707ec59b1f05725f06f0",
-      "observed_at": "2026-11-22T10:51:52+00:00"
+      "commit": "b5fdceea9af1b14f6f178bbc1677969fd3ff73c9",
+      "observed_at": "2026-11-23T15:48:02+00:00"
     },
     "zshard": {
       "repository": "https://github.com/LIghtJUNction/zshard.git",
       "branch": "main",
       "commit": "f7842f70e439c4abda2a46698f0ebe067d38b297",
-      "observed_at": "2026-11-21T21:22:07+00:00"
+      "observed_at": "2026-11-23T15:48:15+00:00"
     },
     "zdot": {
       "repository": "https://github.com/LIghtJUNction/zdot.git",
       "branch": "main",
       "commit": "645fa9a5504672cf7f1ffee522c9889cabb111f3",
-      "observed_at": "2026-11-21T21:22:07+00:00"
+      "observed_at": "2026-11-23T15:48:31+00:00"
     },
     "zrc": {
       "repository": "https://github.com/LIghtJUNction/zrc.git",
       "branch": "main",
-      "commit": "31f37e9bb8f5c5adcf195f68692c47ec7ea26705",
-      "observed_at": "2026-11-21T21:22:07+00:00"
+      "commit": "237a5a939c6a9df647539451ff61a705af71d4ba",
+      "observed_at": "2026-11-23T15:48:46+00:00"
     },
     "zfetch": {
       "repository": "https://github.com/LIghtJUNction/zfetch.git",
       "branch": "main",
       "commit": "f0614f3b76eca222f4b3880f8dd1707d1308f098",
-      "observed_at": "2026-11-21T21:22:07+00:00"
+      "observed_at": "2026-11-23T15:49:04+00:00"
     },
     "zmem": {
       "repository": "https://github.com/LIghtJUNction/zmem.git",
       "branch": "main",
-      "commit": "ff07982d751f48cbf4c9fca554760c658d882d43",
-      "observed_at": "2026-11-23T11:21:01+00:00"
+      "commit": "5997b9581f5b6962c9d9cd12774a2ce119e46ca7",
+      "observed_at": "2026-11-23T15:49:17+00:00"
     }
   }
 }
