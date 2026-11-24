@@ -650,6 +650,12 @@ class InteractiveCompletion(unittest.TestCase):
             "zcalld library mcp apply --agent gem": "zcalld library mcp apply --agent gemini",
             "ztype candidates --engine kan": "ztype candidates --engine kana",
             "zuse --max-steps 10 human ass": "zuse --max-steps 10 human assist",
+            "zuse mcp ser": "zuse mcp serve",
+            "zuse mcp install co": "zuse mcp install codex",
+            "zuse mcp install cla": "zuse mcp install claude",
+            "zuse mcp install ss": "zuse mcp install ssmcp",
+            "zuse mcp serve --std": "zuse mcp serve --stdio",
+            "zuse mcp --std": "zuse mcp --stdio",
             "ssmcpd serve --portal-state-dir direc":
                 "ssmcpd serve --portal-state-dir 'directory with spaces 中文/'",
             "zcalld library skills install demo --dir file":

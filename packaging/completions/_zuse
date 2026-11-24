@@ -1,5 +1,6 @@
 #compdef zuse
 # Grammar: zuse 0.2.2 src/main.rs. The binary need not be installed.
+# MCP additions: Zuse 2228f9318d167435c354bfacef889dc0df58c09b.
 # Never execute the client or read authentication/session configuration on Tab.
 
 _zuse_input_file() {
@@ -21,7 +22,7 @@ _zuse_specs() {
                 'check:Check a source file' 'shell:Open the interactive shell'
                 'doctor:Report desktop capabilities' 'schema:Print the action schema'
                 'resume:Resume a pending request' 'human:Manage human requests'
-                'mcp:Run an MCP endpoint' 'help:Show help'
+                'mcp:Serve or register an MCP endpoint' 'help:Show help'
             )
             ;;
         eval) positionals=('1:source code:->text') ;;
@@ -37,12 +38,18 @@ _zuse_specs() {
             positionals=('1:request ID:->text')
             ;;
         mcp)
+            subcommands=('serve:Run an MCP endpoint' 'install:Register with a local harness')
+            ;&
+        'mcp serve')
             specs+=(
                 '(--host --port --socket)--stdio[Use stdin and stdout]'
                 '(--stdio --socket)--host[Bind to a host]:host:->text'
                 '(--stdio --socket)--port[Bind to a port]:port:->text'
                 '(--stdio --host --port)--socket[Listen on a Unix socket]:socket path:_files'
             )
+            ;;
+        'mcp install')
+            positionals=('1:harness:(codex claude ssmcp)')
             ;;
 
     esac

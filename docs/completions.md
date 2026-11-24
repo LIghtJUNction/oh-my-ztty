@@ -69,7 +69,7 @@ zfetch 0.1.1 accepts `--json` and `--format` in either order. The last format fl
 | zcalld | 0.2.5, including its pinned compatibility grammar |
 | ssmcpd | 0.10.15 |
 | ztype | 0.1.0 source; installation is not required to ship its definition |
-| zuse | 0.2.2 source; installation is not required to ship its definition |
+| zuse | 0.2.2 source with MCP registration support from [2228f93](https://github.com/LIghtJUNction/zuse/commit/2228f9318d167435c354bfacef889dc0df58c09b) |
 | zmcl | 0.1.0 |
 | onim | 0.1.13 |
 | lmm | lmm-cli 0.1.0 source |
