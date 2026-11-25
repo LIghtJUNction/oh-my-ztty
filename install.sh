@@ -1,7 +1,7 @@
 #!/bin/sh
 # Per-user suite with a separately installed system zmem service.
 set -eu
-VERSION=0.2.16
+VERSION=0.2.17
 die() { printf 'oh-my-ztty: %s\n' "$*" >&2; exit 1; }
 usage() {
     cat <<'EOF'
@@ -41,7 +41,7 @@ while [ "$#" -gt 0 ]; do
 done
 [ "$(uname -s)" = Linux ] || die "this release supports Linux"
 case "$(uname -m)" in x86_64|amd64) arch=x86_64 ;; aarch64|arm64) arch=aarch64 ;; *) die "unsupported architecture" ;; esac
-for tool in tar sha256sum awk sed grep tr readlink mktemp; do command -v "$tool" >/dev/null 2>&1 || die "required command not found: $tool"; done
+for tool in tar sha256sum awk sed grep tr readlink mktemp flock; do command -v "$tool" >/dev/null 2>&1 || die "required command not found: $tool"; done
 command -v zsh >/dev/null 2>&1 || die "install zsh with your distribution package manager first"
 zsh -dfc 'autoload -Uz is-at-least; is-at-least 5.9 "$ZSH_VERSION"' || die "zsh 5.9 or newer is required"
 datahome=${XDG_DATA_HOME:-"$HOME/.local/share"}
@@ -49,6 +49,11 @@ case "$datahome:$bindir" in *'
 '*) die "installation paths must not contain a newline" ;; esac
 case "$datahome" in /*) ;; *) die "XDG_DATA_HOME must be absolute" ;; esac
 case "$bindir" in /*) ;; *) die "--bin-dir must be absolute" ;; esac
+# The data directory also exists before the first install and after an uninstall.
+# Lock its inode so concurrent lifecycle commands cannot switch or collect each other's release.
+mkdir -p -- "$datahome"
+exec 9<"$datahome"
+flock -x 9 || die "cannot lock the installation"
 base="$datahome/oh-my-ztty"
 [ ! -L "$base" ] || die "installation root must not be a symlink"
 if [ -e "$base" ]; then
@@ -122,7 +127,10 @@ fetch() {
         wget -q --https-only -O "$2" "$1"
     else die "curl or wget is required for downloading"; fi
 }
-valid_version() { printf '%s\n' "$1" | LC_ALL=C grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; }
+valid_version() {
+    case "$1" in ''|*[!0-9.]*) return 1 ;; esac
+    printf '%s\n' "$1" | LC_ALL=C grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'
+}
 valid_version "$VERSION" || die "invalid version"
 if [ -z "$archive" ]; then
     name="oh-my-ztty-$VERSION-linux-$arch.tar.gz"
@@ -153,7 +161,17 @@ valid_version "$installed_version" || die "bundle version is invalid"
 for exe in omztty ztty ssmcp zdot zshard zfetch zmem; do [ -x "$payload/bin/$exe" ] || die "bundle missing executable: $exe"; done
 [ -f "$payload/components/zshard/zshard.zsh" ] || die "bundle missing zshard"
 [ -f "$payload/config/zmem/zmem.conf" ] || die "bundle missing zmem configuration"
-release_id="$installed_version-linux-$arch"
+# A locally derived archive may share VERSION with a later official build.
+release_name() {
+    if [ -f "$1/LOCAL-PROVENANCE.json" ] && [ ! -L "$1/LOCAL-PROVENANCE.json" ]; then
+        printf '%s-local-%.12s-%s\n' "$2" "$4" "$3"
+    else
+        [ ! -e "$1/LOCAL-PROVENANCE.json" ] && [ ! -L "$1/LOCAL-PROVENANCE.json" ] || return 1
+        printf '%s-%s\n' "$2" "$3"
+    fi
+}
+release_id=$(release_name "$payload" "$installed_version" "linux-$arch" "$actual") ||
+    die "local provenance must be a regular file"
 release="$base/releases/$release_id"
 mkdir -p -- "$base/releases" "$bindir"
 chmod 700 "$base"
@@ -249,6 +267,80 @@ if [ "$saved_memory" != "$memory_manager" ]; then
     mv -Tf -- "$memory_preference_tmp" "$memory_preference"
     memory_preference_tmp=
 fi
+# Old managed releases are immutable. Build the checksum list from the actual
+# tree, so added files are preserved too. The archive format contains no links.
+pristine_release() (
+    cd -- "$1" || exit 1
+    [ -f .archive-sha256 ] && [ -f MANIFEST.sha256 ] || exit 1
+    fingerprint=$(cat .archive-sha256) || exit 1
+    [ "${#fingerprint}" = 64 ] || exit 1
+    case "$fingerprint" in *[!0-9a-f]*) exit 1 ;; esac
+    find . -xdev \( ! -type f ! -type d -o -type d -empty \) -print -quit > "$tmp/unexpected" || exit 1
+    [ ! -s "$tmp/unexpected" ] || exit 1
+    [ "$(cat VERSION)" = "$old_version" ] && [ "$(cat PLATFORM)" = "linux-$arch" ] || exit 1
+    [ "$(release_name . "$old_version" "linux-$arch" "$fingerprint")" = "${1##*/}" ] || exit 1
+    find . -xdev -type f ! -path ./MANIFEST.sha256 ! -path ./.archive-sha256 -printf '%P\0' > "$tmp/old-files" || exit 1
+    xargs -0r sha256sum -- < "$tmp/old-files" > "$tmp/old-digests" || exit 1
+    LC_ALL=C sort "$tmp/old-digests" > "$tmp/old-sorted" || exit 1
+    LC_ALL=C sort MANIFEST.sha256 > "$tmp/expected-sorted" || exit 1
+    cmp -s "$tmp/old-sorted" "$tmp/expected-sorted"
+)
+idle_release() {
+    # Direct binaries and legacy launchers predate shared release locks. Inspect
+    # kernel references, launch arguments and suite environment without logging them.
+    zsh -dfc '
+        zmodload zsh/stat || exit 1
+        [[ -r /proc/self/maps && -d /proc/self/fd ]] || exit 1
+        dir=${1:A}
+        procs=(/proc/<->(NU/))
+        (( ${#procs} )) || exit 1
+        for proc in "${procs[@]}"; do
+            for ref in "$proc"/{exe,cwd,fd/*}(N@); do
+                zstat -L -A target +link -- "$ref" 2>/dev/null || continue
+                [[ $target[1] == "$dir/.archive-sha256" ]] && continue
+                [[ $target[1] == "$dir" || $target[1] == "$dir/"* ]] && exit 1
+            done
+        done
+        grep -Fq -- "$dir/" ${^procs}/maps 2>/dev/null && exit 1
+        grep -zFq -- "$dir/" ${^procs}/cmdline 2>/dev/null && exit 1
+        while IFS= read -r -d "" entry; do
+            value=${entry#*=}
+            if [[ $entry == PATH=* ]]; then
+                refs=("${(@s.:.)value}")
+            else
+                refs=("$value")
+            fi
+            for ref in "${refs[@]}"; do
+                [[ $ref == "$dir" || $ref == "$dir/"* ]] && exit 1
+            done
+        done < <(grep -zhE "^(PATH|OMZTTY_ROOT|ZDOTDIR|ZSHARD_HOME)=" ${^procs}/environ 2>/dev/null)
+        exit 0
+    ' zsh "$1"
+}
+profile="${XDG_CONFIG_HOME:-$HOME/.config}/oh-my-ztty/profile"
+for old in "$base/releases"/*-linux-"$arch"; do
+    [ -d "$old" ] && [ ! -L "$old" ] && [ "$old" != "$release" ] || continue
+    old_id=${old##*/}
+    # Profiles record the semantic version and may still require any local
+    # derivation with that version until a separate defaults baseline exists.
+    old_version=${old_id%%-*}
+    valid_version "$old_version" && [ -f "$old/.archive-sha256" ] && [ ! -L "$old/.archive-sha256" ] || continue
+    if [ "$(cat "$profile/.suite-version" 2>/dev/null)" = "$old_version" ] &&
+       [ "$(cat "$profile/.baseline/.suite-version" 2>/dev/null)" != "$old_version" ]; then
+        continue
+    fi
+    (
+        flock -nx 8 && pristine_release "$old" && idle_release "$old" || exit 0
+        # Unlink only the just-verified files. An unexpected concurrent addition
+        # keeps its directory and is never swept up by a recursive removal.
+        cd -- "$old" || exit 1
+        xargs -0r rm -- < "$tmp/old-files" || exit 1
+        rm -- MANIFEST.sha256 .archive-sha256 || exit 1
+        find . -xdev -depth -mindepth 1 -type d -empty -delete || exit 1
+        cd -- "$base/releases" && rmdir -- "$old_id" || exit 1
+        printf 'Removed unused release %s\n' "$old_id"
+    ) 8<"$old/.archive-sha256" || printf 'Preserved remaining files in %s\n' "$old" >&2
+done
 printf 'Installed oh-my-ztty %s\nRun: %s shell\nOpen a window: %s terminal\nDefault shell: install native zrun; for the zsh preset add --zsh.\nUninstall: %s uninstall\n' "$installed_version" "$bindir/omztty" "$bindir/omztty" "$bindir/omztty"
 if [ "$memory_manager" = 1 ]; then
     printf 'Memory: %s memory status\nRestore previous managers: %s memory rollback\n' "$bindir/omztty" "$bindir/omztty"

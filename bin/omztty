@@ -35,11 +35,29 @@ case "${1:-help}" in
     -V|--version|version) printf 'oh-my-ztty %s\n' "$(cat "$root/VERSION")"; exit 0 ;;
 esac
 cmd=$1; shift
+# Inherit a shared release lock across exec, including external zrun and zsh.
+# Updates hand off to the downloaded installer and do not need the old release.
+case "$cmd" in
+    update|uninstall) ;;
+    *) if [ -f "$root/.archive-sha256" ] && [ "${_OMZTTY_LEASED_ROOT:-}" != "$root" ]; then
+           # flock chooses a free descriptor and execs directly into the launcher.
+           _OMZTTY_LEASED_ROOT=$root exec flock -s -F "$root/.archive-sha256" "$self" "$cmd" "$@"
+       fi
+       unset _OMZTTY_LEASED_ROOT ;;
+esac
 suite_socket() {
     if [ -n "${OMZTTY_SOCKET:-}" ]; then
         export ZTTY_SOCKET="$OMZTTY_SOCKET"
     else
         IFS= read -r version < "$root/VERSION"
+        generation=${root##*/}
+        if [ -f "$root/LOCAL-PROVENANCE.json" ] && [ -f "$root/.archive-sha256" ]; then
+            IFS= read -r digest < "$root/.archive-sha256"
+            variant=$(printf '%s-local-%.12s' "$version" "$digest")
+            case "$generation" in
+                "$variant-linux-x86_64"|"$variant-linux-aarch64") version=$variant ;;
+            esac
+        fi
         export ZTTY_SOCKET="@oh-my-ztty-$(id -u)-$version"
     fi
 }
@@ -240,7 +258,13 @@ case "$cmd" in
         set --
         [ -z "$desktop_option" ] || set -- "$@" "$desktop_option"
         [ -z "$memory_option" ] || set -- "$@" "$memory_option"
-        XDG_DATA_HOME=$(dirname -- "$base") OMZTTY_BIN_DIR=$(cat "$base/.bin-dir") sh "$tmp/install.sh" "$@" ;;
+        # Leave the old launcher before collection; the verified installer keeps
+        # its input fd while the downloaded temporary directory is removed.
+        exec 3<"$tmp/install.sh"
+        rm -rf -- "$tmp"
+        trap - EXIT HUP INT TERM
+        unset OMZTTY_ROOT
+        XDG_DATA_HOME=$(dirname -- "$base") OMZTTY_BIN_DIR=$(cat "$base/.bin-dir") exec sh /proc/self/fd/3 "$@" ;;
     uninstall)
         if [ -f "$root/PACKAGE_MANAGER" ]; then
             printf 'This installation is managed by pacman.\nRemove with: sudo pacman -R oh-my-ztty-bin\n' >&2

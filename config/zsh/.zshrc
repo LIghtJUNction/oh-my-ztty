@@ -11,6 +11,36 @@ path=("$OMZTTY_ROOT/bin" "$HOME/.local/bin" "${path[@]}")
 typeset -g ZSHARD_CACHE_DIR=${ZSHARD_CACHE_DIR:-${XDG_CACHE_HOME:-$HOME/.cache}/oh-my-ztty/zshard/${OMZTTY_ROOT:t}}
 typeset -g HISTFILE=${XDG_STATE_HOME:-$HOME/.local/state}/oh-my-ztty/history
 [[ -d ${HISTFILE:h} ]] || (umask 077; command mkdir -p -- "${HISTFILE:h}")
+# Keep the shell word intact while locating slashes in escaped or quoted paths.
+_omztty_backward_kill_path() {
+    emulate -L zsh
+    setopt extendedglob
+    local -a words=( "${(@Z:n:)LBUFFER}" )
+    local word=$words[-1]
+    if [[ $word != */* ]]; then
+        zle .backward-kill-word
+        return
+    fi
+    # Leave a closing quote to the right of the cursor for continued editing.
+    if [[ $LBUFFER == *"$word" && (
+          $word == \'*\' || ( $word == \"*\" && ${word[-2]} != \\ )
+    ) ]]; then
+        (( CURSOR-- ))
+        word=${word[1,-2]}
+    fi
+    local prefix=${LBUFFER%${word}[[:space:]]#}
+    local stem=${word%%/##}
+    if [[ $stem == */* ]]; then
+        prefix+=${stem%/*}/
+    elif [[ ${word[1]} == \' || ${word[1]} == \" ]]; then
+        prefix+=${word[1]}
+    fi
+    local MARK=${#prefix}
+    zle .kill-region
+}
+zle -N omztty-backward-kill-path _omztty_backward_kill_path
+bindkey -M emacs '^W' omztty-backward-kill-path
+bindkey -M viins '^W' omztty-backward-kill-path
 if [[ -r "${XDG_CONFIG_HOME:-$HOME/.config}/oh-my-ztty/options.zsh" ]]; then
     source "${XDG_CONFIG_HOME:-$HOME/.config}/oh-my-ztty/options.zsh"
 fi

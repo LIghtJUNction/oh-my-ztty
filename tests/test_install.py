@@ -38,9 +38,12 @@ class Installation(unittest.TestCase):
     def tearDown(self):
         self.temp.cleanup()
 
-    def bundle(self, version, warm_exit=0, real_zshard=False):
-        stage = self.work / ("stage-" + version) / "oh-my-ztty"
+    def bundle(self, version, warm_exit=0, real_zshard=False, local=None):
+        identity = f"{version}-{local}" if local else version
+        stage = self.work / ("stage-" + identity) / "oh-my-ztty"
         stage.mkdir(parents=True)
+        if local:
+            (stage / "LOCAL-PROVENANCE.json").write_text(json.dumps({"source": local}))
         for rel in ["install.sh", "uninstall.sh", "bin/omztty", "bin/zshard",
                     "bin/omztty-config", "bin/omztty-manage", "bin/omztty-setup", "bin/omztty-sync",
                     "config/zsh/settings-lib.zsh", "config/zsh/settings.zsh",
@@ -76,7 +79,9 @@ class Installation(unittest.TestCase):
             shutil.copytree(ROOT / "packaging/completions", stage / "packaging/completions")
         for name in ["ztty", "ssmcp", "zdot", "zfetch"]:
             executable = stage / "bin" / name
-            executable.write_text(f"#!/bin/sh\nprintf '{name} fixture\\n'\n")
+            executable.write_text(f"#!/bin/sh\n"
+                                  'if [ "$1" = --test-socket ]; then echo "$ZTTY_SOCKET"; exit; fi\n'
+                                  f"printf '{name} fixture\\n'\n")
             executable.chmod(0o755)
         memory = stage / "bin/zmem"
         memory.write_text(
@@ -90,7 +95,7 @@ class Installation(unittest.TestCase):
         memory.chmod(0o755)
         lines = [f"{sha(p)}  {p.relative_to(stage)}" for p in sorted(stage.rglob("*")) if p.is_file()]
         (stage / "MANIFEST.sha256").write_text("\n".join(lines) + "\n")
-        archive = self.work / f"oh-my-ztty-{version}.tar.gz"
+        archive = self.work / f"oh-my-ztty-{identity}.tar.gz"
         with tarfile.open(archive, "w:gz") as tar:
             tar.add(stage, arcname="oh-my-ztty")
         archive.with_name(archive.name + ".sha256").write_text(f"{sha(archive)}  {archive.name}\n")
@@ -352,11 +357,13 @@ shutil.copyfile(sources[urls[0]], args[args.index("-o") + 1])
 
     def test_update_preserves_desktop_choice_and_accepts_overrides(self):
         self.install(desktop=False)
+        old = (self.base / "current").resolve()
         self.serve_update("0.1.1", self.bundle("0.1.1"))
         desktop = self.data / "applications/oh-my-ztty.desktop"
         preference = self.base / ".desktop-enabled"
         self.cli("update")
         self.assertIn("0.1.1", self.cli("version").stdout)
+        self.assertFalse(old.exists())
         self.assertFalse(desktop.is_symlink())
         self.assertEqual(preference.read_text(), "0\n")
         self.cli("update", "--desktop")
@@ -499,6 +506,136 @@ shutil.copyfile(sources[urls[0]], args[args.index("-o") + 1])
         self.assertIn("completion cache preparation failed", result.stderr)
         self.assertEqual(os.readlink(self.base / "current"), previous)
         self.assertIn("0.1.0", self.cli("version").stdout)
+
+    def test_rolling_install_preserves_live_release_then_prunes_on_repeat(self):
+        self.install()
+        old = (self.base / "current").resolve()
+        newer = self.bundle("0.1.1")
+        with subprocess.Popen(["sleep", "120"], cwd=old / "bin") as session:
+            try:
+                self.install(newer)
+                self.assertTrue((old / "bin/ztty").is_file())
+            finally:
+                session.terminate()
+        self.install(newer)
+        self.assertFalse(old.exists())
+        self.assertEqual(list((self.base / "releases").iterdir()), [(self.base / "current").resolve()])
+
+    def test_external_native_shell_inherits_release_lock(self):
+        self.install()
+        old = (self.base / "current").resolve()
+        native = self.bindir / "zrun"
+        native.write_text("#!/bin/sh\n"
+                          "if [ \"$1\" = --native-shell-version ]; then echo 1; exit; fi\n"
+                          "unset OMZTTY_ROOT\ncat <&8\nexec sleep 120\n")
+        native.chmod(0o755)
+        newer = self.bundle("0.1.1")
+        user_input = self.work / "fd8"
+        user_input.write_text("ready\n")
+        args = ["sh", "-c", 'exec 8<"$1"; exec "$2" shell', "sh", user_input, self.bindir / "omztty"]
+        with subprocess.Popen(args, env=self.env, stdout=subprocess.PIPE, text=True) as shell:
+            try:
+                self.assertEqual(shell.stdout.readline(), "ready\n")
+                self.install(newer)
+                self.assertTrue(old.is_dir())
+            finally:
+                shell.terminate()
+        self.install(newer)
+        self.assertFalse(old.exists())
+
+    def test_environment_only_reference_preserves_an_external_shell(self):
+        self.install()
+        old = (self.base / "current").resolve()
+        newer = self.bundle("0.1.1")
+        for env in ({"OMZTTY_ROOT": str(old)}, {"PATH": self.env["PATH"] + os.pathsep + str(old / "bin")}):
+            with self.subTest(env=list(env)), subprocess.Popen(["sleep", "120"], env={**self.env, **env}) as session:
+                try:
+                    self.install(newer)
+                    self.assertTrue(old.is_dir())
+                finally:
+                    session.terminate()
+        self.install(newer)
+        self.assertFalse(old.exists())
+
+    def test_rolling_cleanup_preserves_modified_extra_unowned_and_symlinked(self):
+        self.install()
+        original = (self.base / "current").resolve()
+        for index, kind in enumerate(("modified", "extra", "empty", "unowned", "symlink"), start=1):
+            archive = self.bundle(f"0.3.{index}")
+            self.install(archive)
+            candidate = (self.base / "current").resolve()
+            if kind == "modified":
+                (candidate / "config/zmem/zmem.conf").write_text("personal")
+            elif kind == "extra":
+                (candidate / "personal").write_text("keep")
+            elif kind == "empty":
+                (candidate / "personal").mkdir()
+            elif kind == "unowned":
+                (candidate / ".archive-sha256").unlink()
+            else:
+                (candidate / "personal").symlink_to(self.home)
+        self.install(self.bundle("0.4.0"))
+        self.assertFalse(original.exists())
+        for candidate in (self.base / "releases").glob("0.3.*"):
+            self.assertTrue((candidate / "bin/ztty").is_file())
+        self.assertEqual(len(list((self.base / "releases").glob("0.3.*"))), 5)
+
+    def test_local_release_allows_same_version_official_update_and_separate_broker(self):
+        first = self.bundle("0.1.0", local="one")
+        self.install(first)
+        old = (self.base / "current").resolve()
+        self.assertIn(f"-local-{sha(first)[:12]}-linux-", old.name)
+        prefix = f"@oh-my-ztty-{os.getuid()}-0.1.0"
+        self.assertEqual(self.cli("ztty", "--test-socket").stdout.strip(), prefix + "-local-" + sha(first)[:12])
+        self.env["OMZTTY_SOCKET"] = "@operator-choice"
+        self.assertEqual(self.cli("ztty", "--test-socket").stdout.strip(), "@operator-choice")
+        del self.env["OMZTTY_SOCKET"]
+        second = self.bundle("0.1.0", local="two")
+        self.install(second)
+        local = (self.base / "current").resolve()
+        self.assertEqual(local.name, f"0.1.0-local-{sha(second)[:12]}-linux-{os.uname().machine}")
+        self.assertFalse(old.exists())
+        with subprocess.Popen(["sleep", "120"], cwd=local) as session:
+            try:
+                self.install(self.archive)
+                self.assertTrue(local.is_dir())
+                self.assertEqual(self.cli("ztty", "--test-socket").stdout.strip(), prefix)
+            finally:
+                session.terminate()
+        self.install(self.archive)
+        current = (self.base / "current").resolve()
+        self.assertEqual(current.name, "0.1.0-linux-" + os.uname().machine)
+        self.assertEqual(list((self.base / "releases").iterdir()), [current])
+
+    def test_local_pruning_preserves_ambiguous_profile_unowned_and_misnamed_releases(self):
+        local_archive = self.bundle("0.1.0", local="build")
+        self.install(local_archive)
+        local = (self.base / "current").resolve()
+        bad = local.with_name(local.name.replace(sha(local_archive)[:12], "012345678901"))
+        shutil.copytree(local, bad)
+        profile = Path(self.env["XDG_CONFIG_HOME"]) / "oh-my-ztty/profile"
+        profile.mkdir(parents=True)
+        (profile / ".suite-version").write_text("0.1.0\n")
+        self.install(self.archive)
+        self.assertTrue((local / "bin/ztty").is_file())
+        (local / ".archive-sha256").unlink()
+        (profile / ".suite-version").unlink()
+        self.install(self.archive)
+        for protected in [bad, local]:
+            self.assertTrue((protected / "bin/ztty").is_file())
+
+    def test_parallel_installs_activate_one_complete_release(self):
+        self.install()
+        archives = [self.bundle(v) for v in ("0.6.1", "0.6.2")]
+        jobs = [subprocess.Popen(["sh", str(ROOT / "install.sh"), "--from", str(archive),
+                                  "--no-memory-manager"], env=self.env,
+                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE) for archive in archives]
+        for job in jobs:
+            _, stderr = job.communicate(timeout=30)
+            self.assertEqual(job.returncode, 0, stderr)
+        current = (self.base / "current").resolve()
+        self.assertIn((current / "VERSION").read_text().strip(), ("0.6.1", "0.6.2"))
+        self.assertEqual(list((self.base / "releases").iterdir()), [current])
 
     def test_modified_release_is_preserved(self):
         self.install()

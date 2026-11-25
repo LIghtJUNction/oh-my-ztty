@@ -138,6 +138,31 @@ class InteractiveCompletion(unittest.TestCase):
             with self.subTest(line=line):
                 self.assertEqual(self.complete(line), shlex.split(expected))
 
+    def test_directory_shortcuts_and_path_component_erase(self):
+        self.start()
+        os.write(self.master, b"'directory with spaces " + "中文".encode() + b"'\n")
+        self.read_until(b"__OMZTTY_READY__")
+        os.write(self.master, b'pwd > "$HOME/entered"; ..; pwd > "$HOME/parent"\n')
+        self.read_until(b"__OMZTTY_READY__")
+        self.assertEqual((self.home / "entered").read_text().strip(),
+                         str(self.project / "directory with spaces 中文"))
+        self.assertEqual((self.home / "parent").read_text().strip(), str(self.project))
+        for keys, expected in [
+            ("print one/two/three\x17", "print one/two/"),
+            ("print one/two/three/\x17\x17", "print one/"),
+            (r"print one/茶\ 叶/" + "\x17", "print one/"),
+            ('print "one/茶 叶/"' + "\x17new", 'print "one/new"'),
+            ('print "one/two/"' + "\x17\x17new", 'print "new"'),
+            ("print one/twoX\x02\x17", "print one/X"),
+        ]:
+            with self.subTest(keys=keys):
+                deadline = time.monotonic() + 2
+                while termios.tcgetattr(self.master)[3] & termios.ICANON:
+                    self.assertLess(time.monotonic(), deadline, "ZLE did not resume")
+                    time.sleep(0.002)
+                os.write(self.master, b"\x1b[26~" + keys.encode())
+                self.assertEqual(self.report()[0], expected)
+
     def test_first_tab_cache_and_config_actions(self):
         self.start()
         self.assertEqual(self.report()[1:], ["0", "no"])

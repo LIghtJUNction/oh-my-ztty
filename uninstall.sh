@@ -4,6 +4,8 @@ die() { printf 'oh-my-ztty: %s\n' "$*" >&2; exit 1; }
 [ "$#" -eq 2 ] && [ "$1" = --root ] || die "use: omztty uninstall"
 base=$2
 case "$base" in /*/oh-my-ztty) ;; *) die "invalid installation root" ;; esac
+exec 9<"${base%/*}"
+flock -x 9 || die "cannot lock the installation"
 [ ! -L "$base" ] && [ -f "$base/.owner" ] && [ "$(cat "$base/.owner")" = oh-my-ztty-v1 ] || die "installation ownership check failed"
 bindir=$(cat "$base/.bin-dir")
 case "$bindir" in /*) ;; *) die "invalid bin directory" ;; esac

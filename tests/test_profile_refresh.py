@@ -184,7 +184,7 @@ class ProfileRefresh(unittest.TestCase):
     def test_saved_baseline_survives_removal_of_old_release(self):
         self.initialize()
         self.upgrade()
-        shutil.rmtree(self.baseline)
+        self.assertFalse(self.baseline.exists())
         self.fixture.cli("config", "refresh")
         self.assertEqual((self.nvim / "context.lua").read_text(), "-- shipped 0.1.1\n")
         self.assertEqual((self.profile / ".baseline/.suite-version").read_text(), "0.1.1\n")
