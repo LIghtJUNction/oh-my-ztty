@@ -1,5 +1,7 @@
 # Shell, PATH and environment
 
+Run `omztty shell` to start native zrun. Its session owns the prompt, working directory, variables and asynchronous tasks. For the optional zsh preset described below, run `omztty shell --zsh`.
+
 Use `omztty` to keep your zsh settings in a predictable directory and change them from the command line. Shared settings live in your profile. Once you enable Git for that profile, shared shell changes are recorded as local commits and you choose when to push them.
 
 ## Start with setup
@@ -14,10 +16,10 @@ For a local setup without a GitHub repository:
 
 ```sh
 omztty setup --local
-omztty shell
+omztty shell --zsh
 ```
 
-`omztty shell` loads the settings in a new preset zsh session. To load the same settings when your ordinary zsh starts, preview and install its startup block:
+`omztty shell --zsh` loads the settings in a new preset zsh session. To load the same settings when your ordinary zsh starts, preview and install its startup block:
 
 ```sh
 omztty rc install --dry-run
@@ -182,7 +184,7 @@ Existing `options.zsh` and `local.zsh` files continue to work in the preset shel
 
 ## Load a change
 
-A new `omztty shell` session reads the updated settings. An ordinary new zsh session also reads them after `rc install`.
+A new `omztty shell --zsh` session reads the updated settings. An ordinary new zsh session also reads them after `rc install`.
 
 To reload from an already running suite shell:
 

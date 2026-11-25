@@ -1,8 +1,10 @@
 # oh-my-ztty
 
-A lean Linux terminal setup built on Project Z: **ztty + zsh + zshard + zrc + zdot + zfetch + ssmcp + zmem**.
+A lean Linux terminal setup built on Project Z: **ztty + zrun + zshard + zrc + zdot + zfetch + ssmcp + zmem**.
 
 [Website](https://lightjunction.github.io/oh-my-ztty/) · [中文](README.zh-CN.md) · [Install guide](docs/installation.md) · [Performance](docs/performance.md) · [0.2.1 workstation report](docs/reports/workspace-0.2.1.md)
+
+On Linux, `omztty shell` and `omztty terminal` open the independent zrun shell. Install a native build of [zrun](https://github.com/LIghtJUNction/zrun) alongside the suite. Use `omztty shell --zsh` or `omztty terminal --zsh` for the Ink zsh preset, plugins and completions. `omztty ai ask` selects that preset directly.
 
 ## Install
 

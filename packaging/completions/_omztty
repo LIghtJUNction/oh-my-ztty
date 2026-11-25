@@ -97,7 +97,7 @@ _omztty() {
     local context state state_descr line
     typeset -A opt_args
     local -a commands=(
-        'shell:Open the preset zsh' 'terminal:Open ztty with the preset'
+        'shell:Open native zrun or the explicit zsh preset' 'terminal:Open ztty with native zrun'
         'ai:Use explicit AI actions' 'config:Manage the unified profile'
         'setup:Set up shell settings and private GitHub sync' 'env:Manage environment variables'
         'path:Manage PATH priority' 'rc:Manage shell snippets and backups' 'sync:Synchronize personal configuration'
@@ -169,7 +169,13 @@ _omztty() {
                 service=zmem
                 _normal
             fi ;;
-        shell) words[1]=zsh; service=zsh; _normal ;;
+        shell)
+            if [[ $words[2] == --zsh ]]; then
+                shift words; (( CURRENT-- )); words[1]=zsh; service=zsh; _normal
+            else
+                _arguments '--zsh[Use the zsh compatibility preset]' '-c[Run a command]:command:' \
+                    '-i[Interactive shell]' '-l[Login shell]' '--help[Show help]' '*:script or argument:_files'
+            fi ;;
         zshard) _normal ;;
         ssmcp)
             local _OMZTTY_COMPLETION_BINARY=$OMZTTY_ROOT/bin/ssmcp

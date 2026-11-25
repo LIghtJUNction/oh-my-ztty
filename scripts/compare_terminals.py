@@ -141,14 +141,14 @@ def main():
                 raise RuntimeError("private D-Bus did not provide an address")
             env["DBUS_SESSION_BUS_ADDRESS"] = bus.stdout.readline().strip()
             cases = {
-                "ztty": ([str(cli), "terminal", "--name", "ohmy-compare", "--geometry", "100x28"], "ztty"),
+                "ztty": ([str(cli), "terminal", "--zsh", "--name", "ohmy-compare", "--geometry", "100x28"], "ztty"),
                 "kitty": ([
                     "kitty", "--config", "NONE", "--class", "ohmy-compare-kitty", "--title", "ohmy-compare-kitty",
                     "-o", f"font_family={font_family}", "-o", f"font_size={font_size}", "-o", "initial_window_width=100c",
                     "-o", "initial_window_height=28c", "-o", "remember_window_size=no", "-o", f"window_padding_width={preset['window-padding']}",
                     "-o", f"background={preset['background']}", "-o", f"foreground={preset['foreground']}",
                     "-o", "shell_integration=disabled", "-o", "enable_audio_bell=no", "-o", "close_on_child_death=yes",
-                    str(cli), "shell",
+                    str(cli), "shell", "--zsh",
                 ], "ohmy-compare-kitty"),
             }
             for name, (command, window_class) in cases.items():

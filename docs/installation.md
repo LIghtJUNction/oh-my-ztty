@@ -86,6 +86,10 @@ omztty terminal
 
 The first command starts a shell in the current terminal. The second opens ztty with that same environment. These commands try the preset in a separate shell session. Use the explicit home-adoption steps below to make it the default configuration; account login-shell records remain unchanged.
 
+Install a native Linux build of [zrun](https://github.com/LIghtJUNction/zrun) to use the default `omztty shell` and `omztty terminal`. The launcher checks `~/.local/bin/zrun`, the suite's `bin/zrun`, `~/.cargo/bin/zrun`, then executables on `PATH`. To select a specific installation set `OMZTTY_ZRUN` to its absolute executable path. The launcher checks native-shell support because older zrun releases forwarded input to an external shell. If it finds no compatible executable it reports the missing dependency before opening a window.
+
+Use `omztty shell --zsh` or `omztty terminal --zsh` for the existing zsh configuration and plugins. For a persistent explicit choice, supply `OMZTTY_SHELL=zsh` in the launch environment. `omztty terminal -e PROGRAM ARG…` passes the command and each argument straight to ztty, independent of either shell. None of these commands edits your login shell or startup files.
+
 The terminal launcher uses a suite-specific ztty broker socket, `@oh-my-ztty-<uid>-<suite-version>`. Set `OMZTTY_SOCKET` to select another socket explicitly. The terminal uses ztty's resident broker; starting `omztty shell` alone does not start a terminal or AI daemon.
 
 Inside the preset shell, `zai context` produces a small context record for AI tools. `zai connect` starts ssmcp in the current directory. Configure and authenticate ssmcp using its own instructions. Merely starting the shell creates no remote connection.
@@ -115,7 +119,7 @@ The standalone Arch Linux package names are `zfetch-project-z` and `zfetch-proje
 
 The default Ink preset uses a warm graphite background, linen text and copper accents, a complete ANSI palette, 28 px padding and a 13 pt font request. Fontconfig tries installed JetBrains Mono, JetBrainsMono Nerd Font, Caskaydia Mono, Cascadia Mono and ordinary monospace in that order. The prompt does not require private-use icon glyphs. Personal Fontconfig rules may change the selected family.
 
-The two-line prompt separates the path and cached Git branch from command input. It shows a nonzero exit code and commands lasting at least two seconds. Its theme callback uses zsh builtins only.
+In the explicit zsh preset, the two-line Ink prompt separates the path and cached Git branch from command input. It shows a nonzero exit code and commands lasting at least two seconds. Its theme callback uses zsh builtins only.
 
 To use zshard's own minimal prompt, put `OMZTTY_THEME=framework` in `options.zsh`. To install a custom prompt, register it with `zshard theme YOUR_FUNCTION` in `local.zsh`; that file is loaded after Ink. See the [theme API](https://github.com/LIghtJUNction/zshard/blob/v0.2.0/docs/plugins.md).
 

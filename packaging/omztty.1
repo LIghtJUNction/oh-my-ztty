@@ -6,7 +6,7 @@ omztty \- a lean Project Z terminal workspace
 .I COMMAND
 .RI [ ARGS... ]
 .SH DESCRIPTION
-Launches a preset zsh environment in the current terminal or bundled ztty.
+Launches the independent native zrun shell in the current terminal or bundled ztty.
 Manage environment variables, PATH, zsh snippets and application profiles from
 one command. Shared configuration lives in the editable profile. A profile with
 its own Git repository records managed shared shell changes as local commits;
@@ -14,10 +14,14 @@ push is explicit. Machine-specific values remain local.
 .SH COMMANDS
 .TP
 .B shell
-Run zsh with the suite configuration. Additional arguments are passed to zsh.
+Run native zrun with the remaining arguments. Install a native zrun on PATH or
+in ~/.local/bin, or set OMZTTY_ZRUN to its absolute path. The
+\-\-zsh option selects the suite's zsh preset and its startup files.
 .TP
 .B terminal
-Open ztty running the suite shell. Additional arguments are ztty options.
+Open ztty running native zrun. Use \-\-zsh as the first option for the zsh preset.
+Set OMZTTY_SHELL=zsh to select that compatibility mode in the launch environment.
+An explicit \-e program or \-\- program is passed through with its original arguments.
 .TP
 .B setup [\-\-local | \-\-repo NAME | \-\-from OWNER/NAME] [\-\-yes] [\-\-install-rc]
 Guide local configuration and optional private GitHub profile synchronization.

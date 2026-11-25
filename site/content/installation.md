@@ -1,5 +1,7 @@
 # Installation
 
+Install the independent native [zrun shell](https://github.com/LIghtJUNction/zrun) for the default terminal. Use `OMZTTY_ZRUN=/absolute/path/to/zrun` to select an installation explicitly, or open `omztty terminal --zsh` for the Ink zsh preset.
+
 Choose a per-user release installation or the Arch Linux package. Both provide the same suite commands; use the matching update and removal instructions below.
 
 The bundle includes the terminal, shell framework and configuration tools. You need system zsh and the libraries listed below. Installing a release and managing its configuration require neither Rust nor Python.
@@ -9,7 +11,8 @@ The bundle includes the terminal, shell framework and configuration tools. You n
 | Requirement | Supported configuration |
 | --- | --- |
 | Operating system | Linux x86_64 or ARM64 |
-| Shell | System zsh 5.9 or newer |
+| Default shell | Separately installed native zrun |
+| zsh preset and management tools | System zsh 5.9 or newer |
 | Default memory manager | Linux cgroup v2, systemd, util-linux and administrator access; Btrfs also uses btrfs-progs |
 | Optional editor profile | Neovim 0.11 or newer, installed separately |
 | Private GitHub profile sync | Git and the optional GitHub CLI (`gh`) |

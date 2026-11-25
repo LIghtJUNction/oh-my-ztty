@@ -1,6 +1,6 @@
 # A working terminal setup for Linux
 
-oh-my-ztty gives Linux developers a configured zsh shell and a terminal to run it in. Open a session to get a directory and Git-branch prompt, Tab completion, history suggestions and command highlighting.
+oh-my-ztty opens the native zrun shell in your current terminal or a ztty window. Run `omztty shell --zsh` for the Ink zsh prompt, Tab completion, history suggestions and command highlighting.
 
 Use the shell in your current terminal or open the included ztty window. An optional application profile adds matching Neovim and terminal-tool settings, which you can edit as ordinary configuration files.
 

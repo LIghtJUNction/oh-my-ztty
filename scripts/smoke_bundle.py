@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("archive", type=Path)
+    parser.add_argument("--zrun", type=Path, help="Also verify default mode with this native zrun executable")
     args = parser.parse_args()
     archive = args.archive.resolve()
     with tempfile.TemporaryDirectory(prefix="oh-my-ztty real smoke ") as temp:
@@ -37,8 +38,14 @@ def main():
         run(*install)
         assert current.resolve() == first_target and current.lstat().st_ino == first_inode
         cli = home / ".local/bin/omztty"
-        run(cli, "doctor")
-        run(cli, "shell", "-ic", "print -r -- OMZTTY_SHELL_OK")
+        if args.zrun:
+            env["OMZTTY_ZRUN"] = str(args.zrun.resolve(strict=True))
+            run(cli, "doctor")
+            assert "native-ready" in run(cli, "shell", "-c", "async t -- printf native-ready; await t")
+        else:
+            env["OMZTTY_SHELL"] = "zsh"
+            run(cli, "doctor")
+        run(cli, "shell", "--zsh", "-ic", "print -r -- OMZTTY_SHELL_OK")
         context = json.loads(run(cli, "ai", "context"))
         assert context["schema"] == "zshard.context.v1"
         assert context["history_included"] is False and context["environment_included"] is False

@@ -15,7 +15,7 @@ Desktop entry preference is remembered; --desktop enables it, --no-desktop disab
 zmem is the default system memory manager; its setup uses sudo and replaces old managers.
 --no-memory-manager skips system setup and remembers that choice for later updates.
 --memory-manager enables setup again. Existing /etc/zmem/zmem.conf edits are preserved.
-Run omztty shell or omztty terminal. Your login shell and .zshrc stay yours.
+Run omztty shell or omztty terminal with native zrun installed. For the zsh preset, use omztty shell --zsh. Your login shell and .zshrc stay yours.
 EOF
 }
 archive= expected= desktop= memory_manager=
@@ -249,7 +249,7 @@ if [ "$saved_memory" != "$memory_manager" ]; then
     mv -Tf -- "$memory_preference_tmp" "$memory_preference"
     memory_preference_tmp=
 fi
-printf 'Installed oh-my-ztty %s\nRun: %s shell\nOpen a window: %s terminal\nUninstall: %s uninstall\n' "$installed_version" "$bindir/omztty" "$bindir/omztty" "$bindir/omztty"
+printf 'Installed oh-my-ztty %s\nRun: %s shell\nOpen a window: %s terminal\nDefault shell: install native zrun; for the zsh preset add --zsh.\nUninstall: %s uninstall\n' "$installed_version" "$bindir/omztty" "$bindir/omztty" "$bindir/omztty"
 if [ "$memory_manager" = 1 ]; then
     printf 'Memory: %s memory status\nRestore previous managers: %s memory rollback\n' "$bindir/omztty" "$bindir/omztty"
 fi

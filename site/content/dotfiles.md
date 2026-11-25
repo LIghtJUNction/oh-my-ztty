@@ -90,7 +90,7 @@ omztty setup --from YOUR_LOGIN/dotfiles
 omztty rc check
 omztty rc install --dry-run
 omztty rc install
-omztty shell
+omztty shell --zsh
 ```
 
 Replace `YOUR_LOGIN` with your account name. `--from` requires the standard profile location to be absent and preserves an existing profile by refusing to overwrite it. The downloaded profile is not automatically linked over application configuration or sourced during the clone.

@@ -1,6 +1,6 @@
 # oh-my-ztty
 
-基于 Project Z 的 Linux 工作环境：**ztty + zshard + zrc + zdot + zfetch + ssmcp + zmem**。系统 zsh 负责执行命令，套件统一终端、编辑器和常用工具的配置。
+基于 Project Z 的 Linux 工作环境：**ztty + zrun + zshard + zrc + zdot + zfetch + ssmcp + zmem**。Linux 下，`omztty shell` 和 `omztty terminal` 默认打开独立的 [zrun](https://github.com/LIghtJUNction/zrun)。请另行安装支持原生 shell 的 zrun。输入 `omztty shell --zsh` 或 `omztty terminal --zsh` 可使用原来的 Ink zsh 预设、插件和补全。`omztty ai ask` 自动使用该预设。
 
 [官网](https://lightjunction.github.io/oh-my-ztty/) · [English](README.md) · [安装说明](docs/installation.md) · [配置与恢复](docs/configuration.md) · [性能记录](docs/performance.md) · [0.2.1 实机报告](docs/reports/workspace-0.2.1.md)
 

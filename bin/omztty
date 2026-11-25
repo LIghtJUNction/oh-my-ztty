@@ -8,8 +8,8 @@ usage() {
     cat <<'EOF'
 oh-my-ztty — a lean terminal workspace
 Usage: omztty COMMAND [ARGS...]
-  shell       Open the preset zsh (accepts zsh arguments)
-  terminal    Open ztty with the preset zsh (accepts ztty options)
+  shell       Open native zrun; use --zsh for the zsh preset
+  terminal    Open ztty with native zrun; --zsh selects the zsh preset
   ai          Connect this directory through bundled ssmcp
   config      Manage the unified zrc profile through zdot
   setup       Set up shell settings and optional private GitHub sync
@@ -59,22 +59,73 @@ terminal_needs_default_shell() {
     done
     return 0
 }
+# The older zrun facade shares a release version with the first native shell.
+# Probe a noninteractive capability; querying the facade cannot enter its backend.
+supports_native_zrun() {
+    [ -f "$1" ] && [ -x "$1" ] || return 1
+    if capability=$(ZRUN_SHELL=/bin/false "$1" --native-shell-version </dev/null 2>/dev/null) && [ "$capability" = 1 ]; then
+        return 0
+    fi
+    # Compatibility with the first native release, before the capability flag.
+    help=$(ZRUN_SHELL=/bin/false "$1" --help </dev/null 2>/dev/null) || return 1
+    case "$help" in
+        *"Enter the native Linux terminal shell"*) return 0 ;;
+    esac
+    return 1
+}
+find_native_zrun() {
+    if [ -n "${OMZTTY_ZRUN:-}" ]; then
+        case "$OMZTTY_ZRUN" in
+            /*) if supports_native_zrun "$OMZTTY_ZRUN"; then printf '%s\n' "$OMZTTY_ZRUN"; return 0; fi ;;
+        esac
+        printf 'omztty: OMZTTY_ZRUN must point to an absolute, executable native zrun: %s\n' "$OMZTTY_ZRUN" >&2
+        return 126
+    fi
+    for candidate in "$HOME/.local/bin/zrun" "$root/bin/zrun" "$HOME/.cargo/bin/zrun"; do
+        if supports_native_zrun "$candidate"; then printf '%s\n' "$candidate"; return 0; fi
+    done
+    # Preserve spaces in PATH entries and resolve relative entries before ztty changes cwd.
+    path_entries=${PATH-}:
+    while [ -n "$path_entries" ]; do
+        directory=${path_entries%%:*}; path_entries=${path_entries#*:}
+        candidate=${directory:-.}/zrun
+        if supports_native_zrun "$candidate"; then readlink -f -- "$candidate"; return; fi
+    done
+    printf '%s\n' 'omztty: native zrun is required for the default shell. Install the independent zrun shell or set OMZTTY_ZRUN to its absolute path. Use omztty shell --zsh or omztty terminal --zsh for the zsh preset.' >&2
+    return 127
+}
+preset_zsh() {
+    command -v zsh >/dev/null 2>&1 || { printf 'zsh is required for the compatibility preset\n' >&2; exit 127; }
+    export OMZTTY_USER_ZDOTDIR="${OMZTTY_USER_ZDOTDIR-${ZDOTDIR-$HOME}}"
+    export ZDOTDIR="$root/config/zsh"
+    export ZSHARD_HOME="$root/components/zshard"
+    export ZSHARD_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/oh-my-ztty/zshard/${root##*/}"
+    state="${XDG_STATE_HOME:-$HOME/.local/state}/oh-my-ztty"
+    [ -d "$state" ] || (umask 077; mkdir -p -- "$state")
+    export HISTFILE="$state/history"
+    exec zsh -d "$@"
+}
 case "$cmd" in
     shell|terminal)
-        command -v zsh >/dev/null 2>&1 || { printf 'zsh is required\n' >&2; exit 1; }
         export PATH="$root/bin:$PATH"
-        export OMZTTY_USER_ZDOTDIR="${OMZTTY_USER_ZDOTDIR-${ZDOTDIR-$HOME}}"
-        export ZDOTDIR="$root/config/zsh"
-        export ZSHARD_HOME="$root/components/zshard"
-        export ZSHARD_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/oh-my-ztty/zshard/${root##*/}"
-        state="${XDG_STATE_HOME:-$HOME/.local/state}/oh-my-ztty"
-        [ -d "$state" ] || (umask 077; mkdir -p -- "$state")
-        export HISTFILE="$state/history"
-        if [ "$cmd" = shell ]; then exec zsh -d "$@"; fi
-        suite_socket
-        if terminal_needs_default_shell "$@"; then
-            set -- "$@" -e "$root/bin/omztty" shell
+        selected=${OMZTTY_SHELL:-zrun}
+        if [ "${1:-}" = --zsh ]; then selected=zsh; shift; fi
+        if [ "$cmd" = terminal ]; then
+            suite_socket
+            if ! terminal_needs_default_shell "$@"; then
+                exec "$root/bin/ztty" --config "$root/config/ztty/config" "$@"
+            fi
         fi
+        case "$selected" in
+            zrun)
+                native=$(find_native_zrun) || exit $?
+                if [ "$cmd" = shell ]; then exec "$native" "$@"; fi
+                set -- "$@" -e "$native" ;;
+            zsh)
+                if [ "$cmd" = shell ]; then preset_zsh "$@"; fi
+                set -- "$@" -e "$root/bin/omztty" shell --zsh ;;
+            *) printf 'omztty: OMZTTY_SHELL must be zrun or zsh\n' >&2; exit 2 ;;
+        esac
         exec "$root/bin/ztty" --config "$root/config/ztty/config" "$@" ;;
     ai)
         export PATH="$root/bin:$PATH"
@@ -83,9 +134,9 @@ case "$cmd" in
         [ "$#" -eq 0 ] || shift
         case "$action" in
             context) exec "$root/components/zshard/bin/zshard" ai context "$@" ;;
-            ask) exec "$root/bin/omztty" shell -i -c 'zai ask "$@"' omztty-ai "$@" ;;
+            ask) exec "$root/bin/omztty" shell --zsh -i -c 'zai ask "$@"' omztty-ai "$@" ;;
             connect) exec "$root/bin/ssmcp" "$@" ;;
-            propose) printf 'Open omztty shell, then use: zai propose "command"\nThe proposal is placed in the editable buffer for review.\n'; exit 2 ;;
+            propose) printf 'Open omztty shell --zsh, then use: zai propose "command"\nThe proposal is placed in the editable buffer for review.\n'; exit 2 ;;
             help|-h|--help) printf 'Usage: omztty ai context | connect [ssmcp options] | ask TEXT\nContext is local JSON; connect starts ssmcp explicitly.\n' ;;
             *) printf 'Unknown AI action: %s\n' "$action" >&2; exit 2 ;;
         esac ;;
@@ -118,6 +169,14 @@ case "$cmd" in
     doctor)
         failed=0
         printf 'oh-my-ztty %s\n' "$(cat "$root/VERSION")"
+        if native=$(find_native_zrun 2>/dev/null); then
+            printf 'ok   native zrun %s\n' "$native"
+        elif [ "${OMZTTY_SHELL:-zrun}" = zsh ]; then
+            printf 'info native zrun unavailable; explicit zsh preset selected\n'
+        else
+            printf 'miss native zrun; install the independent shell or set OMZTTY_ZRUN to its absolute path\n'
+            failed=1
+        fi
         for tool in zsh git; do
             if command -v "$tool" >/dev/null 2>&1; then printf 'ok   system %s\n' "$tool"; else printf 'miss system %s\n' "$tool"; failed=1; fi
         done

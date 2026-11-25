@@ -35,7 +35,7 @@ It does not read file contents or emit the previous command. A fresh standalone 
 omztty ai connect
 ```
 
-This starts the bundled ssmcp in the current directory. Inside the preset shell, `zai connect` provides the same handoff and forwards supplied arguments to ssmcp.
+This starts the bundled ssmcp in the current directory. Inside `omztty shell --zsh`, `zai connect` provides the same handoff and forwards supplied arguments to ssmcp.
 
 Use the [ssmcp 0.10.20 connection instructions](https://github.com/LIghtJUNction/ssmcp/tree/v0.10.20) when connecting an AI client. Model selection and account setup stay with that client.
 
@@ -62,7 +62,7 @@ The launcher reads the persistent provider configuration. Returned text is displ
 
 ## Stage a command
 
-In an interactive preset shell:
+In `omztty shell --zsh`:
 
 ```zsh
 zai propose 'git status --short'

@@ -151,7 +151,7 @@ def main():
                 raise RuntimeError("Xvfb returned an invalid display")
             env["DISPLAY"] = ":" + number
             start = time.perf_counter_ns()
-            launcher = subprocess.Popen([str(cli), "terminal", "--name", "oh-my-ztty-verify", "--geometry", "100x28"],
+            launcher = subprocess.Popen([str(cli), "terminal", "--zsh", "--name", "oh-my-ztty-verify", "--geometry", "100x28"],
                                         env=env, cwd=demo, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True)
             owned[launcher.pid] = process_identity(launcher.pid)
             def window():
@@ -252,7 +252,7 @@ def main():
         if live:
             raise RuntimeError("owned application process remained after cleanup")
         report["cleanup"] = "All owned application processes and Xvfb stopped; temporary HOME removed."
-        cases = {"vanilla_zsh": ["zsh", "-df", "-ic", "exit"], "suite_shell": [str(cli), "shell", "-ic", "exit"]}
+        cases = {"vanilla_zsh": ["zsh", "-df", "-ic", "exit"], "suite_shell": [str(cli), "shell", "--zsh", "-ic", "exit"]}
         for command in cases.values():
             for _ in range(5):
                 run(command, env, cwd=demo)

@@ -15,7 +15,7 @@ omztty path add "$HOME/dev tools/bin" --append
 omztty rc add aliases
 omztty rc edit aliases
 omztty rc check
-omztty shell
+omztty shell --zsh
 ```
 
 An environment variable is a named value passed to programs the shell starts. `env set` saves a machine-specific value; `--shared` saves a value in the profile repository. Local values override shared values with the same name. `env list` shows names and sources, while `env get NAME` and `env list --show` explicitly show values. `env unset NAME` removes a local definition; add `--shared` to remove a shared definition.

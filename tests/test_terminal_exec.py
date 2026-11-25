@@ -47,8 +47,79 @@ class TerminalExec(unittest.TestCase):
             XDG_STATE_HOME=str(self.home / ".local/state"),
         )
         self.prefix = ["--config", str(self.runtime / "config/ztty/config")]
-        self.default = ["-e", str(self.runtime / "bin/omztty"), "shell"]
+        self.native = self.home / ".local/bin/zrun"
+        self.native.parent.mkdir(parents=True)
+        self.make_native(self.native)
+        self.default = ["-e", str(self.native)]
         self.sentinel = self.work / "MUST_NOT_EXECUTE"
+
+    @staticmethod
+    def make_native(path):
+        path.write_text(
+            "#!/usr/bin/env python3\n"
+            "import json, os, sys\n"
+            "if sys.argv[1:] == ['--native-shell-version']: print('1')\n"
+            "else: print(json.dumps([sys.argv[0], sys.argv[1:], os.getenv('ZDOTDIR')]))\n"
+        )
+        path.chmod(0o755)
+
+    def test_shell_uses_native_executable_preserves_argv_and_user_environment(self):
+        self.env["ZDOTDIR"] = "/original shell setting"
+        args = ["-c", "literal; input", "two words", ""]
+        result = subprocess.run([str(self.runtime / "bin/omztty"), "shell", *args], env=self.env,
+                                text=True, capture_output=True, check=True)
+        self.assertEqual(json.loads(result.stdout), [str(self.native), args, "/original shell setting"])
+        self.assertFalse((self.home / ".local/state/oh-my-ztty").exists())
+
+    def test_legacy_zrun_is_skipped_even_when_it_precedes_native_zrun_in_path(self):
+        self.native.write_text("#!/bin/sh\nprintf 'usage: enter the configured shell\\n'\n")
+        another = self.work / "other directory"
+        another.mkdir()
+        self.make_native(another / "zrun")
+        self.env["PATH"] = os.pathsep.join([str(self.native.parent), str(another), self.env["PATH"]])
+        self.assertEqual(self.forwarded(), self.prefix + ["-e", str(another / "zrun")])
+
+    def test_first_native_revision_supports_help_capability_fallback(self):
+        self.native.write_text("#!/bin/sh\n[ \"$1\" = --help ] && echo '  zrun     Enter the native Linux terminal shell'\n")
+        self.assertEqual(self.forwarded(), self.prefix + self.default)
+
+    def test_explicit_compatibility_uses_preset_only_on_request(self):
+        self.env["OMZTTY_ZRUN"] = "/not-installed"
+        self.assertEqual(self.forwarded("--zsh", "--geometry", "80x24"), self.prefix + [
+            "--geometry", "80x24", "-e", str(self.runtime / "bin/omztty"), "shell", "--zsh"])
+        self.env["OMZTTY_SHELL"] = "zsh"
+        self.assertEqual(self.forwarded(), self.prefix + [
+            "-e", str(self.runtime / "bin/omztty"), "shell", "--zsh"])
+        self.assertEqual(self.forwarded("-e", "/bin/true"), self.prefix + ["-e", "/bin/true"])
+
+    def test_bad_explicit_zrun_fails_before_opening_terminal_and_leaves_command_passthrough(self):
+        self.env["OMZTTY_ZRUN"] = "relative path"
+        for mode in ("shell", "terminal"):
+            p = subprocess.run([str(self.runtime / "bin/omztty"), mode], env=self.env,
+                               text=True, capture_output=True)
+            self.assertEqual(p.returncode, 126)
+            self.assertIn("OMZTTY_ZRUN", p.stderr)
+        self.assertEqual(self.forwarded("-e", "/bin/true"), self.prefix + ["-e", "/bin/true"])
+
+    def test_missing_native_shell_is_actionable_and_explicit_commands_still_run(self):
+        self.native.unlink()
+        only = self.work / "minimal path"
+        only.mkdir()
+        for name in ("readlink", "id", "python3"):
+            (only / name).symlink_to(shutil.which(name))
+        self.env["PATH"] = str(only)
+        for mode in ("shell", "terminal"):
+            result = subprocess.run([str(self.runtime / "bin/omztty"), mode], env=self.env,
+                                    text=True, capture_output=True)
+            self.assertEqual(result.returncode, 127, result.stderr)
+            self.assertIn("omztty shell --zsh", result.stderr)
+        self.assertEqual(self.forwarded("-e", "/bin/true"), self.prefix + ["-e", "/bin/true"])
+
+    def test_explicit_absolute_native_binary_takes_precedence(self):
+        selected = self.work / "selected executable"
+        self.make_native(selected)
+        self.env["OMZTTY_ZRUN"] = str(selected)
+        self.assertEqual(self.forwarded(), self.prefix + ["-e", str(selected)])
 
     def tearDown(self):
         self.temp.cleanup()
@@ -61,7 +132,7 @@ class TerminalExec(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         return json.loads(result.stdout)
 
-    def test_option_only_invocations_keep_the_preset_shell(self):
+    def test_option_only_invocations_open_the_native_shell(self):
         cases = [
             [],
             ["--observe"],

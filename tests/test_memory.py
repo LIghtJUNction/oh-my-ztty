@@ -78,6 +78,7 @@ class MemoryCommands(unittest.TestCase):
     def test_doctor_without_systemd_reports_information(self):
         for name in ["ztty", "ssmcp", "zdot", "zfetch", "zmem", "zsh", "git"]:
             self.program(name, '#!/bin/sh\nprintf "fixture 0.1.0\\n"\n')
+        self.program("zrun", '#!/bin/sh\n[ "$1" = --native-shell-version ] && echo 1\n')
         self.program("uname", '#!/bin/sh\nprintf "Darwin\\n"\n')
         self.program("systemctl", '#!/bin/sh\nprintf "must not be called" >&2\nexit 99\n')
         shard = self.root / "components/zshard"

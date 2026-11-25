@@ -242,7 +242,7 @@ shutil.copyfile(sources[urls[0]], args[args.index("-o") + 1])
         self.assertEqual(current_inode, (self.base / "current").lstat().st_ino)
         self.assertEqual(first, (self.base / "current").resolve())
         self.assertEqual(foreign.read_text(), "user-owned")
-        result = self.cli("shell", "-ic", 'print -rl -- "$ZSHARD_TEST" "$ZSHARD_CACHE_DIR" "$ZDOTDIR"')
+        result = self.cli("shell", "--zsh", "-ic", 'print -rl -- "$ZSHARD_TEST" "$ZSHARD_CACHE_DIR" "$ZDOTDIR"')
         self.assertIn("loaded", result.stdout)
         expected_cache = self.home / ".cache/oh-my-ztty/zshard" / first.name
         expected_zdotdir = first / "config/zsh"
@@ -301,7 +301,7 @@ shutil.copyfile(sources[urls[0]], args[args.index("-o") + 1])
         command = 'zshard complete || exit; print -r -- "$_ZSHARD_COMPLETION_READY"'
         if completion:
             command += '; print -r -- "$_comps[omztty-cache-test]"'
-        result = self.cli("shell", "-ic", command)
+        result = self.cli("shell", "--zsh", "-ic", command)
         self.assertEqual(result.stdout.splitlines(), ["1"] + ([completion] if completion else []))
         self.assertEqual(snapshot(), prepared,
                          "first completion must reuse the prepared bytes and mtime")
@@ -530,12 +530,12 @@ shutil.copyfile(sources[urls[0]], args[args.index("-o") + 1])
         direct = self.cli("ztty", "--version").stdout.splitlines()
         self.assertEqual(direct[0], f"@oh-my-ztty-{os.getuid()}-0.1.0")
         self.env["OMZTTY_SOCKET"] = "@suite-test-explicit"
-        terminal = self.cli("terminal", "--geometry", "100x28").stdout.splitlines()
+        terminal = self.cli("terminal", "--zsh", "--geometry", "100x28").stdout.splitlines()
         self.assertEqual(terminal[0], "@suite-test-explicit")
         self.assertEqual(terminal[1], "--config")
         self.assertEqual(terminal[3:6], ["--geometry", "100x28", "-e"])
-        self.assertEqual(terminal[-1], "shell")
-        self.assertIn("home with spaces", terminal[-2])
+        self.assertEqual(terminal[-2:], ["shell", "--zsh"])
+        self.assertIn("home with spaces", terminal[-3])
 
     def test_archive_symlink_rejected(self):
         bad = self.work / "bad.tar.gz"
