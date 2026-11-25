@@ -1,18 +1,18 @@
 {
   "schema": 2,
-  "updated_at": "2026-11-25T16:39:18+00:00",
+  "updated_at": "2026-11-25T17:10:33+00:00",
   "components": {
     "ztty": {
       "repository": "https://github.com/LIghtJUNction/ztty.git",
       "branch": "main",
-      "commit": "6a0cb4d54efa2c5961543f7df9eadebca66c8146",
-      "observed_at": "2026-11-25T16:39:18+00:00"
+      "commit": "95aec33bb80f77895f1993fe57c24c635b0aa8b4",
+      "observed_at": "2026-11-25T17:04:10+00:00"
     },
     "ssmcp": {
       "repository": "https://github.com/LIghtJUNction/ssmcp.git",
       "branch": "main",
-      "commit": "228aa47f93a135b932245fd97d17532317b9dc7a",
-      "observed_at": "2026-11-25T09:15:09+00:00"
+      "commit": "a1578f1308358930974f8520307988f1f9482ec7",
+      "observed_at": "2026-11-25T17:10:33+00:00"
     },
     "zshard": {
       "repository": "https://github.com/LIghtJUNction/zshard.git",
