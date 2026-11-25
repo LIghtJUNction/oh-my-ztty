@@ -4,7 +4,7 @@ oh-my-ztty opens the native zrun shell in your current terminal or a ztty window
 
 Use the shell in your current terminal or open the included ztty window. An optional application profile adds matching Neovim and terminal-tool settings, which you can edit as ordinary configuration files.
 
-The current suite release is **0.2.13** once its Linux x86_64 and ARM64 bundles are published. The quick start uses the latest published installer.
+The current suite release is **0.2.16** once its Linux x86_64 and ARM64 bundles are published. The quick start uses the latest published installer.
 
 ## Quick start
 
