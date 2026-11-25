@@ -1,13 +1,14 @@
 # Architecture
 
-oh-my-ztty assembles seven independent projects into one versioned Linux environment. Development synchronizes their latest default branches. Git submodules and the schema 2 source lock record the selected revisions; the release bundle contains the executables and shell files needed at runtime.
+oh-my-ztty assembles seven independent projects into one versioned Linux environment. Development synchronizes their latest default branches. Git submodules and the schema 2 source lock record the selected revisions; the release bundle contains those component executables and zsh preset files. The default shell, native zrun, is detected separately at launch.
 
 ## Runtime
 
 | Component | Work it owns | When it runs |
 | --- | --- | --- |
 | ztty | Terminal window, rendering and PTY | While its broker is running; detached sessions may outlive windows |
-| System zsh | Parsing and executing shell commands | While the shell is open |
+| Native zrun | Parse shell commands, own session state and dispatch named tasks | Default shell and terminal |
+| System zsh | Parse the zsh preset, plugins and snippets | Explicit `--zsh` sessions, management commands and `omztty ai ask` |
 | zshard | Prompt, completion, editing hooks and plugin loading | Inside the existing zsh process |
 | zrc | Native Neovim and terminal-tool configuration | Read by the corresponding application |
 | zdot | Planning and managing dotfile links; explicit Git sync | For a requested command |

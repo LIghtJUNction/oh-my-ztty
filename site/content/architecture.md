@@ -1,13 +1,14 @@
 # Architecture
 
-The suite packages seven independently maintained tools around system zsh. This page explains which process does each job, where configuration lives and how a release records the versions it uses.
+The suite packages seven independently maintained tools and detects a separate native zrun installation for its default shell. This page explains which process does each job, where configuration lives and how a release records the versions it uses.
 
 ## Process boundaries
 
 | Component | Responsibility | When it runs |
 | --- | --- | --- |
 | ztty | Terminal rendering, windows and PTY | While its broker is running |
-| System zsh | Parse and execute commands | While the shell is open |
+| Native zrun | Parse commands, own session state and dispatch named tasks | Default shell and terminal |
+| System zsh | Parse the zsh preset, plugins and snippets | Explicit `--zsh` sessions, management commands and `omztty ai ask` |
 | zshard | Prompt, completion, editing and plugin loading | Inside the existing zsh process |
 | zrc | Native editor and terminal-tool profiles | Read by the corresponding application |
 | zdot | Dotfile planning, links and explicit Git sync | For a requested command |

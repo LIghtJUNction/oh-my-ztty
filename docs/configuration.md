@@ -26,7 +26,7 @@ Rc snippets hold ordinary zsh code such as aliases and functions. Use `rc add NA
 
 For an ordinary zsh session to load these settings, run `omztty rc install --dry-run`, then `omztty rc install`. The loader block is added to `$ZDOTDIR/.zshrc` when set, otherwise `~/.zshrc`, preserving the existing startup code. `omztty rc uninstall` removes that block. Both install and uninstall accept `--dry-run`.
 
-A new shell loads the saved settings. In an existing suite shell, `source "$OMZTTY_ROOT/config/zsh/settings.zsh"` reloads them and runs enabled snippets again. Programs cannot change their parent shell's environment; saving a rule does not immediately alter the shell that ran the command. Use a fresh session to check removed settings.
+A new `omztty shell --zsh` loads these zsh settings. In an existing preset zsh session, `source "$OMZTTY_ROOT/config/zsh/settings.zsh"` reloads them and runs enabled snippets again. Programs cannot change their parent shell's environment; saving a rule does not immediately alter the shell that ran the command. Use a fresh session to check removed settings.
 
 For a complete command walkthrough, see the [shell guide](../site/content/shell.md).
 
