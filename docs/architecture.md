@@ -1,6 +1,6 @@
 # Architecture
 
-oh-my-ztty assembles seven independent projects into one versioned Linux environment. Development synchronizes their latest default branches. Git submodules and the schema 2 source lock record the selected revisions; the release bundle contains those component executables and zsh preset files. The default shell, native zrun, is detected separately at launch.
+oh-my-ztty assembles seven independent projects into one versioned Linux environment. Development synchronizes their latest default branches. Git submodules and the schema 2 source lock record the selected revisions; the release bundle contains the suite tools and zsh preset files. The graphical terminal uses the system ztty executable. The default shell, native zrun, is detected separately at launch.
 
 ## Runtime
 

@@ -4,7 +4,7 @@ Install the independent native [zrun shell](https://github.com/LIghtJUNction/zru
 
 Choose a per-user release installation or the Arch Linux package. Both provide the same suite commands; use the matching update and removal instructions below.
 
-The bundle includes the terminal, shell framework and configuration tools. You need system zsh and the libraries listed below. Installing a release and managing its configuration require neither Rust nor Python.
+Install ztty through your system package manager for graphical terminal sessions. The suite provides the shell framework and configuration tools. Installing a release and managing its configuration require neither Rust nor Python.
 
 ## Requirements
 
@@ -37,7 +37,7 @@ sudo apt-get install zsh git curl libx11-6 libxrender1 libxft2 libfontconfig1 \
 Install the [oh-my-ztty-bin package](https://aur.archlinux.org/packages/oh-my-ztty-bin) with an AUR helper:
 
 ```sh
-yay -S oh-my-ztty-bin
+yay -S oh-my-ztty-bin ztty
 omztty doctor
 omztty shell
 ```
@@ -226,7 +226,7 @@ omztty update --desktop
 
 Updates retain the desktop-entry choice saved by your last successful installation. Either option above changes that choice after the update succeeds.
 
-Each version has its own directory. A `current` link selects the active version, and completion caches are separated by release.
+A `current` link selects the active suite runtime. Updates remove unused verified runtimes and preserve any runtime still referenced by live processes or a profile baseline.
 
 Before activation, the installer prepares an audited completion cache. A failed preparation leaves the previous version active. Reinstalling the same archive verifies the existing files; it preserves and reports an installed version that has been modified.
 

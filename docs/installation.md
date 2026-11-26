@@ -1,6 +1,6 @@
 # Installation
 
-The release bundle includes ztty, zshard, zrc, zdot, zfetch, ssmcp and zmem. Installation and existing configuration commands from a release do not require Rust or Python. The optional completion manager requires Python 3.11 or newer. Install system zsh 5.9 or newer first.
+The release bundle includes zshard, zrc, zdot, zfetch, ssmcp and zmem. The graphical terminal uses the separately installed ztty package. Installation and existing configuration commands from a release do not require Rust or Python. The optional completion manager requires Python 3.11 or newer. Install system zsh 5.9 or newer first.
 
 The suite window runs on X11 or XWayland. The pinned ztty 0.5.2 executable links X11, Xrender, Xft, Fontconfig, Wayland, xkbcommon, FreeType, HarfBuzz, EGL and GLES. These runtime libraries are required even when you select the X11 backend.
 
