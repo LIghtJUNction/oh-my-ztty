@@ -10,7 +10,7 @@
 
 ### 用户级发行包
 
-先下载并查看安装脚本，再执行：
+图形终端 `ztty` 由系统包管理器安装和更新。先下载并查看套件安装脚本，再执行。
 
 ```sh
 curl -fLO https://github.com/LIghtJUNction/oh-my-ztty/releases/latest/download/install.sh
@@ -151,6 +151,6 @@ python3 scripts/workspace.py check
 python3 scripts/build_bundle.py
 ```
 
-`sync` 默认获取七个组件的最新默认分支，并在 schema 2 源码锁中记录提交与观测时间。旧锁首次升级需要完整同步；此后可用 `sync zshard` 单独更新一个组件。打包时通过 Cargo `--locked` 从记录的源码编译五个原生程序，沿用已有的共享构建目录配置。
+`sync` 默认获取七个组件的最新默认分支，并在 schema 2 源码锁中记录提交与观测时间。旧锁首次升级需要完整同步；此后可用 `sync zshard` 单独更新一个组件。打包时通过 Cargo `--locked` 从记录的源码编译套件的四个原生程序，沿用已有的共享构建目录配置。
 
 开发、测试和显式发布步骤见 [CONTRIBUTING.md](CONTRIBUTING.md)。性能数字与测量范围见[性能记录](docs/performance.md)。项目采用 MIT 许可证。

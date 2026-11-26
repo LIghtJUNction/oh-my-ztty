@@ -33,6 +33,10 @@ class Installation(unittest.TestCase):
                         XDG_CACHE_HOME=str(self.home / ".cache"),
                         XDG_STATE_HOME=str(self.home / ".local/state"))
         (self.home / ".zshrc").write_text("print UNWANTED_USER_RC\n")
+        self.terminal = self.work / "system-ztty"
+        self.terminal.write_text('#!/bin/sh\nif [ "$1" = --test-socket ]; then echo "$ZTTY_SOCKET"; fi\n')
+        self.terminal.chmod(0o755)
+        self.env["OMZTTY_ZTTY"] = str(self.terminal)
         self.archive = self.bundle("0.1.0")
 
     def tearDown(self):
@@ -77,7 +81,7 @@ class Installation(unittest.TestCase):
                 shutil.copytree(ROOT / "components/zshard" / directory, shard / directory,
                                 dirs_exist_ok=True)
             shutil.copytree(ROOT / "packaging/completions", stage / "packaging/completions")
-        for name in ["ztty", "ssmcp", "zdot", "zfetch"]:
+        for name in ["ssmcp", "zdot", "zfetch"]:
             executable = stage / "bin" / name
             executable.write_text(f"#!/bin/sh\n"
                                   'if [ "$1" = --test-socket ]; then echo "$ZTTY_SOCKET"; exit; fi\n'
@@ -504,6 +508,7 @@ shutil.copyfile(sources[urls[0]], args[args.index("-o") + 1])
         broken = self.bundle("0.1.1", warm_exit=12)
         result = self.install(broken, ok=False)
         self.assertIn("completion cache preparation failed", result.stderr)
+        self.assertEqual(len(list((self.base / "releases").iterdir())), 1)
         self.assertEqual(os.readlink(self.base / "current"), previous)
         self.assertIn("0.1.0", self.cli("version").stdout)
 
@@ -514,12 +519,30 @@ shutil.copyfile(sources[urls[0]], args[args.index("-o") + 1])
         with subprocess.Popen(["sleep", "120"], cwd=old / "bin") as session:
             try:
                 self.install(newer)
-                self.assertTrue((old / "bin/ztty").is_file())
+                self.assertTrue((old / "bin/ssmcp").is_file())
             finally:
                 session.terminate()
         self.install(newer)
         self.assertFalse(old.exists())
         self.assertEqual(list((self.base / "releases").iterdir()), [(self.base / "current").resolve()])
+
+    def test_migrates_managed_terminal_link_without_installing_a_private_binary(self):
+        self.install()
+        old = (self.base / "current").resolve()
+        bundled = old / "bin/ztty"
+        shutil.copy2(self.terminal, bundled)
+        manifest = old / "MANIFEST.sha256"
+        with manifest.open("a") as stream:
+            stream.write(f"{sha(bundled)}  bin/ztty\n")
+        legacy_link = self.bindir / "ztty"
+        legacy_link.symlink_to(self.base / "current/bin/ztty")
+
+        self.install(self.bundle("0.1.1"))
+        self.assertFalse(old.exists())
+        self.assertFalse(legacy_link.is_symlink())
+        self.assertFalse((self.base / "current/bin/ztty").exists())
+        self.assertEqual(self.cli("ztty", "--test-socket").stdout.strip(),
+                         f"@oh-my-ztty-{os.getuid()}-0.1.1")
 
     def test_external_native_shell_inherits_release_lock(self):
         self.install()
@@ -577,7 +600,7 @@ shutil.copyfile(sources[urls[0]], args[args.index("-o") + 1])
         self.install(self.bundle("0.4.0"))
         self.assertFalse(original.exists())
         for candidate in (self.base / "releases").glob("0.3.*"):
-            self.assertTrue((candidate / "bin/ztty").is_file())
+            self.assertTrue((candidate / "bin/ssmcp").is_file())
         self.assertEqual(len(list((self.base / "releases").glob("0.3.*"))), 5)
 
     def test_local_release_allows_same_version_official_update_and_separate_broker(self):
@@ -617,12 +640,12 @@ shutil.copyfile(sources[urls[0]], args[args.index("-o") + 1])
         profile.mkdir(parents=True)
         (profile / ".suite-version").write_text("0.1.0\n")
         self.install(self.archive)
-        self.assertTrue((local / "bin/ztty").is_file())
+        self.assertTrue((local / "bin/ssmcp").is_file())
         (local / ".archive-sha256").unlink()
         (profile / ".suite-version").unlink()
         self.install(self.archive)
         for protected in [bad, local]:
-            self.assertTrue((protected / "bin/ztty").is_file())
+            self.assertTrue((protected / "bin/ssmcp").is_file())
 
     def test_parallel_installs_activate_one_complete_release(self):
         self.install()
@@ -639,7 +662,7 @@ shutil.copyfile(sources[urls[0]], args[args.index("-o") + 1])
 
     def test_modified_release_is_preserved(self):
         self.install()
-        binary = self.base / "current/bin/ztty"
+        binary = self.base / "current/bin/ssmcp"
         binary.write_text("edited by user")
         self.install(ok=False)
         self.assertEqual(binary.read_text(), "edited by user")
@@ -661,7 +684,7 @@ shutil.copyfile(sources[urls[0]], args[args.index("-o") + 1])
 
     def test_terminal_uses_suite_socket_and_preserves_arguments(self):
         self.install()
-        binary = self.base / "current/bin/ztty"
+        binary = self.terminal
         binary.write_text('#!/bin/sh\nprintf "%s\\n" "$ZTTY_SOCKET" "$@"\n')
         self.env["ZTTY_SOCKET"] = "@unrelated-running-terminal"
         direct = self.cli("ztty", "--version").stdout.splitlines()

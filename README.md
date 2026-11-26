@@ -10,7 +10,7 @@ On Linux, `omztty shell` and `omztty terminal` open the independent zrun shell. 
 
 ### Per-user release
 
-Download and inspect the installer, then run it:
+Install `ztty` through your system package manager for the graphical terminal. Download and inspect the suite installer before running it.
 
 ```sh
 curl -fLO https://github.com/LIghtJUNction/oh-my-ztty/releases/latest/download/install.sh
@@ -142,7 +142,7 @@ python3 scripts/workspace.py check
 python3 scripts/build_bundle.py
 ```
 
-`sync` fetches all seven default branches and records their commits and observation times in the schema 2 source lock. After the first full synchronization, `sync zshard` updates one component. The bundle compiles all five native programs from those sources with Cargo's `--locked` option and respects the configured shared target directory.
+`sync` fetches all seven default branches and records their commits and observation times in the schema 2 source lock. After the first full synchronization, `sync zshard` updates one component. The bundle compiles the four bundled native programs from those sources with Cargo's `--locked` option and respects the configured shared target directory.
 
 [Development and release guide](CONTRIBUTING.md) covers local checks, source updates and explicit version publication. [Architecture](docs/architecture.md) describes the runtime boundaries and extension interfaces.
 

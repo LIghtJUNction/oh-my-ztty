@@ -114,6 +114,8 @@ def main():
         runtime = temp / "runtime"
         runtime.mkdir(mode=0o700)
         env = {key: value for key, value in os.environ.items() if not key.startswith(("XDG_", "ZSHARD_", "OMZTTY_", "ZDOTDIR", "ZTTY_")) and key not in ["DISPLAY", "WAYLAND_DISPLAY", "XAUTHORITY"]}
+        if "OMZTTY_ZTTY" in os.environ:
+            env["OMZTTY_ZTTY"] = os.environ["OMZTTY_ZTTY"]
         address = "@oh-my-ztty-test-" + uuid.uuid4().hex
         env.update(HOME=str(home), XDG_DATA_HOME=str(home / ".local/share"),
                    XDG_CONFIG_HOME=str(home / ".config"), XDG_CACHE_HOME=str(home / ".cache"),

@@ -19,7 +19,7 @@ from managed_build import background_command
 ROOT = Path(__file__).resolve().parents[1]
 ARCHES = {"x86_64": 62, "aarch64": 183}
 COMPONENTS = ("ztty", "ssmcp", "zshard", "zdot", "zrc", "zfetch", "zmem")
-BINARIES = ("ztty", "ssmcp", "zdot", "zfetch", "zmem")
+BINARIES = ("ssmcp", "zdot", "zfetch", "zmem")
 
 def run(argv, cwd=ROOT, **kwargs):
     return subprocess.check_output(argv, cwd=cwd, text=True, **kwargs).strip()

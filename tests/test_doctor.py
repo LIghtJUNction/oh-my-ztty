@@ -27,11 +27,11 @@ class DoctorDiagnosticsTest(unittest.TestCase):
                 else:
                     program.write_text("#!/bin/sh\nprintf '%s\\n' '" + name + " 0.0.0'\n")
                 program.chmod(0o755)
-            env = dict(os.environ, PATH=str(bindir) + os.pathsep + os.environ.get("PATH", ""))
+            env = dict(os.environ, OMZTTY_ZTTY=str(bindir / "ztty"), PATH=str(bindir) + os.pathsep + os.environ.get("PATH", ""))
             result = subprocess.run([str(bindir / "omztty"), "doctor"],
                                     env=env, text=True, capture_output=True, timeout=5)
             self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
-            self.assertIn("fail bundled ztty\n" + error, result.stdout)
+            self.assertIn("fail system ztty\n" + error, result.stdout)
             self.assertIn("ok   ssmcp 0.0.0", result.stdout)
             self.assertIn("ok   zdot 0.0.0", result.stdout)
             self.assertIn("No connection or background service was started.", result.stdout)

@@ -171,7 +171,9 @@ omztty update --desktop
 
 For installations created by v0.1.1 or older, the first successful installation with this installer infers the choice from the existing desktop-entry record: present means enabled, absent means disabled. Either explicit option overrides that choice. The installer saves the preference after installation succeeds; failed preparation leaves the previous choice intact.
 
-Each version has its own directory; a `current` symlink chooses the active one. Completion caches also use the immutable release directory name, so upgrades and rollback use their matching inputs. Before changing that link, the installer prepares an audited completion cache using the system functions, zshard and suite completions. The first Tab can reuse that cache. Changing completion paths or plugins causes normal revalidation. A failed preparation leaves the previously active version selected. Installing the same archive again verifies the existing installation. If an installed version's files were modified, the installer preserves them and reports the conflict.
+Install `ztty` with your system package manager. `omztty terminal` and `omztty ztty` use the system executable. An absolute `OMZTTY_ZTTY` path can select a different externally installed binary.
+
+Suite updates verify and prepare the new runtime, then atomically switch `current`. The installer removes obsolete, unmodified runtimes once no live process or profile baseline needs them. A candidate that fails preparation is discarded.
 
 ## Dotfiles
 

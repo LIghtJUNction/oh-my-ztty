@@ -262,6 +262,7 @@ class BundleTests(unittest.TestCase):
         archive = self.root / "dist/oh-my-ztty-0.3.0-linux-x86_64.tar.gz"
         first_digest = BUNDLE.digest(archive)
         with tarfile.open(archive, "r:gz") as stream:
+            self.assertNotIn("oh-my-ztty/bin/ztty", stream.getnames())
             metadata = json.load(stream.extractfile("oh-my-ztty/BUILD.json"))
             self.assertEqual(metadata["schema"], 2)
             self.assertEqual(metadata["sources_updated_at"], lock["updated_at"])

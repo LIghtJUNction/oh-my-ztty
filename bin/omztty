@@ -20,7 +20,8 @@ Usage: omztty COMMAND [ARGS...]
   sync        Synchronize your private configuration repository
   dot         Run bundled zdot
   zshard      Manage shell plugins
-  ztty|ssmcp  Run a bundled component directly
+  ztty        Run the system terminal
+  ssmcp       Run the bundled SSMCP client
   info        Show the lightweight native system overview
   memory      Manage memory and Swap through zmem
   doctor      Check installed components and system dependencies
@@ -45,6 +46,21 @@ case "$cmd" in
        fi
        unset _OMZTTY_LEASED_ROOT ;;
 esac
+find_system_ztty() {
+    if [ -n "${OMZTTY_ZTTY:-}" ]; then
+        case "$OMZTTY_ZTTY" in
+            /*) [ ! -d "$OMZTTY_ZTTY" ] && [ -x "$OMZTTY_ZTTY" ] &&
+                { printf '%s\n' "$OMZTTY_ZTTY"; return; } ;;
+        esac
+        printf 'omztty: OMZTTY_ZTTY must name an absolute executable path\n' >&2
+        return 126
+    fi
+    for candidate in /usr/bin/ztty /usr/local/bin/ztty; do
+        if [ -f "$candidate" ] && [ -x "$candidate" ]; then printf '%s\n' "$candidate"; return; fi
+    done
+    printf 'omztty: install ztty through your system package manager\n' >&2
+    return 127
+}
 suite_socket() {
     if [ -n "${OMZTTY_SOCKET:-}" ]; then
         export ZTTY_SOCKET="$OMZTTY_SOCKET"
@@ -129,9 +145,10 @@ case "$cmd" in
         selected=${OMZTTY_SHELL:-zrun}
         if [ "${1:-}" = --zsh ]; then selected=zsh; shift; fi
         if [ "$cmd" = terminal ]; then
+            terminal_binary=$(find_system_ztty) || exit $?
             suite_socket
             if ! terminal_needs_default_shell "$@"; then
-                exec "$root/bin/ztty" --config "$root/config/ztty/config" "$@"
+                exec "$terminal_binary" --config "$root/config/ztty/config" "$@"
             fi
         fi
         case "$selected" in
@@ -144,7 +161,7 @@ case "$cmd" in
                 set -- "$@" -e "$root/bin/omztty" shell --zsh ;;
             *) printf 'omztty: OMZTTY_SHELL must be zrun or zsh\n' >&2; exit 2 ;;
         esac
-        exec "$root/bin/ztty" --config "$root/config/ztty/config" "$@" ;;
+        exec "$terminal_binary" --config "$root/config/ztty/config" "$@" ;;
     ai)
         export PATH="$root/bin:$PATH"
         export ZSHARD_HOME="$root/components/zshard"
@@ -183,7 +200,7 @@ case "$cmd" in
     setup|sync) exec zsh -df "$root/bin/omztty-$cmd" "$@" ;;
     dot|zdot) exec "$root/bin/zdot" "$@" ;;
     zshard) exec "$root/components/zshard/bin/zshard" "$@" ;;
-    ztty) suite_socket; exec "$root/bin/ztty" "$@" ;;
+    ztty) terminal_binary=$(find_system_ztty) || exit $?; suite_socket; exec "$terminal_binary" "$@" ;;
     doctor)
         failed=0
         printf 'oh-my-ztty %s\n' "$(cat "$root/VERSION")"
@@ -198,7 +215,17 @@ case "$cmd" in
         for tool in zsh git; do
             if command -v "$tool" >/dev/null 2>&1; then printf 'ok   system %s\n' "$tool"; else printf 'miss system %s\n' "$tool"; failed=1; fi
         done
-        for tool in ztty ssmcp zdot zfetch zmem; do
+        if terminal_binary=$(find_system_ztty); then
+            if version_output=$("$terminal_binary" --version 2>&1); then
+                printf 'ok   system %s\n' "$version_output"
+            else
+                printf 'fail system ztty\n%s\n' "$version_output"
+                failed=1
+            fi
+        else
+            failed=1
+        fi
+        for tool in ssmcp zdot zfetch zmem; do
             if version_output=$("$root/bin/$tool" --version 2>&1); then
                 printf 'ok   %s\n' "$version_output"
             else

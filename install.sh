@@ -9,7 +9,7 @@ Usage: sh install.sh [--version X.Y.Z] [--from ARCHIVE] [--sha256 HEX]
                      [--bin-dir DIR] [--desktop | --no-desktop]
                      [--memory-manager | --no-memory-manager]
 Installs into $XDG_DATA_HOME/oh-my-ztty (default ~/.local/share).
-Commands go in ~/.local/bin; existing ztty/ssmcp/zdot commands are preserved.
+Commands go in ~/.local/bin. Install ztty through your system package manager.
 --from requires a .sha256 sidecar or an explicit --sha256.
 Desktop entry preference is remembered; --desktop enables it, --no-desktop disables it.
 zmem is the default system memory manager; its setup uses sudo and replaces old managers.
@@ -110,7 +110,11 @@ tmp=$(mktemp -d "${TMPDIR:-/tmp}/oh-my-ztty.XXXXXXXX")
 stage=
 preference_tmp=
 memory_preference_tmp=
+candidate=
 cleanup() {
+    if [ -n "$candidate" ] && [ "$(readlink "$base/current" 2>/dev/null || :)" != "releases/$release_id" ]; then
+        rm -rf -- "$candidate"
+    fi
     rm -rf -- "$tmp"
     [ -z "$stage" ] || rm -rf -- "$stage"
     [ -z "$preference_tmp" ] || rm -f -- "$preference_tmp"
@@ -158,7 +162,8 @@ payload="$tmp/oh-my-ztty"
 installed_version=$(cat "$payload/VERSION")
 valid_version "$installed_version" || die "bundle version is invalid"
 [ "$(cat "$payload/PLATFORM")" = "linux-$arch" ] || die "bundle architecture does not match this machine"
-for exe in omztty ztty ssmcp zdot zshard zfetch zmem; do [ -x "$payload/bin/$exe" ] || die "bundle missing executable: $exe"; done
+for exe in omztty ssmcp zdot zshard zfetch zmem; do [ -x "$payload/bin/$exe" ] || die "bundle missing executable: $exe"; done
+[ ! -e "$payload/bin/ztty" ] || die "bundle includes a private ztty executable"
 [ -f "$payload/components/zshard/zshard.zsh" ] || die "bundle missing zshard"
 [ -f "$payload/config/zmem/zmem.conf" ] || die "bundle missing zmem configuration"
 # A locally derived archive may share VERSION with a later official build.
@@ -190,6 +195,7 @@ else
     cp -R "$payload/." "$stage/"
     printf '%s\n' "$actual" > "$stage/.archive-sha256"
     mv -T -- "$stage" "$release"
+    candidate="$release"
     stage=
 fi
 # Share the default fpath without running personal startup hooks during installation.
@@ -216,7 +222,11 @@ if [ ! -L "$base/current" ] || [ "$(readlink "$base/current")" != "releases/$rel
     ln -s "releases/$release_id" "$base/.current.$$"
     mv -Tf -- "$base/.current.$$" "$base/current"
 fi
-for exe in omztty ztty ssmcp zdot zshard zfetch zmem; do
+legacy_ztty="$bindir/ztty"
+if [ -L "$legacy_ztty" ] && [ "$(readlink "$legacy_ztty")" = "$base/current/bin/ztty" ]; then
+    rm -- "$legacy_ztty"
+fi
+for exe in omztty ssmcp zdot zshard zfetch zmem; do
     target="$base/current/bin/$exe"
     if [ -e "$bindir/$exe" ] || [ -L "$bindir/$exe" ]; then
         if [ -L "$bindir/$exe" ] && [ "$(readlink "$bindir/$exe")" = "$target" ]; then :; else

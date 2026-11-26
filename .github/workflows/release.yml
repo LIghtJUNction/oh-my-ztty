@@ -76,6 +76,11 @@ jobs:
         run: make check
       - name: Build complete source-locked bundle
         run: python3 scripts/build_bundle.py --arch "${{ matrix.arch }}"
+      - name: Build the external ztty used by acceptance checks
+        run: |
+          cargo install --locked --path components/ztty --features wayland --bin ztty --root "$RUNNER_TEMP/external-ztty"
+          printf 'OMZTTY_ZTTY=%s\n' "$RUNNER_TEMP/external-ztty/bin/ztty" >> "$GITHUB_ENV"
+          printf '%s\n' "$RUNNER_TEMP/external-ztty/bin" >> "$GITHUB_PATH"
       - name: Smoke actual bundled programs in isolated HOME
         run: python3 scripts/smoke_bundle.py dist/oh-my-ztty-*-linux-${{ matrix.arch }}.tar.gz
       - name: Check actual terminal window, keyboard, completion and cleanup

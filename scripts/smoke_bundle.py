@@ -19,6 +19,8 @@ def main():
         home = Path(temp) / "home with spaces"
         home.mkdir()
         env = {k: v for k, v in os.environ.items() if not k.startswith(("XDG_", "ZSHARD_", "OMZTTY_", "ZDOTDIR"))}
+        if "OMZTTY_ZTTY" in os.environ:
+            env["OMZTTY_ZTTY"] = os.environ["OMZTTY_ZTTY"]
         env.update(HOME=str(home), XDG_DATA_HOME=str(home / ".local/share"),
                    XDG_CONFIG_HOME=str(home / ".config"), XDG_CACHE_HOME=str(home / ".cache"),
                    XDG_STATE_HOME=str(home / ".local/state"))

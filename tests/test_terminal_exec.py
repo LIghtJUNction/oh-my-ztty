@@ -23,7 +23,7 @@ class TerminalExec(unittest.TestCase):
         (self.runtime / "VERSION").write_text("test-version\n")
         (self.runtime / "config/ztty").mkdir(parents=True)
         (self.runtime / "config/ztty/config").write_text("# inert fixture\n")
-        ztty = self.runtime / "bin/ztty"
+        ztty = self.work / "system-ztty"
         ztty.write_text(
             "#!/usr/bin/env python3\n"
             "import json, sys\n"
@@ -41,6 +41,7 @@ class TerminalExec(unittest.TestCase):
         }
         self.env.update(
             HOME=str(self.home),
+            OMZTTY_ZTTY=str(ztty),
             PATH=str(fake_bin) + os.pathsep + os.environ.get("PATH", "/usr/bin:/bin"),
             XDG_CONFIG_HOME=str(self.home / ".config"),
             XDG_CACHE_HOME=str(self.home / ".cache"),
